@@ -1,0 +1,35 @@
+package vn.dreamhouse.glade;
+import com.jme3.math.*;
+import com.jme3.scene.*;
+import com.jme3.collision.CollisionResults;
+import com.jme3.system.AppSettings;
+import com.jme3.input.KeyInput;
+import java.nio.*;
+import java.nio.file.*;
+import java.util.*;
+class ArchitectureMaterialCheck extends ProceduralMechanicsCheck {
+ static boolean tagInItem(long id,String key,String value)throws Exception{return engine(()->{var f=GladeApp.class.getDeclaredField("content");f.setAccessible(true);for(var part:((Node)f.get(app)).getChildren())if(Objects.equals(part.getUserData("itemId"),id)){boolean[] yes={false};part.depthFirstTraversal(n->{if(Objects.toString(n.getUserData(key)).equals(value))yes[0]=true;});return yes[0];}return false;});}
+ static void paint(long id,String material)throws Exception{esc();select(id);clickRaw("palette");clickRaw("paintMaterial:"+material);}
+ static int detailVertices()throws Exception{return engine(()->{var f=GladeApp.class.getDeclaredField("content");f.setAccessible(true);int[] count={0};((Node)f.get(app)).depthFirstTraversal(n->{if(n instanceof Geometry g && Boolean.TRUE.equals(g.getUserData("facadeMaterial")))count[0]+=g.getMesh().getVertexCount();});return count[0];});}
+ public static void main(String[] args)throws Exception {
+  app=new GladeApp();var settings=new AppSettings(true);settings.setResolution(1360,860);settings.setRenderer(AppSettings.LWJGL_OPENGL33);settings.setAudioRenderer(null);settings.setTitle("DreamHouse · Kiểm thử kiến trúc và vật liệu");app.setSettings(settings);app.setShowSettings(false);app.setPauseOnLostFocus(false);app.start();
+  try {engine(()->true);Thread.sleep(300);var house=block(0,0,0,4,3,2.6f,1.4f);fixture(new GladeDesign(List.of(house),2));
+   ok(tagInItem(0,"facadeMaterial","plaster") && tagInItem(0,"stoneFoundation","true"),"new default has exposed timber and stone foundation");int timber=detailVertices();ok(timber>0,"frame uses actual geometry");
+   engine(()->{var f=GladeApp.class.getDeclaredField("content");f.setAccessible(true);int[] details={0};((Node)f.get(app)).depthFirstTraversal(n->{if(n instanceof Geometry && (Boolean.TRUE.equals(n.getUserData("facadeMaterial")) || Boolean.TRUE.equals(n.getUserData("stoneFoundation"))))details[0]++;});ok(details[0]>0 && details[0]<=6,"structural details batch into a bounded number of draws");System.out.println("DEFAULT_FACADE_BATCHES "+details[0]);return true;});
+   for(String material:List.of("brick","stone","wood")){
+    paint(0,material);ok(item(0).form().finish().material().equals(material) && tagInItem(0,"materialStructure",material) && tagInItem(0,"reliefStyle",material),"material changes structural relief: "+material);ok(detailVertices()>0,"relief exists");
+    engine(()->{var f=GladeApp.class.getDeclaredField("content");f.setAccessible(true);((Node)f.get(app)).depthFirstTraversal(n->{if(n instanceof Geometry g){var pos=g.getMesh().getBuffer(VertexBuffer.Type.Position);if(pos!=null){var values=(FloatBuffer)pos.getData();for(int i=0;i<values.limit();i++)ok(Float.isFinite(values.get(i)),"finite material mesh");}}});return true;});
+   }
+   var file=PlayerFiles.directory("checks").resolve("material-architecture.glade");design().save(file);fixture(GladeDesign.load(file));ok(tagInItem(0,"materialStructure","wood"),"material structure restored from existing save format");paint(0,"plaster");ok(tagInItem(0,"facadeMaterial","plaster"),"return to timber/plaster");chord(KeyInput.KEY_Z);ok(tagInItem(0,"materialStructure","wood"),"undo regenerates previous structural material");chord(KeyInput.KEY_Y);ok(tagInItem(0,"materialStructure","plaster"),"redo regenerates timber frame");
+   var low=new GladeDesign.Item(0,house.kind(),house.center(),4,3,.04f,false,List.of(),0,null,house.form().roof(0));fixture(new GladeDesign(List.of(low),2));ok(tagged("craftShape","Tấm phẳng") && !tagInItem(0,"stoneFoundation","true") && !tagInItem(0,"materialStructure","plaster"),"flat plate has no stray foundation or facade");
+   var woodSeat=new GladeDesign.Item(0,house.kind(),house.center(),4,3,.8f,false,List.of(),0,null,house.form().roof(0).finish(new GladeDesign.Finish("wood","","tile","",18)));fixture(new GladeDesign(List.of(woodSeat),2));ok(tagged("craftShape","Ghế gỗ") && !tagInItem(0,"stoneFoundation","true") && !tagInItem(0,"materialStructure","wood"),"wood craft seat does not get masonry walls");
+   var upper=new GladeDesign.Item(1,house.kind(),house.center(),2,2,2,true,List.of(),0,null,new GladeDesign.Form(0,1,0,0).finish(GladeCatalog.plain()));fixture(new GladeDesign(List.of(house,upper),2));ok(!tagInItem(1,"stoneFoundation","true"),"stacked upper floor does not get ground foundation");
+   fixture(new GladeDesign(List.of(house,path(1,0,-5,0,5)),2));ok(engine(()->{var f=GladeApp.class.getDeclaredField("content");f.setAccessible(true);var root=(Node)f.get(app);var hits=new CollisionResults();root.getChild(0).collideWith(new Ray(new Vector3f(0,1,5),new Vector3f(0,0,-1)),hits);return hits.size()==0;}),"material details do not seal a path passage");
+   var neighbor=block(2,3,0,4,3,2.6f,1.4f);fixture(new GladeDesign(List.of(house,neighbor),2));ok(engine(()->{var f=GladeApp.class.getDeclaredField("content");f.setAccessible(true);var hits=new CollisionResults();((Node)f.get(app)).collideWith(new Ray(new Vector3f(0,1,0),Vector3f.UNIT_X),hits);for(var hit:hits)if(hit.getDistance()<3.8f)return false;return true;}),"joined interiors stay free of facade details");
+   fixture(new GladeDesign(List.of(source(0,0,0),path(1,-5,0,5,0)),2));ok(tagInItem(1,"bridgeMaterial","wood"),"default adaptive bridge is wood");paint(1,"stone");ok(tagInItem(1,"bridgeMaterial","stone"),"palette changes bridge structure to masonry");chord(KeyInput.KEY_Z);ok(tagInItem(1,"bridgeMaterial","wood"),"bridge undo restores wood");
+   fixture(new GladeDesign(List.of(path(0,-5,0,5,0)),LandBounds.level(2),new TerrainField().brush(0,0,2.4f,2,null)));paint(0,"wood");ok(tagInItem(0,"stepMaterial","wood"),"slope path responds with wooden stairs");paint(0,"stone");ok(tagInItem(0,"stepMaterial","stone"),"slope path changes to stone stairs");
+   var tower=new GladeDesign.Item(0,GladeDesign.Kind.TOWER,house.center(),3,4,4.4f,true,List.of(),0,null,house.form());fixture(new GladeDesign(List.of(tower),2));ok(tagInItem(0,"stoneFoundation","true") && tagInItem(0,"materialStructure","plaster"),"elliptical tower also gets structural materials");paint(0,"stone");ok(tagInItem(0,"reliefStyle","stone"),"tower stone relief follows cylinder");
+   System.out.println("ARCHITECTURE_MATERIAL_PASS: timber/plaster default, stone foundations, brick/stone/wood relief, reversible paint/save/undo, flat and stacked safety, exposed merged faces, path openings, material-driven bridge and stairs, elliptical tower; no screenshots");
+  }finally {app.stop();}
+ }
+}

@@ -1,0 +1,13 @@
+/target/
+/glade-data/
+
+/release/
+/glade/classes/
+/glade/native/
+/glade/test-results/
+/glade/captures/
+/game-code/release/
+/game-code/glade/native/
+/game-code/glade/test-results/
+/game-code/glade/target/
+/game-code/classic/target/

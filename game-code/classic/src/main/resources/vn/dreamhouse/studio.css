@@ -1,0 +1,179 @@
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 12px;
+    -fx-accent: #52775e;
+    -fx-focus-color: #8eac87;
+    -fx-faint-focus-color: #8eac8722;
+}
+.game-shell { -fx-background-color: #dfe8d5; }
+.game-world {
+    -fx-background-color: radial-gradient(center 50% 45%, radius 76%, #faf3dc, #dce9df 65%, #bacfd0);
+}
+.world-brand {
+    -fx-font-family: "Georgia";
+    -fx-font-size: 35px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #345a48;
+    -fx-effect: dropshadow(gaussian, #ffffffcc, 5, 0.2, 0, 2);
+}
+.world-tagline { -fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #6a806b; }
+.coin-badge {
+    -fx-background-color: linear-gradient(to bottom, #fff0bd, #efd496);
+    -fx-background-radius: 22px; -fx-padding: 10px 18px;
+    -fx-text-fill: #775a26; -fx-font-weight: bold; -fx-font-size: 14px;
+    -fx-border-color: #fff6d9; -fx-border-width: 2px; -fx-border-radius: 22px;
+    -fx-effect: dropshadow(gaussian, #465c4525, 12, 0, 0, 3);
+}
+.place-badge { -fx-text-fill: #536d59; -fx-font-size: 11px; -fx-padding: 3px 8px; }
+.studio-sidebar {
+    -fx-background-color: #fff9ed;
+    -fx-border-color: #e1d7bc; -fx-border-width: 2px 0 0 0;
+}
+.studio-header, .studio-summary { -fx-padding: 12px 18px; }
+.studio-header { -fx-background-color: #e6eddb; }
+.studio-title { -fx-font-family: "Georgia"; -fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #355a48; }
+.studio-subtitle { -fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #6b846c; }
+.studio-sidebar .tab-header-area { -fx-padding: 6px 20px 0; }
+.studio-sidebar .tab-header-background, .studio-sidebar .scroll-pane,
+.studio-sidebar .scroll-pane > .viewport { -fx-background-color: #fff9ed; }
+.studio-sidebar .tab {
+    -fx-padding: 5px 20px; -fx-background-radius: 12px 12px 0 0; -fx-background-color: #eae8d7;
+}
+.studio-sidebar .tab:selected { -fx-background-color: #cfe0c5; }
+.studio-sidebar .tab-label { -fx-text-fill: #4a6350; -fx-font-weight: bold; }
+.studio-tab-content { -fx-padding: 8px 20px; }
+.studio-summary { -fx-background-color: #e5eddb; }
+.material-box { -fx-background-color: #eee8d8; -fx-background-radius: 12px; -fx-padding: 9px; }
+.button, .game-toggle {
+    -fx-background-color: linear-gradient(to bottom, #fffdf4, #efe8d7);
+    -fx-background-radius: 10px; -fx-padding: 6px 12px;
+    -fx-border-color: #d8d3b9; -fx-border-radius: 10px;
+    -fx-text-fill: #455e4a; -fx-cursor: hand;
+}
+.button:hover, .game-toggle:hover { -fx-background-color: #edf3dc; -fx-border-color: #89a27f; }
+.button:focused { -fx-border-color: #7f9c77; }
+.build-card {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f7f1e3);
+    -fx-border-color: #ded5bc; -fx-border-width: 1px 1px 3px 1px;
+    -fx-border-radius: 12px; -fx-background-radius: 12px;
+    -fx-padding: 5px 10px; -fx-font-weight: bold;
+}
+.build-card:chosen { -fx-background-color: #e2edce; -fx-border-color: #8eaa74; }
+.build-card:hover { -fx-translate-y: -2px; -fx-border-color: #87a471; }
+.card-price { -fx-font-size: 10px; -fx-text-fill: #aa843a; -fx-font-weight: bold; }
+.viewport-hint {
+    -fx-background-color: #fffdf0da; -fx-background-radius: 14px;
+    -fx-padding: 8px 14px; -fx-text-fill: #536b56;
+}
+.game-toggle:selected {
+    -fx-background-color: linear-gradient(to bottom, #749776, #506f58);
+    -fx-text-fill: #fff9e8; -fx-border-color: #48664e;
+}
+.game-section-title { -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #49634b; }
+.chest-button {
+    -fx-background-color: linear-gradient(to bottom, #fff8e6, #edddbb);
+    -fx-background-radius: 15px; -fx-border-radius: 15px;
+    -fx-border-color: #fff9e7; -fx-border-width: 2px;
+    -fx-padding: 4px 10px 6px; -fx-text-fill: #5d5c3d;
+    -fx-font-size: 10px; -fx-font-weight: bold; -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #4c62422b, 10, 0.1, 0, 3);
+}
+.chest-button:selected { -fx-background-color: #dfeac8; -fx-border-color: #aabd8d; }
+.chest-button:hover { -fx-scale-x: 1.035; -fx-scale-y: 1.035; }
+.design-drawer {
+    -fx-background-color: #fff9e9; -fx-background-radius: 12px; -fx-padding: 9px;
+    -fx-effect: dropshadow(gaussian, #4c62422b, 12, 0, 0, 3);
+}
+
+/* Candy buttons and clay construction pieces */
+.game-world {
+    -fx-background-color: radial-gradient(center 50% 44%, radius 80%, #e9fcf4, #c3eceb 70%, #a9dfe3);
+}
+.world-brand { -fx-text-fill: #fff2ca; -fx-effect: dropshadow(gaussian, #71482a, 2, 1, 1, 3); }
+.world-tagline { -fx-text-fill: #437779; }
+.button, .game-toggle {
+    -fx-background-color: #663d23, #c58b43, linear-gradient(to bottom, #ffe6a0, #edb85c);
+    -fx-background-insets: 0, 2, 5 4 7 4;
+    -fx-background-radius: 13px, 11px, 8px;
+    -fx-border-color: transparent;
+    -fx-text-fill: #734623;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 14px 10px;
+}
+.button:hover, .game-toggle:hover {
+    -fx-background-color: #663d23, #e4aa5e, linear-gradient(to bottom, #fff0b6, #f9c96f);
+    -fx-border-color: transparent;
+}
+.button:pressed, .game-toggle:pressed { -fx-translate-y: 2px; }
+.candy-button {
+    -fx-background-color: #633b20, #f1b84d, #fff1a4, linear-gradient(to bottom, #b8f15a, #68c331 55%, #3b9b2c);
+    -fx-background-insets: 0, 2, 5, 8 7 12 7;
+    -fx-background-radius: 25px, 23px, 20px, 17px;
+    -fx-border-color: transparent;
+    -fx-padding: 21px 22px 25px;
+    -fx-min-width: 214px;
+    -fx-effect: dropshadow(gaussian, #6e65333b, 6, 0.2, 0, 4);
+    -fx-cursor: hand;
+}
+.candy-button:hover { -fx-scale-x: 1.025; -fx-scale-y: 1.025; }
+.candy-button:pressed { -fx-translate-y: 3px; }
+.candy-gold {
+    -fx-background-color: #633b20, #e59e45, #fff2a0, linear-gradient(to bottom, #ffe585, #f6b841 55%, #d88929);
+}
+.candy-green:selected {
+    -fx-background-color: #633b20, #f1b84d, #fff1a4, linear-gradient(to bottom, #b8f15a, #68c331 55%, #3b9b2c);
+}
+.candy-gold:selected {
+    -fx-background-color: #633b20, #e59e45, #fff2a0, linear-gradient(to bottom, #ffe585, #f6b841 55%, #d88929);
+}
+.candy-caption {
+    -fx-font-family: "Arial Rounded MT Bold", "Segoe UI";
+    -fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: #fff9d9;
+    -fx-effect: dropshadow(gaussian, #684520, 1.8, 1, 1, 3);
+}
+.round-game-button, .round-game-button:hover, .round-game-button:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+.round-game-button:hover { -fx-scale-x: 1.07; -fx-scale-y: 1.07; }
+.round-game-button:pressed { -fx-translate-y: 3px; -fx-scale-x: 0.97; -fx-scale-y: 0.97; }
+.build-card {
+    -fx-background-color: #785332, #d9a566, linear-gradient(to bottom, #fff3c7, #f4dca2);
+    -fx-background-insets: 0, 2, 4 4 7 4;
+    -fx-background-radius: 16px, 14px, 12px;
+    -fx-border-color: transparent;
+    -fx-padding: 4px 8px 10px;
+    -fx-text-fill: #714b2d;
+}
+.build-card:chosen {
+    -fx-background-color: #5a7430, #e7c363, linear-gradient(to bottom, #e6f5b5, #bfdf7a);
+}
+.build-card:hover { -fx-border-color: transparent; -fx-translate-y: -3px; }
+.studio-sidebar { -fx-background-color: #fff0c9; -fx-border-color: #ad7a42; -fx-border-width: 4px 0 0; }
+.studio-sidebar .tab-header-background, .studio-sidebar .scroll-pane,
+.studio-sidebar .scroll-pane > .viewport { -fx-background-color: #fff0c9; }
+.studio-sidebar .tab { -fx-background-color: #dfbd7e; }
+.studio-sidebar .tab:selected { -fx-background-color: #ffe3a0; }
+.studio-sidebar .tab-label { -fx-text-fill: #76512c; }
+.coin-badge {
+    -fx-background-color: #7b4d24, #d69f41, linear-gradient(to bottom, #fff3ac, #edbd5c);
+    -fx-background-insets: 0, 2, 5;
+    -fx-background-radius: 24px, 22px, 19px;
+    -fx-border-color: transparent; -fx-text-fill: #794c21;
+    -fx-padding: 12px 22px;
+}
+.design-drawer { -fx-background-color: #fff0c9; -fx-border-color: #b87e42; -fx-border-radius: 12px; }
+.candy-caption {
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, #684520, 1, 1, 0, 2);
+}
+.candy-green:hover {
+    -fx-background-color: #633b20, #f1b84d, #fff1a4, linear-gradient(to bottom, #c5fa72, #7bd13b 55%, #42aa30);
+}
+.candy-gold:hover {
+    -fx-background-color: #633b20, #e59e45, #fff2a0, linear-gradient(to bottom, #ffeda0, #ffc953 55%, #e79d35);
+}

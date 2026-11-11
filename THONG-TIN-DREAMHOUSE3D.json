@@ -1,0 +1,295 @@
+{
+  "ten": "DreamHouse 3D",
+  "loai": "Trò chơi mô phỏng xây dựng nhà và cảnh quan 3D",
+  "ngonNgu": "Tiếng Việt",
+  "moTa": "Trò chơi cho phép người chơi dựng và tùy chỉnh công trình trên một thung lũng 3D, sắp xếp địa hình và cảnh quan, rồi lưu thiết kế để tiếp tục sử dụng.",
+  "phienBanHienHanh": {
+    "ten": "Glade",
+    "trangThai": "Bản hiện hành",
+    "congNgheDoHoa": "jMonkeyEngine",
+    "phienBanCongNghe": "3.9.0-stable",
+    "java": "21",
+    "lopChayChinh": "vn.dreamhouse.glade.GladeApp",
+    "nenTang": [
+      "Windows"
+    ],
+    "banPortableKemJava": true
+  },
+  "phienBanCu": {
+    "ten": "Classic",
+    "trangThai": "Bản JavaFX trước đây",
+    "congNgheDoHoa": "JavaFX",
+    "java": "21 trở lên",
+    "lopChayChinh": "vn.dreamhouse.DreamHouseApp"
+  },
+  "chucNang": [
+    "Dựng công trình 3D bằng cách đặt, chọn, kéo, thay đổi kích thước và xoay các khối.",
+    "Tùy chỉnh mái, mặt tiền, vật liệu và màu sắc công trình.",
+    "Tạo và chỉnh sửa địa hình; xây đường, đổ nước và tạo cảnh quan.",
+    "Xoay, di chuyển và thu phóng góc nhìn trong thế giới 3D.",
+    "Lưu và mở toàn bộ thung lũng từ tệp .glade.",
+    "Lưu các cụm công trình làm mẫu để đặt lại và tái sử dụng.",
+    "Hỗ trợ hướng dẫn thao tác, hoàn tác và làm lại."
+  ],
+  "chiTietBanGlade": {
+    "giaoDienVaCheDo": {
+      "manHinhMenu": [
+        "Tiếp tục hoặc phục hồi phiên gần nhất",
+        "Tạo thế giới mới",
+        "Mở bản thiết kế",
+        "Lưu thiết kế",
+        "Cài đặt",
+        "Hướng dẫn chơi",
+        "Thoát"
+      ],
+      "trongCanh": [
+        "Hộp dụng cụ để mở hoặc thu gọn thanh công cụ",
+        "Hộp bản thiết kế để lưu/mở thung lũng và quản lý mẫu công trình",
+        "Menu ba gạch để mở cảnh mẫu, đất trống, toàn cảnh và hướng dẫn",
+        "Chế độ Đi bộ để tham quan cảnh ở tầm mắt gần mặt đất"
+      ],
+      "congCu": [
+        "Xây dựng",
+        "Con đường",
+        "Cửa sổ",
+        "Bảng màu",
+        "Tẩy",
+        "Địa hình",
+        "Hoa",
+        "Cây cối",
+        "Nước",
+        "Máy ảnh",
+        "Thời gian"
+      ],
+      "caiDat": [
+        "Đồ họa Nhẹ hoặc Đẹp",
+        "Âm lượng",
+        "Bật/tắt âm thanh thiên nhiên",
+        "Độ nhạy camera",
+        "Kích thước cửa sổ hoặc toàn màn hình"
+      ],
+      "huongDan": "Hướng dẫn trong game chia thành các bước dựng công trình, biến đổi hình khối, chọn vật liệu, lưu cụm mẫu và lưu thung lũng."
+    },
+    "thuVienCauKien": {
+      "luuY": "Danh mục có mẫu cơ bản và biến thể vật liệu/hình dáng. Một số đối tượng xuất hiện ở nhiều nhóm công cụ; không nên cộng các nhóm thành tổng số vật thể riêng.",
+      "kienTruc": [
+        "Khối vuông",
+        "Khối trụ",
+        "Tường",
+        "Hàng rào",
+        "Nền hoặc khối craft",
+        "Bậc thang"
+      ],
+      "cuaVaOngKhoi": [
+        "Cửa sổ vòm",
+        "Cửa sổ tròn",
+        "Cửa vòm",
+        "Cửa đôi",
+        "Ống khói vuông",
+        "Ống khói thấp"
+      ],
+      "cay": [
+        "Cây tán tròn",
+        "Cây thông",
+        "Bạch dương",
+        "Cây táo",
+        "Anh đào",
+        "Bách thon",
+        "Cây mùa thu",
+        "Bonsai"
+      ],
+      "vuon": [
+        "Hoa đồng nội",
+        "Oải hương",
+        "Hoa vàng",
+        "Hoa hồng",
+        "Bồn hoa gỗ",
+        "Bồn hoa hồng",
+        "Giếng nước",
+        "Ghế tựa",
+        "Giàn hoa",
+        "Rào cây",
+        "Sàn sân vườn"
+      ],
+      "tuongVaHangRao": [
+        "Tường đá",
+        "Tường gạch",
+        "Vách gỗ",
+        "Hàng rào gỗ",
+        "Hàng rào cây",
+        "Cầu thang đá"
+      ],
+      "congTrinhGo": [
+        "Nhà gỗ",
+        "Sàn gỗ",
+        "Chòi gỗ",
+        "Giàn hoa",
+        "Cầu thang gỗ",
+        "Cầu gỗ",
+        "Ghế sân vườn",
+        "Các biến thể khối craft gỗ, bàn craft gỗ và giàn craft gỗ"
+      ],
+      "mai": [
+        "Mái ngói đỏ",
+        "Mái đá xám",
+        "Mái gỗ",
+        "Mái kim loại",
+        "Ống khói gạch",
+        "Ống khói đá"
+      ],
+      "duongVaDiaHinh": [
+        "Đường đá sáng",
+        "Đường gạch ấm",
+        "Đường đá xám",
+        "Đường sân vườn",
+        "Công cụ đắp/hạ đất",
+        "Công cụ tạo nguồn nước"
+      ],
+      "phanBiet": "Danh mục thư viện là căn cứ cho các mẫu công cụ. Các ý tưởng được ghi là Đề xuất trong ARCHITECTURE-COLLECTION.md không được xem là tính năng đã triển khai."
+    },
+    "xayDungVaThaoTac": {
+      "datCongTrinh": "Chọn một mẫu để đặt kích thước mặc định bằng một lần bấm; có thể kéo trên mặt đất để xác định mặt bằng. Khung xem trước dạng giàn và đường viền chân khối hiển thị trước khi đặt.",
+      "chinhSua": [
+        "Bấm công trình để chọn; kéo công trình đã chọn để di chuyển.",
+        "Kéo các tay nắm để đổi chiều ngang, chiều sâu, cao độ trên/dưới và nâng/hạ toàn khối.",
+        "Kéo cung ở chân khối để xoay công trình.",
+        "Kéo tay nắm mái riêng để thay đổi kích thước mái.",
+        "Giữ Alt để tạm tắt bắt dính; thả Alt để bật lại.",
+        "Dùng Tẩy để xóa đối tượng; hoàn tác nếu cần khôi phục."
+      ],
+      "ghepCongTrinh": [
+        "Có thể chồng tầng trên công trình hoặc sàn.",
+        "Các khối chữ nhật cùng cao độ có thể nối thành tổ hợp và mái chữ L/T.",
+        "Nhà cao có thể chia dải tầng; đặt trên sườn đất có thể phát sinh chân đỡ.",
+        "Đường có thể cắt tường tạo lối thông và cắt hàng rào tạo cổng."
+      ],
+      "maiVaMatTien": [
+        "Đặt mái lên nhà; mỗi nhà dùng một bộ mái gắn riêng và đặt mái khác sẽ thay mái đang gắn.",
+        "Mái có kích thước riêng sau khi đặt; ống khói bám theo mặt dốc.",
+        "Hạ mái đến hết hành trình để chuyển thành sân thượng có tường răng cưa; kéo lên để khôi phục mái.",
+        "Đặt cửa sổ ở độ cao tại điểm bấm; cửa chính đặt ở chân tường.",
+        "Cửa, cửa sổ, mái và ống khói liên kết với nhà; xóa nhà sẽ xóa cấu kiện gắn.",
+        "Muốn đổi điểm gắn cửa hoặc cửa sổ, xóa rồi đặt lại; chưa hỗ trợ kéo trượt cấu kiện trên tường."
+      ],
+      "vatLieu": "Bật Bảng màu rồi bấm đối tượng để chọn vật liệu/màu. Tường và mái đổi độc lập; chế độ tô không di chuyển công trình.",
+      "duong": "Công cụ Con đường dùng để vẽ đường; đoạn đi qua nước có thể tạo cầu, đoạn qua dốc tạo bậc, và đoạn cắt tường/hàng rào có thể tạo lối thông/cổng theo loại cấu kiện.",
+      "diaHinh": "Giữ chuột trái để đắp đất, chuột phải để hạ đất. Có thể chỉnh cỡ bút bằng phím ngoặc vuông; dùng công cụ để lấp/chỉnh lại vùng thấp.",
+      "nuoc": "Bấm để đặt nguồn nước; nước lan theo vùng thấp, bị địa hình cao và công trình cản, có thể chảy xuống cốt thấp hơn. Bề mặt nước được làm mềm và không tự đào hồ.",
+      "cayHoa": "Bấm để đặt cây/hoa hoặc giữ và rê để trồng thành nét; cả nét là một bước hoàn tác. Có thể dùng Tẩy để dọn cây.",
+      "gioiHanMoPhong": [
+        "Chế độ Đi bộ chưa mô phỏng va chạm nhân vật với tường.",
+        "Nước không tự đào hồ và giới hạn tối đa 8192 ô tính toán cho mỗi nguồn.",
+        "Ghép hình học tổng quát cho mọi mái tròn, mái lệch cao độ và đồ trang trí tùy ý chưa được hỗ trợ.",
+        "Cầu thang đặt độc lập, chưa tự nhận tầng đích hoặc tạo đường đi cho NPC."
+      ]
+    },
+    "dieuKhienChiTiet": {
+      "chonVaXay": "Chuột trái dùng để chọn, di chuyển và dựng vật thể; không dùng để xoay cảnh.",
+      "xoayCanh": "Giữ chuột phải và kéo; trong công cụ Địa hình, chuột phải dùng để hạ đất.",
+      "truotCanh": "Giữ chuột giữa và kéo.",
+      "diChuyenCamera": "WASD hoặc phím mũi tên, di chuyển theo hướng camera.",
+      "thuPhong": "Cuộn chuột; mức thay đổi chậm, khoảng 3% mỗi nấc tiêu chuẩn.",
+      "chinhDat": "Phím [ và ] thay đổi kích cỡ bút địa hình.",
+      "diBo": "WASD hoặc phím mũi tên để đi; giữ chuột phải để nhìn quanh; Esc hoặc nút Về xây dựng để thoát.",
+      "saoChepCum": "Ctrl+C sao chép, Ctrl+X cắt, Ctrl+V dán cụm liên kết.",
+      "lichSu": "Ctrl+Z hoàn tác; Ctrl+Y làm lại; Esc hủy thao tác hoặc trở về chọn/xoay."
+    },
+    "quyTacCanhQuanVaPhanUng": [
+      "Cửa sổ thấp có thể chuyển thành cửa; cửa sổ đặt trên mái tạo mái phụ; các cửa sổ kề nhau có thể tạo ban công chung.",
+      "Cây hoặc hoa cạnh tường có thể tạo dây leo lên đến mép mái; xóa cây cập nhật khoảng trống và bóng.",
+      "Nước sát nhà có thể tạo chân đá/rêu; vùng nước đủ lớn có thể có lá súng và vịt.",
+      "Hàng rào khép kín có thể làm gọn cỏ phía trong; đầu hàng rào có thể bắt vào tường gần đó.",
+      "Khối craft có thể chuyển hình dạng theo kiểu và vật liệu.",
+      "Nhà mới dùng tường vữa sáng, khung gỗ và chân móng đá; chi tiết thay đổi theo vật liệu được chọn.",
+      "Thời gian có các chế độ Ban ngày, Nắng chiều và Chạng vạng; ánh sáng và nền chuyển tiếp khi đổi chế độ."
+    ],
+    "luuTruVaPhucHoi": {
+      "dinhDangHienTai": "glade-9",
+      "tuongThich": "Đọc các phiên bản định dạng glade-1 đến glade-8.",
+      "duLieuDuocLuu": [
+        "Công trình, kích thước, vị trí và liên kết cấu kiện",
+        "Vật liệu, màu sắc và biến thể",
+        "Địa hình và nguồn nước",
+        "Trạng thái cảnh và dữ liệu phiên chơi"
+      ],
+      "tuDongPhucHoi": "Tự lưu nền sau khoảng 3 giây không có chỉnh sửa hoặc định kỳ khoảng 30 giây; luân phiên 3 phiên bản phục hồi và thử bản trước nếu bản gần nhất bị lỗi.",
+      "duLieuNguoiChoi": {
+        "thuMucGoc": "%LOCALAPPDATA%\\DreamHouse",
+        "thuMucCon": [
+          "saves",
+          "recovery",
+          "captures",
+          "logs"
+        ],
+        "caiDat": "settings.properties"
+      },
+      "gioiHanTep": {
+        "kichThuoc": "16 MB",
+        "soCongTrinh": 10000,
+        "tongDiemNet": 250000,
+        "diemToiDaMoiNet": 4096,
+        "ghiChu": "Đây là giới hạn bảo vệ khi lưu/nạp, không phải cam kết hiệu năng với cảnh có số lượng đối tượng tối đa."
+      },
+      "anhChup": "Máy ảnh chỉ chụp khi người chơi bấm; ảnh PNG được lưu trong %LOCALAPPDATA%\\DreamHouse\\captures."
+    },
+    "kiemThuVaChatLuong": {
+      "lenhKiemThu": [
+        "KIEM-TRA.cmd: kiểm tra dữ liệu và bộ đệm mô hình",
+        "KIEM-TRA.cmd -IncludeGraphics: chạy bộ 17 bài kiểm tra hiện hành có giao diện/đồ họa"
+      ],
+      "baoCao": "glade/test-results/<lượt>/summary.json",
+      "nhomTinhHuong": [
+        "Biến đổi mái và khối, lưu/mở, cây/hoa và hoàn tác",
+        "Sáu loại cấu trúc, địa hình, nước và vật cản",
+        "Cửa, ban công, mái phụ, dây leo, chân đỡ, cầu/bậc/cổng và hàng rào",
+        "Camera tự do, chế độ Đi bộ, ép phẳng bằng tay nắm và lưu/hoàn tác",
+        "Vật liệu, kết cấu khối ghép, cửa xuyên tường và bộ đệm dựng cảnh"
+      ],
+      "anhChupTuDong": false
+    }
+  },
+  "dieuKhien": {
+    "xoayGocNhin": "Giữ chuột phải và kéo",
+    "diChuyenGocNhin": "Giữ chuột giữa và kéo",
+    "diChuyenTrongTheGioi": "WASD hoặc phím mũi tên",
+    "thuPhong": "Lăn chuột",
+    "huyThaoTac": "Esc",
+    "hoanTac": "Ctrl+Z",
+    "lamLai": "Ctrl+Y",
+    "saoChep": "Ctrl+C",
+    "cat": "Ctrl+X",
+    "dan": "Ctrl+V"
+  },
+  "cachChay": {
+    "khuyenNghi": "Mở thư mục chương trình và chạy CHOI-GAME.cmd, sau đó chọn Vào thung lũng.",
+    "launcher": "CHOI-GAME.cmd",
+    "launcherGlade": "Mo-DreamHouse-Glade.cmd",
+    "launcherClassic": "Mo-DreamHouse-Classic.cmd",
+    "yeuCauJavaKhiChoiBanPortable": false,
+    "ghiChu": "Giữ nguyên thư mục DreamHouse.exe, app và runtime khi chép bản portable sang máy khác."
+  },
+  "duLieu": {
+    "luuThungLung": "Tệp .glade do người chơi chọn khi lưu.",
+    "duLieuNguoiChoi": "%LOCALAPPDATA%\\DreamHouse",
+    "duLieuPhucHoiVaCaiDat": "Dữ liệu phục hồi và cài đặt của người chơi được lưu riêng trong thư mục dữ liệu người chơi.",
+    "dinhDangCu": [
+      ".dreamblocks",
+      ".dreamhouse"
+    ]
+  },
+  "maNguon": {
+    "thuMuc": "game-code",
+    "thuMucGlade": "game-code\\glade",
+    "thuMucClassic": "game-code\\classic",
+    "tepBuildGlade": "game-code\\glade\\pom.xml",
+    "tepBuildClassic": "game-code\\classic\\pom.xml"
+  },
+  "banPortable": {
+    "tepThongTin": "game-code\\release\\current.json",
+    "buildId": "20261111-201517-460",
+    "thoiGianBuildUtc": "2026-11-11T13:15:31.3471320Z",
+    "coJavaKemTheo": true,
+    "tepChay": "game-code\\release\\build-20261111-201517-460\\bundled\\DreamHouse\\DreamHouse.exe"
+  },
+  "ghiChuPhamVi": "Thông tin này mô tả trò chơi DreamHouse 3D; các thư mục hoặc tài liệu về ứng dụng khác trong cùng thư mục không thuộc phạm vi mô tả."
+}

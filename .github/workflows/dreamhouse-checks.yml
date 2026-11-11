@@ -1,0 +1,19 @@
+name: DreamHouse regression
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  data-and-cache:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Data, recovery, import and CPU cache checks
+        shell: powershell
+        run: ./game-code/Run-DreamHouse-Checks.ps1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-results
+          path: game-code/glade/test-results/**
