@@ -1,5 +1,7 @@
 package vn.dreamhouse.glade;
 
+import java.io.IOException;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.collision.CollisionResults;
@@ -188,17 +190,23 @@ public final class GladeApp extends SimpleApplication {
     private ScenicBackdrop backdrop;
     private CozyAtmosphere atmosphere;
     private String message="Kéo chuột trái để vẽ. Giữ chuột phải để xoay. Cuộn để thu phóng.";
+    private LauncherWorld startupWorld=LauncherWorld.MENU;
+    private Path startupFile;
+    private String startupError;
 
     public static void main(String[] args) {
         var app=new GladeApp();
         app.managedSession=true;app.mainMenuOpen=true;
+        app.startupWorld=LauncherWorld.fromArgs(args);
+        if(app.startupWorld==LauncherWorld.FILE)app.startupFile=LauncherWorld.fileFromArgs(args);
         var preferences=PlayerFiles.settings();
         try{app.volume=FastMath.clamp(Float.parseFloat(preferences.getProperty("volume","0.55")),0,1);app.cameraSensitivity=FastMath.clamp(Float.parseFloat(preferences.getProperty("cameraSensitivity","1")),.4f,2);}catch(NumberFormatException ignored){}
         app.ambientEnabled=Boolean.parseBoolean(preferences.getProperty("ambient","false"));app.qualityLow=Boolean.parseBoolean(preferences.getProperty("lowQuality","false"));
         var settings=new AppSettings(true);
         settings.setTitle("DreamHouse · Glade — Dựng & biến đổi kiến trúc");
         settings.setIcons(new Object[]{LauncherIcon.image(16),LauncherIcon.image(32),LauncherIcon.image(64)});
-        settings.setResolution(1360,860);
+        var size=GladeLauncher.resolution(preferences);
+        settings.setResolution(size.width,size.height);
         settings.setSamples(4);
         settings.setVSync(true);
         settings.setResizable(true);
@@ -266,10 +274,44 @@ public final class GladeApp extends SimpleApplication {
         applyQuality();
         if(context instanceof com.jme3.system.lwjgl.LwjglWindow window)org.lwjgl.glfw.GLFW.glfwSetWindowSizeLimits(window.getWindowHandle(),960,640,org.lwjgl.glfw.GLFW.GLFW_DONT_CARE,org.lwjgl.glfw.GLFW.GLFW_DONT_CARE);
         bindInput();
+        openStartupWorld();
         rebuild();
         updateCamera();
         rebuildHud();
         LaunchSignals.publish("FIRST_FRAME");
+    }
+
+    private void openStartupWorld() {
+        var world = switch(startupWorld) {
+            case GARDEN -> GardenScene.create();
+            case ISLAND -> GardenScene.island();
+            case NEW -> new GladeDesign(List.of(),2);
+            case RECOVERY -> recovery == null ? null : recovery.design();
+            case FILE -> readStartupFile();
+            case MENU -> null;
+        };
+        if(world == null) {
+            if(startupWorld == LauncherWorld.RECOVERY) startupError="Chưa có phiên hợp lệ để phục hồi.";
+            return;
+        }
+        design=world;
+        savedDesign=world;
+        if(startupWorld==LauncherWorld.FILE)currentFile=startupFile;
+        mainMenuOpen=false;
+        if(startupWorld==LauncherWorld.RECOVERY)recovery=null;
+        if(startupWorld==LauncherWorld.GARDEN || startupWorld==LauncherWorld.ISLAND){
+            focus.set(0,1.9f,0);yaw=-.38f;elevation=.43f;distance=startupWorld==LauncherWorld.GARDEN?30:22;
+        }
+        message=startupWorld.title;
+    }
+
+    private GladeDesign readStartupFile() {
+        if(startupFile!=null) {
+            try { return GladeDesign.load(startupFile); }
+            catch(IOException | IllegalArgumentException error) { PlayerFiles.error("Không mở được bản lưu từ launcher",error); }
+        }
+        startupError="Không mở được bản lưu. Hãy chọn Mở bản thiết kế.";
+        return null;
     }
 
     private void bindInput() {
@@ -1189,6 +1231,7 @@ public final class GladeApp extends SimpleApplication {
         if(sounds!=null)sounds.tap();
         if(id.startsWith("settings:")){setting(id.substring(9));return;}
         if(id.startsWith("menu:")){
+            startupError=null;
             switch(id.substring(5)){
                 case "continue" -> {if(recovery!=null){replaceWorld(recovery.design(),null);recovery=null;}mainMenuOpen=false;settingsOpen=false;}
                 case "new" -> {
@@ -1789,7 +1832,8 @@ public final class GladeApp extends SimpleApplication {
     @Override public void handleError(String message,Throwable error){if(!launchReady)LaunchSignals.publish("FAILED");PlayerFiles.error(message,error);if(sessionStore!=null && design!=null)sessionStore.save(design);super.handleError(message,error);}
     private void drawMainMenu(int w,int h){
         hud.layer(9);hud.veil(w,h);hud.layer(10);int pw=Math.min(480,w-36),ph=Math.min(480,h-30),x=(w-pw)/2,y=(h-ph)/2;
-        hud.panel(settingsOpen?"CÀI ĐẶT":"DREAMHOUSE",settingsOpen?"Thay đổi được lưu trên máy của bạn":"Xây thung lũng theo cách của bạn",x,y,pw,ph);
+        String subtitle=settingsOpen?"Thay đổi được lưu trên máy của bạn":startupError!=null?startupError:"Xây thung lũng theo cách của bạn";
+        hud.panel(settingsOpen?"CÀI ĐẶT":"DREAMHOUSE",subtitle,x,y,pw,ph);
         String[] ids,labels;
         if(settingsOpen){ids=new String[]{"settings:quality","settings:volume","settings:ambient","settings:sensitivity","settings:resolution","settings:fullscreen","menu:back"};labels=new String[]{"Đồ họa: "+(qualityLow?"Nhẹ":"Đẹp"),"Âm lượng: "+Math.round(volume*100)+"%","Âm thiên nhiên: "+(ambientEnabled?"Bật":"Tắt"),"Độ nhạy camera: "+String.format(Locale.ROOT,"%.1f",cameraSensitivity),"Cửa sổ: "+cam.getWidth()+" × "+cam.getHeight(),fullscreen?"Về cửa sổ":"Toàn màn hình","Trở lại chơi"};}
         else{ids=new String[]{"menu:continue","menu:new","menu:load","menu:save","menu:settings","menu:help","menu:exit"};labels=new String[]{recovery!=null?"Phục hồi phiên gần nhất":"Tiếp tục chơi","Thế giới mới","Mở bản thiết kế","Lưu thiết kế"+(unsaved()?" *":""),"Cài đặt","Hướng dẫn chơi","Thoát"};}

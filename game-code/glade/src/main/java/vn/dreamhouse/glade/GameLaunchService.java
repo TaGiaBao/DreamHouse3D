@@ -47,14 +47,20 @@ final class GameLaunchService {
     int awaitExit(long timeoutMs)throws InterruptedException{if(child==null || !child.waitFor(timeoutMs,java.util.concurrent.TimeUnit.MILLISECONDS))return -1;return child.exitValue();}
     boolean hasLiveChild(){return child!=null && child.isAlive() && !handedOff;}
     void prepare(){if(!watching.get() && !hasLiveChild()){cancelled=false;handedOff=false;}}
-    synchronized Result start(Consumer<String> progress)throws IOException,InterruptedException{
+    Result start(Consumer<String> progress)throws IOException,InterruptedException{
+        return start(progress,LauncherWorld.MENU,null);
+    }
+    synchronized Result start(Consumer<String> progress,LauncherWorld world,Path worldFile)throws IOException,InterruptedException{
         if(hasLiveChild())return monitor(progress,startupTimeout);
         if(GameSessionLock.isRunning())return new Result(State.ALREADY_RUNNING,"Game đã mở. Hãy quay lại cửa sổ DreamHouse đang chạy.",null,-1);
         if(cancelled)return new Result(State.CANCELLED,"Đã hủy lượt mở game này.",log,-1);
         handedOff=false;token=UUID.randomUUID().toString();
         var folder=PlayerFiles.directory("logs");log=folder.resolve("launcher-"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))+"-"+token.substring(0,8)+".log");
         progress.accept("Đang mở cửa sổ game…");
-        var builder=new ProcessBuilder(commands.apply(token,PlayerFiles.root()));builder.directory(PlayerFiles.root().toFile());builder.redirectErrorStream(true);builder.redirectOutput(log.toFile());
+        var launchCommand=new ArrayList<>(commands.apply(token,PlayerFiles.root()));
+        if(world!=LauncherWorld.MENU)launchCommand.add(world.argument());
+        if(world==LauncherWorld.FILE && worldFile!=null)launchCommand.add(LauncherWorld.fileArgument(worldFile));
+        var builder=new ProcessBuilder(launchCommand);builder.directory(PlayerFiles.root().toFile());builder.redirectErrorStream(true);builder.redirectOutput(log.toFile());
         child=builder.start();if(cancelled){cancel();return new Result(State.CANCELLED,"Đã hủy lượt mở game này.",log,child.pid());}return monitor(progress,startupTimeout);
     }
     Result monitor(Consumer<String> progress,long timeoutMs)throws IOException,InterruptedException{

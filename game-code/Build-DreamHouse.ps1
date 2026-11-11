@@ -2,6 +2,7 @@
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\Find-Java.ps1"
 . "$PSScriptRoot\Resolve-DreamHouse.ps1"
+. "$PSScriptRoot\Set-DreamHouseLauncherUtf8.ps1"
 $jdk = Find-DreamHouseJava
 $root = $PSScriptRoot
 $id = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
@@ -12,6 +13,7 @@ New-Item -ItemType Directory -Force -Path $classes, "$inputDir\lib" | Out-Null
 $sources = Get-ChildItem -LiteralPath "$root\glade\src\main\java\vn\dreamhouse\glade" -Filter '*.java' | ForEach-Object FullName
 & "$jdk\bin\javac.exe" --release 21 -encoding UTF-8 -cp "$root\glade\lib\*" -d $classes @sources
 if ($LASTEXITCODE -ne 0) { throw 'Bien dich game that bai.' }
+Get-ChildItem -LiteralPath "$root\glade\src\main\resources" | Copy-Item -Destination $classes -Recurse -Force
 if ($NoPackage) { Write-Output $classes; exit 0 }
 $jars = Get-ChildItem -LiteralPath "$root\glade\lib" -Filter '*.jar'
 $jars | Copy-Item -Destination "$inputDir\lib"
@@ -28,10 +30,11 @@ if ($LASTEXITCODE -ne 0) { throw 'Tao icon that bai.' }
 & "$jdk\bin\jar.exe" cfm "$inputDir\DreamHouse.jar" $manifest -C $classes .
 if ($LASTEXITCODE -ne 0) { throw 'Tao jar that bai.' }
 Write-Host 'Dang tao DreamHouse.exe kem Java runtime...'
-& "$jdk\bin\jpackage.exe" --type app-image --name DreamHouse --app-version 0.2.0 --vendor DreamHouse --input $inputDir --main-jar DreamHouse.jar --main-class vn.dreamhouse.glade.GladeLauncher --dest "$build\bundled" --icon "$inputDir\DreamHouse.ico" --add-modules 'java.desktop,java.logging,java.xml,java.management,java.prefs,jdk.unsupported,jdk.charsets,jdk.crypto.ec' --java-options '--enable-native-access=ALL-UNNAMED'
+& "$jdk\bin\jpackage.exe" --type app-image --name DreamHouse --app-version 1.0.0 --vendor DreamHouse --input $inputDir --main-jar DreamHouse.jar --main-class vn.dreamhouse.glade.GladeLauncher --dest "$build\bundled" --icon "$inputDir\DreamHouse.ico" --add-modules 'java.desktop,java.logging,java.xml,java.management,java.prefs,jdk.unsupported,jdk.charsets,jdk.crypto.ec' --java-options '--enable-native-access=ALL-UNNAMED'
 if ($LASTEXITCODE -ne 0) { throw 'Dong goi exe that bai.' }
 $exe = Join-Path $build 'bundled\DreamHouse\DreamHouse.exe'
 if (!(Test-Path -LiteralPath $exe)) { throw 'Khong tim thay exe sau dong goi.' }
+Set-DreamHouseLauncherUtf8 -Executable $exe
 $metadata = [ordered]@{ buildId=$id; createdUtc=(Get-Date).ToUniversalTime().ToString('o'); executable="build-$id\bundled\DreamHouse\DreamHouse.exe"; javaBundled=$true; jarSha256=(Get-DreamHouseFileHash -Path "$inputDir\DreamHouse.jar") }
 $metadata | ConvertTo-Json | Set-Content -LiteralPath "$root\release\current.json" -Encoding UTF8
 @'

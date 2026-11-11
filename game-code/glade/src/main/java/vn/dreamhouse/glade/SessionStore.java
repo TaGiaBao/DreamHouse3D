@@ -53,6 +53,9 @@ final class SessionStore implements AutoCloseable {
         }
     }
     private List<Path> slots(){return List.of(directory.resolve("autosave-0.glade"),directory.resolve("autosave-1.glade"),directory.resolve("autosave-2.glade"));}
+    static boolean hasRecoveryFile(Path directory){
+        return java.util.stream.IntStream.range(0,3).anyMatch(slot->Files.isRegularFile(directory.resolve("autosave-"+slot+".glade")));
+    }
     static long modified(Path file){try{return Files.getLastModifiedTime(file).toMillis();}catch(IOException e){return Long.MIN_VALUE;}}
     private static Comparator<Slot> order(){return Comparator.comparingLong(Slot::sequence).thenComparingLong(Slot::modified);}
     private List<Slot> readSlots(){

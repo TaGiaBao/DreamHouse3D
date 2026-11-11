@@ -12,6 +12,7 @@ $source = Get-ChildItem -LiteralPath "$root\glade\src\main\java\vn\dreamhouse\gl
 $checks = Get-ChildItem -LiteralPath "$root\glade\checks" -Filter '*.java' | ForEach-Object FullName
 & "$jdk\bin\javac.exe" --release 21 -encoding UTF-8 -cp "$root\glade\lib\*" -d $classes @source @checks
 if ($LASTEXITCODE -ne 0) { throw 'Bien dich kiem thu that bai.' }
+Get-ChildItem -LiteralPath "$root\glade\src\main\resources" | Copy-Item -Destination $classes -Recurse -Force
 $runnerCases = @()
 foreach ($code in @(0,7,-1)) {
     $argsProbe = @('-cp', "$classes;$root\glade\lib\*", 'vn.dreamhouse.glade.RunnerProbe', "$code")

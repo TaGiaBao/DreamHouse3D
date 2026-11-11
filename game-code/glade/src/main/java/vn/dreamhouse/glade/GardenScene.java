@@ -5,6 +5,20 @@ import static vn.dreamhouse.glade.GladeDesign.*;
 
 /** An authored garden made from ordinary, editable and serializable player items. */
 final class GardenScene {
+    static GladeDesign island() {
+        var items = new ArrayList<Item>();
+        var cottage = new Finish("plaster","#f4d5a4","tile","#b15e4a");
+        add(items,Kind.HOUSE,0,-2,4.4f,3.8f,2.8f,1.65f,cottage);
+        mounted(items,Kind.CHIMNEY_BRICK,0,.28f,-.16f,1,.52f,.52f,1.15f);
+        path(items,0,0,2.3f,5,1);
+        add(items,Kind.TREE,-4.2f,-1.6f,2.8f,2.8f,4.2f,0,Finish.DEFAULT.variant(6));
+        add(items,Kind.TREE,4.1f,-3,2.6f,2.6f,4,0,Finish.DEFAULT);
+        add(items,Kind.FLOWERS,-2.4f,.4f,1.4f,.9f,.52f,0,Finish.DEFAULT.variant(2));
+        add(items,Kind.FLOWERS,2.7f,.7f,1.2f,.9f,.48f,0,Finish.DEFAULT.variant(1));
+        add(items,Kind.BENCH,-2.9f,2.3f,1.6f,.7f,.85f,0,Finish.DEFAULT);
+        return new GladeDesign(items,new LandBounds(-8,8,-7,7),new TerrainField());
+    }
+
     static GladeDesign create() {
         var a=new ArrayList<Item>();
         var cream=new Finish("plaster","#eedbb2","tile","#c77b4b");
