@@ -1,3 +1,5 @@
 @echo off
-call "%~dp0Mo-DreamHouse-Glade.cmd"
+setlocal
+cd /d "%~dp0game-code"
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0game-code\Start-DreamHouse.ps1"
 exit /b %errorlevel%
