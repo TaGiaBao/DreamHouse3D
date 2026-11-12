@@ -10,7 +10,7 @@ final class BlockFusion {
     private final Map<Long,List<GladeDesign.Item>> groups=new HashMap<>();
     BlockFusion(GladeDesign design) {
         this.design=design;
-        var roofs=design.items().stream().filter(item->item.kind().roofHost() && item.kind()!=GladeDesign.Kind.PAVILION
+        var roofs=design.items().stream().filter(item->item.kind().roofHost() && item.kind()!=GladeDesign.Kind.PENTAGON
                 && item.form().roofLeft()==0 && item.form().roofRight()==0 && item.form().roofFront()==0 && item.form().roofBack()==0 && design.roofRise(item)>.02f && !design.customRoof(item.id())).toList();
         int[] parents=new int[roofs.size()];for(int i=0;i<parents.length;i++) parents[i]=i;
         var bins=new HashMap<String,List<Integer>>();var checked=new HashSet<Long>();

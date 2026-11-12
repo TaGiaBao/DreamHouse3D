@@ -28,6 +28,46 @@ class ResourceCacheCheck {
         if (!(beforeRoad > withRoad && beforeRoad == restoredBank)) {
             throw new AssertionError("riverbank decor must rebuild when an adjacent road is added or removed");
         }
-        System.out.println("RESOURCE_CACHE_PASS: material cache bounded to 512 and riverbank rebuilt when path changes; no screenshots");
+        var first=new GladeDesign.Point(-3,-3);
+        var second=new GladeDesign.Point(3,3);
+        var source=WaterGesture.draft(scene,List.of(first),first,1,0);
+        var onlySource=scene.add(source);
+        var flow=SceneRules.of(onlySource).flows.get(source.id());
+        renderer.update(root,art,onlySource);
+        var sourceNode=root.getChild(1);
+        var additional=WaterGesture.draft(onlySource,List.of(second),second,2,0);
+        var twoSources=onlySource.add(additional);
+        renderer.update(root,art,twoSources);
+        if(SceneRules.of(twoSources).flows.get(source.id())!=flow || root.getChild(1)!=sourceNode)
+            throw new AssertionError("independent flow and mesh should be reused when another source is drawn");
+        var raised=twoSources.withTerrain(twoSources.terrain().brush(first.x(),first.z(),2,2,null));
+        renderer.update(root,art,raised);
+        if(SceneRules.of(raised).flows.get(source.id())==flow || root.getChild(1)==sourceNode)
+            throw new AssertionError("terrain edits must invalidate the affected flow and mesh");
+        var empty=new GladeDesign(List.of(),2);
+        var meadow=art.meadow(empty);
+        var terrain=meadow.getChild("Địa hình");
+        int clear=meadow.getTriangleCount();
+        ReactiveFeatures.trimGrass(meadow,empty.add(WaterGesture.draft(empty,List.of(first),first,4,0)));
+        if(meadow.getTriangleCount()>=clear || meadow.getChild("Địa hình")!=terrain)
+            throw new AssertionError("wet ground trims grass without replacing the terrain");
+        ReactiveFeatures.trimGrass(meadow,empty);
+        if(meadow.getTriangleCount()!=clear)throw new AssertionError("grass returns after removing water");
+        var distant=ProceduralMechanicsCheck.block(0,-8,0,2,2,2,1);
+        var near=ProceduralMechanicsCheck.block(1,4,2,2,2,2,1);
+        var dryRoad=ProceduralMechanicsCheck.path(2,-10,-4,-6,-4);
+        var wetRoad=ProceduralMechanicsCheck.path(3,2,0,7,0);
+        var village=new GladeDesign(List.of(distant,near,dryRoad,wetRoad),2);
+        renderer.update(root,art,village);
+        var original=List.copyOf(root.getChildren());
+        var creek=ProceduralMechanicsCheck.source(4,4,0);
+        renderer.update(root,art,village.add(creek));
+        if(root.getChild(0)!=original.get(0) || root.getChild(2)!=original.get(2))
+            throw new AssertionError("a distant dry house and road should retain their existing meshes");
+        if(root.getChild(1)==original.get(1) || root.getChild(3)==original.get(3))
+            throw new AssertionError("house near the bank and road crossing water should refresh");
+        renderer.update(root,art,village);
+        if(root.getChild(3).getParent()!=root)throw new AssertionError("removing water restores the road");
+        System.out.println("RESOURCE_CACHE_PASS: bounded materials, path-sensitive banks, independent water, reversible grass and local scene updates");
     }
 }

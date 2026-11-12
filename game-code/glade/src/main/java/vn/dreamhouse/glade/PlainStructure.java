@@ -6,12 +6,16 @@ import java.util.*;
 /** Bare structural solids: exposed walls only, with path-cut openings and material chosen separately. */
 final class PlainStructure {
     static boolean render(GladeArt art,Node node,GladeDesign.Item item,GladeDesign scene){
-        if(item.form().finish().variant()!=18 || !item.kind().building() && item.kind()!=GladeDesign.Kind.DECK)return false;
+        if(item.kind()!=GladeDesign.Kind.PENTAGON && (item.form().finish().variant()!=18 || !item.kind().building() && item.kind()!=GladeDesign.Kind.DECK))return false;
         float w=item.width(),d=item.depth(),h=item.height();
         var body=StructureShell.build(art,item,scene);if(body.getMesh().getVertexCount()>0)node.attachChild(body);
         float rise=scene.roofRise(item);
         if(item.kind().building() && rise>.02f && !scene.customRoof(item.id()) && !art.joinedRoof(item,scene)){
-            if(item.kind()!=GladeDesign.Kind.TOWER)HipRoof.build(art,node,item,rise);
+            if(item.kind()==GladeDesign.Kind.PENTAGON){
+                var peak=new Node("Dáng mái ngũ giác");peak.setLocalTranslation(0,h,0);node.attachChild(peak);
+                RoofProfiles.build(art,peak,GladeDesign.Kind.ROOF_PENTAGON,item,rise);
+            }
+            else if(item.kind()!=GladeDesign.Kind.TOWER)HipRoof.build(art,node,item,rise);
             else {var roof=art.roofGroup(node);var cone=new Geometry("Mái tháp",new Cylinder(2,32,.001f,w/2+.12f,rise,true,false));cone.rotate(-FastMath.HALF_PI,0,0);cone.setLocalScale(1,d/w,1);cone.setLocalTranslation(0,h+rise/2,0);cone.setMaterial(art.material("#c58b62"));cone.setUserData("roofSurface",true);roof.attachChild(cone);}
         }
         trim(art,node,item,scene,rise);
@@ -19,7 +23,7 @@ final class PlainStructure {
         node.setUserData("plainStructure",true);return true;
     }
     private static void trim(GladeArt art,Node node,GladeDesign.Item item,GladeDesign scene,float rise) {
-        if(!item.kind().building())return;
+        if(!item.kind().building() || item.kind()==GladeDesign.Kind.PENTAGON)return;
         float w=item.width(),d=item.depth(),h=item.height();boolean wood=item.form().finish().material().equals("wood");String stone=wood?"#a58b62":item.form().finish().material().equals("stone")?"#abb3a6":"#cfc09c";
         if(item.kind()!=GladeDesign.Kind.TOWER && !item.form().finish().material().equals("plaster")){
             int rows=Math.max(2,Math.min(24,(int)(h/.34f)));

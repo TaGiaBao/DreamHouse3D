@@ -41,7 +41,7 @@ final class ScenicDetails {
         }
     }
     static void house(GladeArt art,Node root,GladeDesign.Item item,GladeDesign scene){
-        if(item.height()<1.5f || item.form().finish().variant()==18)return;
+        if(item.height()<1.5f || item.form().finish().variant()==18 || item.kind()==GladeDesign.Kind.PENTAGON)return;
         var details=new Node("Chi tiết thủ công");
         float w=item.width(),d=item.depth(),h=item.height();
         for(int side:new int[]{-1,1}){

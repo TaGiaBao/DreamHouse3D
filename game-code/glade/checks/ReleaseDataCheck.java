@@ -22,7 +22,27 @@ class ReleaseDataCheck {
         try(var restarted=new SessionStore(root.resolve("recovery"))){ok(restarted.recover().isPresent(),"recovery survives store restart");}
         var settings=new Properties();settings.setProperty("volume","0.25");PlayerFiles.saveSettings(settings);ok(PlayerFiles.settings().getProperty("volume").equals("0.25"),"player settings roundtrip");
         ok(GameSound.tone(460,.17f,false).getAudioData().getDuration()>.16f,"original generated effect data");
+        var village=RiversideVillage.create();
+        ok(village.items().stream().filter(i->i.kind().building() || i.kind().mounted() || i.kind()==GladeDesign.Kind.PERGOLA).count()==40,"scene M contains 40 architecture modules");
+        ok(village.items().stream().filter(i->Set.of(GladeDesign.Kind.FLOWERS,GladeDesign.Kind.TREE,GladeDesign.Kind.BENCH).contains(i.kind())).count()==300
+                && village.items().stream().filter(WaterFlow::source).count()==3,"scene M contains 300 decorations and three water sources");
+        var villageFile=root.resolve("riverside.glade");village.save(villageFile);
+        ok(GladeDesign.load(villageFile).items().equals(village.items()),"scene M uses the ordinary editable save format");
+        var shed=village.items().stream().filter(i->i.kind()==GladeDesign.Kind.ROOF_SHED).findFirst().orElseThrow();
+        var host=village.items().stream().filter(i->i.id()==shed.mount().hostId()).findFirst().orElseThrow();
+        ok(village.roofLocalHeight(host,0,-1)>village.roofLocalHeight(host,0,1)+.5f,"shed heights follow the same slope as the mounted model");
+        ok(GladeLauncher.nextResolution("1920 × 1080").equals("960 × 640"),"resolution cycles back to the minimum preset");
         var assets=new DesktopAssetManager(true);var art=new GladeArt(assets);var results=new StringBuilder("{\"benchmark\":\"CPU scene rebuild only, not FPS\",\"measurements\":[");
+        var model=art.render(shed,village);model.updateGeometricState();
+        var placement=village.placement(host);
+        for(float z:new float[]{-.8f,0,.8f}){
+            var hits=new com.jme3.collision.CollisionResults();
+            var origin=new com.jme3.math.Vector3f(host.center().x(),placement.elevation()+8,host.center().z()+z);
+            model.collideWith(new com.jme3.math.Ray(origin,new com.jme3.math.Vector3f(0,-1,0)),hits);
+            float expected=placement.elevation()+village.roofLocalHeight(host,0,z);
+            ok(hits.size()>0 && Math.abs(hits.getClosestCollision().getContactPoint().y-expected)<.07f,
+                    "shed surface mesh and attachment height agree across the slope");
+        }
         for(int countItems:new int[]{100,500,1000}){
             var original=scene(countItems);var renderer=new SceneRenderer();var node=new Node();renderer.update(node,art,original);long firstNanos=renderer.lastNanos;
             var old=original.items().getFirst();var changed=new GladeDesign.Item(old.id(),old.kind(),old.center(),old.width(),old.depth(),.05f,false,List.of());var next=original.replace(changed);var unchanged=node.getChild(1);renderer.update(node,art,next);

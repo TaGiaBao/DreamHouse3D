@@ -12,6 +12,7 @@ class SoftWaterCheck extends ProceduralMechanicsCheck {
    engine(()->{var f=GladeApp.class.getDeclaredField("content");f.setAccessible(true);var content=(Node)f.get(app);int[] totals={0,0};boolean[] offGrid={false},gradient={false};
     content.depthFirstTraversal(part->{if(part instanceof Geometry geo && Boolean.TRUE.equals(geo.getUserData("softSurface"))){
      totals[0]++;var mesh=geo.getMesh();var pos=(FloatBuffer)mesh.getBuffer(VertexBuffer.Type.Position).getData();var color=(FloatBuffer)mesh.getBuffer(VertexBuffer.Type.Color).getData();var normal=(FloatBuffer)mesh.getBuffer(VertexBuffer.Type.Normal).getData();
+     ok(mesh.getIndexBuffer()!=null && mesh.getVertexCount()<=mesh.getTriangleCount()*3,"valid indexed water surface");
      for(int i=0;i<pos.limit();i+=3){ok(Float.isFinite(pos.get(i)) && Float.isFinite(pos.get(i+1)) && Float.isFinite(pos.get(i+2)),"finite water vertices");if(Math.abs(pos.get(i)/WaterFlow.STEP-Math.round(pos.get(i)/WaterFlow.STEP))>.05f)offGrid[0]=true;ok(normal.get(i+1)>.98f,"continuous surface without vertical cell walls");}
      for(int i=3;i<color.limit();i+=4)if(color.get(i)<.8f)gradient[0]=true;
      float before=pos.get(1);SoftWater.animate(geo,50);float after=pos.get(1);SoftWater.animate(geo,51);ok(Math.abs(pos.get(1)-after)<.04f,"gentle bounded wave amplitude");if(Math.abs(before-after)>.00001f)totals[1]++;

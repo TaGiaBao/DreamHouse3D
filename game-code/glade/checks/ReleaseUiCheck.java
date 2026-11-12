@@ -15,6 +15,13 @@ class ReleaseUiCheck extends ProceduralMechanicsCheck {
             clickRaw("menu:settings");clickRaw("settings:quality");ok((Boolean)field("qualityLow"),"low quality available");clickRaw("settings:quality");ok(!(Boolean)field("qualityLow"),"quality restored");
             float before=(Float)field("cameraSensitivity");clickRaw("settings:sensitivity");ok((Float)field("cameraSensitivity")!=before,"camera sensitivity adjustable");clickRaw("settings:volume");ok(PlayerFiles.settings().containsKey("volume"),"settings persist");clickRaw("menu:back");ok(!(Boolean)field("mainMenuOpen") && !(Boolean)field("settingsOpen"),"back resumes scene");
             ok(engine(()->{app.getCamera().resize(680,400,true);var redraw=GladeApp.class.getDeclaredMethod("rebuildHud");redraw.setAccessible(true);redraw.invoke(app);var width=GladeApp.class.getDeclaredField("knownWidth");width.setAccessible(true);var hud=GladeApp.class.getDeclaredField("hud");hud.setAccessible(true);return width.getInt(app)==680 && ((GladeHud)hud.get(app)).bounds("architecture")==null;}),"small viewport produces fresh fallback instead of stale HUD");engine(()->{app.getCamera().resize(960,640,true);return true;});call("rebuildHud");ok(ArchitectureCheck.buttons().containsKey("architecture"),"HUD restored after resize");
+            clickRaw("sceneMenu");ok(ArchitectureCheck.buttons().containsKey("village"),"editable village is discoverable");clickRaw("sceneMenu");
+            clickRaw("terrain");clickRaw("photo");
+            ok((Boolean)field("photoMode") && ArchitectureCheck.buttons().containsKey("photoTake") && !ArchitectureCheck.buttons().containsKey("architecture"),"photo preview replaces build controls");
+            var photoScene=design();float yaw=(Float)field("yaw");
+            right(550,390,true);mouse(610,415,null);right(610,415,false);
+            ok(design()==photoScene && Math.abs((Float)field("yaw")-yaw)>.01f,"right drag frames photo without editing terrain");
+            esc();ok(!(Boolean)field("photoMode") && ArchitectureCheck.buttons().containsKey("terrain"),"Esc restores build controls");
             set("managedSession",true);
             set("savedDesign",design());
             clickRaw("mainMenu");

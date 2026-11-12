@@ -29,15 +29,27 @@ final class LauncherView extends JPanel {
     final Button play = new Button("CHƠI NGAY", Tone.GREEN, 32);
     final Button logs = new Button("Xem nhật ký", Tone.CREAM, 14);
     final Button cancel = new Button("Hủy mở", Tone.WOOD, 14);
+    final JButton profileButton = new JButton();
     final JTextArea status = new JTextArea("Game đã sẵn sàng!");
     final JProgressBar progress = new JProgressBar(0, 100);
     private final boolean canRecover;
+    private String playerName = GladeLauncher.DEFAULT_PLAYER_NAME;
 
     LauncherView(boolean canRecover) {
         this.canRecover = canRecover;
         setLayout(null);
         setBackground(new Color(105, 76, 58));
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        profileButton.setContentAreaFilled(false);
+        profileButton.setBorderPainted(false);
+        profileButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        profileButton.addChangeListener(event -> repaint());
+        profileButton.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override public void focusGained(java.awt.event.FocusEvent event) { repaint(); }
+            @Override public void focusLost(java.awt.event.FocusEvent event) { repaint(); }
+        });
+        setPlayerName(playerName);
+        place(profileButton,17,72,284,78);
         place(settings, 882, 15, 126, 40);
         place(quit, 908, 61, 100, 39);
         place(openFile, 818, 400, 188, 41);
@@ -83,6 +95,13 @@ final class LauncherView extends JPanel {
             button.getAccessibleContext().setAccessibleDescription(world == selected ? "Đang chọn" : "Chọn thế giới");
             button.repaint();
         });
+    }
+
+    void setPlayerName(String name) {
+        playerName=name;
+        profileButton.setToolTipText(name+" · Bấm để đổi tên");
+        profileButton.getAccessibleContext().setAccessibleName("Đổi tên người chơi · "+name);
+        repaint();
     }
 
     private void world(LauncherWorld world, int y) {
@@ -154,13 +173,26 @@ final class LauncherView extends JPanel {
         g.drawString("THUNG LŨNG MƠ ƯỚC", 19, 64);
     }
 
-    private static void profile(Graphics2D g) {
-        panel(g, 64, 82, 130, 63, CREAM, new Color(230, 202, 165), 16);
+    private void profile(Graphics2D g) {
+        panel(g, 64, 82, 237, 63, profileButton.getModel().isRollover()?Color.WHITE:CREAM, new Color(230, 202, 165), 16);
+        if(profileButton.isFocusOwner()){
+            g.setColor(INK);
+            g.drawRoundRect(68,86,229,54,12,12);
+        }
         g.setFont(font(20, Font.BOLD));
         g.setColor(INK);
-        g.drawString("Cá Con", 104, 108);
+        var display=playerName;
+        var metrics=g.getFontMetrics();
+        if(metrics.stringWidth(display)>185){
+            var breaks=java.text.BreakIterator.getCharacterInstance();
+            breaks.setText(playerName);
+            int end=breaks.last();
+            do{end=breaks.previous();}while(end>0 && metrics.stringWidth(playerName.substring(0,end)+"…")>185);
+            display=playerName.substring(0,Math.max(0,end))+"…";
+        }
+        g.drawString(display, 94, 108);
         g.setFont(font(12, Font.PLAIN));
-        g.drawString("Chơi ngoại tuyến", 93, 129);
+        g.drawString("Đổi tên người chơi", 94, 129);
         g.setColor(INK);
         g.fillOval(17, 73, 71, 77);
         g.setColor(WOOD);

@@ -18,7 +18,14 @@ final class StructureShell {
     static Geometry build(GladeArt art,GladeDesign.Item item,GladeDesign scene){
         var mesh=new PlainStructure.Builder();float w=item.width()/2,d=item.depth()/2,h=item.height();
         var faces=new ArrayList<Face>();
-        if(item.kind()==GladeDesign.Kind.TOWER){
+        if(item.kind()==GladeDesign.Kind.PENTAGON){
+            for(var edge:Pentagon.edges(item.width(),item.depth())){
+                var delta=edge.to().subtract(edge.from());float span=delta.length();var normal=edge.normal();
+                var center=edge.from().add(edge.to()).multLocal(.5f);
+                faces.add(new Face(new Vector3f(center.x,0,center.y),new Vector3f(delta.x/span,0,delta.y/span),
+                        new Vector3f(normal.x,0,normal.y),span));
+            }
+        }else if(item.kind()==GladeDesign.Kind.TOWER){
             for(int i=0;i<48;i++){float a=i*FastMath.TWO_PI/48,b=(i+1)*FastMath.TWO_PI/48;var p=new Vector3f(FastMath.sin(a)*w,0,FastMath.cos(a)*d);var q=new Vector3f(FastMath.sin(b)*w,0,FastMath.cos(b)*d);var direction=q.subtract(p);float span=direction.length();var tangent=direction.divide(span);faces.add(new Face(p.add(q).multLocal(.5f),tangent,new Vector3f(-tangent.z,0,tangent.x),span));}
         }else{
             faces.add(new Face(new Vector3f(0,0,d),Vector3f.UNIT_X,Vector3f.UNIT_Z,w*2));
@@ -34,9 +41,10 @@ final class StructureShell {
     private static Vector3f rotate(GladeDesign.Item host,Vector3f p){return new Quaternion().fromAngleAxis(host.rotation()*FastMath.DEG_TO_RAD,Vector3f.UNIT_Y).mult(p);}
     private static void wall(PlainStructure.Builder mesh,GladeDesign.Item item,GladeDesign scene,Face face,float h){
         var bounds=PolyCuts.rectangle(-face.span/2,0,face.span/2,h);var cuts=new ArrayList<List<Vector2f>>();
+        float elevation=scene.placement(item).elevation();
         var origin=world(item,scene,face.origin);var tangent=rotate(item,face.tangent);var normal=rotate(item,face.normal);
         for(var other:scene.items())if(other.id()!=item.id() && solid(other)){
-            float low=scene.placement(other).elevation()-scene.placement(item).elevation(),high=low+other.height();if(high<=0 || low>=h)continue;
+            float low=scene.placement(other).elevation()-elevation,high=low+other.height();if(high<=0 || low>=h)continue;
             var interval=footprintInterval(other,origin.add(normal.mult(.012f)),tangent);
             if(interval==null && other.id()<item.id())interval=footprintInterval(other,origin,tangent);
             if(interval!=null && interval[1]-interval[0]>.0001f)cuts.add(PolyCuts.rectangle(interval[0],Math.max(0,low),interval[1],Math.min(h,high)));
@@ -56,9 +64,10 @@ final class StructureShell {
             float length=a.distance(b);if(length<.001f || Math.abs(db-da)/length<.25f)continue;
             float t;if(da*db<=0)t=da/(da-db);else if(Math.min(Math.abs(da),Math.abs(db))<.55f)t=Math.abs(da)<Math.abs(db)?0:1;else continue;
             float x=a.x()+(b.x()-a.x())*t,z=a.z()+(b.z()-a.z())*t,u=(x-origin.x)*tangent.x+(z-origin.z)*tangent.z;
+            if(Math.abs(u)>face.span/2+.55f || entrances.stream().anyMatch(old->Math.abs(old-u)<.30f))continue;
             float walkLevel=scene.terrain().height(x,z)+.03f;Float water=SceneRules.of(scene).water(x+normal.x*.25f,z+normal.z*.25f);if(water!=null)walkLevel=Math.max(walkLevel,water+.18f);
-            if(Math.abs(scene.placement(item).elevation()-walkLevel)>.65f)continue;
-            if(Math.abs(u)>face.span/2+.55f || entrances.stream().anyMatch(old->Math.abs(old-u)<.30f))continue;entrances.add(u);cuts.add(arch(u,0,1.12f,Math.min(2.1f,h*.9f)));
+            if(Math.abs(elevation-walkLevel)>.65f)continue;
+            entrances.add(u);cuts.add(arch(u,0,1.12f,Math.min(2.1f,h*.9f)));
         }
         List<List<Vector2f>> pieces=new ArrayList<>();pieces.add(bounds);for(var cut:cuts)pieces=PolyCuts.subtract(pieces,cut);
         var inward=face.normal.mult(-THICKNESS);
@@ -82,6 +91,18 @@ final class StructureShell {
     }
     private static float[] footprintInterval(GladeDesign.Item item,Vector3f origin,Vector3f direction){
         var center=new GladeDesign.Point(origin.x,origin.z);float x=item.localX(center),z=item.localZ(center);double angle=Math.toRadians(item.rotation());float dx=(float)(Math.cos(angle)*direction.x-Math.sin(angle)*direction.z),dz=(float)(Math.sin(angle)*direction.x+Math.cos(angle)*direction.z);float w=item.width()/2,d=item.depth()/2;
+        if(item.kind()==GladeDesign.Kind.PENTAGON){
+            var local=new Vector2f(x,z);var along=new Vector2f(dx,dz);
+            float low=-10000,high=10000;
+            for(var edge:Pentagon.edges(item.width(),item.depth())){
+                float distance=edge.distance(local),speed=edge.normal().dot(along);
+                if(Math.abs(speed)<.000001f){if(distance>.00001f)return null;continue;}
+                float boundary=-distance/speed;
+                if(speed>0)high=Math.min(high,boundary);else low=Math.max(low,boundary);
+                if(low>=high)return null;
+            }
+            return new float[]{low,high};
+        }
         if(item.kind()==GladeDesign.Kind.TOWER){float a=dx*dx/(w*w)+dz*dz/(d*d),b=2*(x*dx/(w*w)+z*dz/(d*d)),c=x*x/(w*w)+z*z/(d*d)-1;if(a<.000001f)return c<=0?new float[]{-10000,10000}:null;float disc=b*b-4*a*c;if(disc<0)return null;float root=FastMath.sqrt(disc);return new float[]{(-b-root)/(2*a),(-b+root)/(2*a)};}
         float low=-10000,high=10000;for(float[] axis:new float[][]{{x,dx,w},{z,dz,d}}){if(Math.abs(axis[1])<.000001f){if(Math.abs(axis[0])>axis[2]+.00001f)return null;}else{float a=(-axis[2]-axis[0])/axis[1],b=(axis[2]-axis[0])/axis[1];low=Math.max(low,Math.min(a,b));high=Math.min(high,Math.max(a,b));if(low>=high)return null;}}return new float[]{low,high};
     }
@@ -91,6 +112,7 @@ final class StructureShell {
     }
     private static List<Vector2f> ellipse(float x,float y,float w,float h){var p=new ArrayList<Vector2f>();for(int i=0;i<32;i++){float a=i*FastMath.TWO_PI/32;p.add(new Vector2f(x+FastMath.cos(a)*w,y+FastMath.sin(a)*h));}return p;}
     private static List<Vector2f> footprint(GladeDesign.Item item){
+        if(item.kind()==GladeDesign.Kind.PENTAGON)return PolyCuts.ccw(Pentagon.edges(item.width(),item.depth()).stream().map(Pentagon.Edge::from).toList());
         if(item.kind()!=GladeDesign.Kind.TOWER)return PolyCuts.rectangle(-item.width()/2,-item.depth()/2,item.width()/2,item.depth()/2);
         var polygon=new ArrayList<Vector2f>();for(int i=0;i<48;i++){float a=i*FastMath.TWO_PI/48;polygon.add(new Vector2f(FastMath.cos(a)*item.width()/2,FastMath.sin(a)*item.depth()/2));}return polygon;
     }

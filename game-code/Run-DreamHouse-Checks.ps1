@@ -31,6 +31,7 @@ if ($IncludeGraphics) {
         @{ Name='GardenStyleCheck'; Marker='GARDEN_STYLE_PASS' },
         @{ Name='RoofColorCheck'; Marker='ROOF_COLOR_PASS' },
         @{ Name='WaterDrawingCheck'; Marker='WATER_DRAWING_PASS' },
+        @{ Name='StrokeToolsCheck'; Marker='STROKE_TOOLS_PASS' },
         @{ Name='BlueprintFlowCheck'; Marker='BLUEPRINT_FLOW_PASS' },
         @{ Name='BuildInteractionCheck'; Marker='BUILD_INTERACTION_PASS' },
         @{ Name='FreeCameraAndFlattenCheck'; Marker='FREE_CAMERA_FLATTEN_PASS' },

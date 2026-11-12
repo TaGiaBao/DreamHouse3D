@@ -22,6 +22,28 @@ final class GladeHud {
     Node node() { return node; }
     Rectangle bounds(String id) {return buttons.get(id);}
     void clear() { node.detachAllChildren();buttons.clear();layer=1; }
+    void block(String id,int x,int y,int width,int height) {buttons.put(id,new Rectangle(x,y,width,height));}
+
+    void slider(String id,int x,int y,int width,float fraction) {
+        buttons.put(id,new Rectangle(x,y,width,32));
+        sliderValue(id,fraction);
+    }
+
+    void sliderValue(String id,float fraction) {
+        var area=buttons.get(id);if(area==null)return;
+        node.detachChildNamed(id);
+        var image=new BufferedImage(area.width,area.height,BufferedImage.TYPE_INT_ARGB);
+        var g=graphics(image);
+        g.setColor(new Color(66,52,39));g.fillRoundRect(0,0,area.width,area.height,18,18);
+        int thumb=Math.round(12+(area.width-24)*fraction);
+        g.setColor(new Color(122,103,80));g.fillRoundRect(10,14,area.width-20,4,4,4);
+        g.setColor(new Color(101,200,238));g.fillRoundRect(10,14,thumb-8,4,4,4);
+        g.setColor(new Color(136,222,252,94));g.fillOval(thumb-9,7,18,18);
+        g.setColor(new Color(108,208,245));g.fillOval(thumb-5,11,10,10);
+        g.dispose();surface(image,area.x,area.y,3);
+        var slider=node.getChild(node.getQuantity()-1);
+        slider.setName(id);slider.setUserData("buttonId",id);
+    }
 
     String hit(float x,float y) {
         var entries=new java.util.ArrayList<>(buttons.entrySet());
@@ -213,6 +235,7 @@ final class GladeHud {
     }
 
     void stat(String label,String value,String icon,int x,int y) {
+        node.detachChildNamed(label);
         int w=152,h=49;
         var image=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);var g=graphics(image);
         g.setColor(new Color(84,64,42,45));g.fillRoundRect(1,4,w-2,h-4,25,25);
@@ -223,6 +246,7 @@ final class GladeHud {
         g.setColor(Color.decode("#7b694b"));g.setFont(new Font("Segoe UI",Font.BOLD,9));g.drawString(label,48,17);
         g.setColor(Color.decode("#594a33"));g.setFont(new Font("Segoe UI",Font.BOLD,13));g.drawString(value,48,33);
         g.dispose();surface(image,x,y);
+        node.getChild(node.getQuantity()-1).setName(label);
     }
 
     void update(float tpf,float mouseX,float mouseY) {

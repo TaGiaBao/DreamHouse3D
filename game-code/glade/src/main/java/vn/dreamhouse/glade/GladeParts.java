@@ -24,6 +24,10 @@ final class GladeParts {
                     shape.setLocalScale(1,h/.5f,1);node.attachChild(shape);
                 }
             }
+            case ROOF_FLAT,ROOF_PYRAMID,ROOF_PENTAGON,ROOF_SHED -> {
+                var host=design.items().stream().filter(part->part.id()==item.mount().hostId()).findFirst().orElseThrow();
+                if(!design.hasUpper(host.id()))RoofProfiles.build(art,node,item.kind(),host,h);
+            }
             case CHIMNEY_BRICK,CHIMNEY_STONE -> chimney(node,w,d,h,item.kind()==GladeDesign.Kind.CHIMNEY_BRICK);
             case WINDOW_ARCH -> {
                 var window=art.window();window.setLocalScale(w/0.89f,h/1.08f,1);node.attachChild(window);

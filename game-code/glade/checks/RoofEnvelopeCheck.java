@@ -30,6 +30,50 @@ class RoofEnvelopeCheck {
   }
   var separated=new GladeDesign(List.of(house(0,0,0,4,1,45),house(1,2.8f,2.8f,4,1,45)),2);ok(!new BlockFusion(separated).joined(0),"overlapping AABBs cannot fuse separated rotated houses");
   var a=house(0,0,0,4,3,0);var b=house(1,3,0,4,3,0);var scene=new GladeDesign(List.of(a,b),2);var fusion=new BlockFusion(scene);ok(Math.abs(scene.roofLocalHeight(a,1.9f,0)-fusion.surfaceHeight(a,1.9f,0))<.001f,"attachment height comes from the shared roof envelope");
-  System.out.println("ROOF_ENVELOPE_PASS: outward gable winding, wall material separated from roof, closed shared edges on sample/L/T roofs, rotated false fusion rejected, attachment envelope height; no screenshots");
+  checkTerracotta(art,a);
+  checkRoofProfiles(art,a);
+  System.out.println("ROOF_ENVELOPE_PASS: closed shared roof edges, outward gables, attachment envelope, overlapping terracotta relief and mipmaps; no screenshots");
+ }
+
+ private static void checkRoofProfiles(GladeArt art,GladeDesign.Item host){
+  for(var kind:List.of(GladeDesign.Kind.ROOF_FLAT,GladeDesign.Kind.ROOF_PYRAMID,GladeDesign.Kind.ROOF_PENTAGON)){
+   var part=new GladeDesign.Item(1,kind,host.center(),host.width(),host.depth(),1.1f,true,List.of(),0,new GladeDesign.Mount(host.id(),0,0,0));
+   var design=new GladeDesign(List.of(host,part),2);
+   var mesh=art.render(part,design);mesh.updateGeometricState();
+   float x=.71f,z=.42f;
+   var hits=new CollisionResults();mesh.collideWith(new Ray(new Vector3f(x,10,z),Vector3f.UNIT_Y.negate()),hits);
+   ok(hits.size()>0 && Math.abs(hits.getClosestCollision().getContactPoint().y-design.roofLocalHeight(host,x,z))<.065f,
+       "roof detail stays close to the same chimney profile: "+kind);
+   boolean[] detail={false};
+   mesh.depthFirstTraversal(partNode->{
+    if(partNode instanceof Geometry geometry && (partNode.getName().equals("Lát sân mái") || partNode.getName().equals("Hàng ngói cong")))
+     detail[0]=geometry.getMesh().getTriangleCount()>30;
+   });
+   ok(detail[0],"each profile has physical tile or paving relief");
+  }
+ }
+
+ private static void checkTerracotta(GladeArt art,GladeDesign.Item house){
+  var mesh=new PlainStructure.Builder();
+  TileRoof.course(mesh,new Vector3f(0,0,1),new Vector3f(1,0,1),
+      new Vector3f(0,.4f,.48f),new Vector3f(1,.4f,.48f),1,false);
+  TileRoof.course(mesh,new Vector3f(0,.4f,.5f),new Vector3f(1,.4f,.5f),
+      new Vector3f(0,.8f,-.02f),new Vector3f(1,.8f,-.02f),1,false);
+  var courses=mesh.geometry(art,"Terracotta course fixture","#c78150");
+  courses.updateGeometricState();
+  var hits=new CollisionResults();
+  courses.collideWith(new Ray(new Vector3f(.43f,2,.49f),Vector3f.UNIT_Y.negate()),hits);
+  ok(hits.size()==2 && hits.getFarthestCollision().getDistance()-hits.getClosestCollision().getDistance()>.01f,
+      "adjacent clay courses overlap at different heights");
+  var tiled=art.render(house,new GladeDesign(List.of(house),2));
+  int[] textures={0};
+  tiled.depthFirstTraversal(part->{
+   if(part instanceof Geometry tile && "tile".equals(tile.getUserData("paintMaterial"))){
+    var map=(com.jme3.texture.Texture)tile.getMaterial().getParam("DiffuseMap").getValue();
+    ok(map.getImage().hasMipmaps(),"roof texture carries mipmaps");
+    textures[0]++;
+   }
+  });
+  ok(textures[0]>0,"four-sided roof uses painted clay in a normal save");
  }
 }

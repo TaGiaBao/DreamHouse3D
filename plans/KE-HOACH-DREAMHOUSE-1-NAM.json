@@ -1,0 +1,1331 @@
+{
+  "schema_version": "1.0",
+  "project": "DreamHouse",
+  "document_type": "Đặc tả đồ họa, tính năng và kế hoạch phát triển một năm",
+  "language": "vi-VN",
+  "created_date": "2026-11-07",
+  "timezone": "Asia/Saigon",
+  "planning_status": "Ước lượng có điều kiện; chưa phải cam kết đạt hình ảnh concept đúng từng chi tiết",
+  "timeframe": {
+    "start": "2026-11-07",
+    "target_completion": "2027-11-07",
+    "existing_project_deadline": "2026-11-12",
+    "existing_project_deadline_meaning": "Giữ bản đồ án hiện tại ổn định, dễ mở và đủ trình diễn; mốc một năm bổ sung một nhánh phát triển dài hạn.",
+    "weekly_hours_assumption": {
+      "minimum": 20,
+      "maximum": 25
+    },
+    "effective_working_weeks": 46,
+    "gross_capacity_hours": {
+      "minimum": 920,
+      "maximum": 1150
+    },
+    "reserved_capacity_percent": 20,
+    "reserved_capacity_hours": {
+      "minimum": 184,
+      "maximum": 230
+    },
+    "planned_capacity_hours": {
+      "minimum": 736,
+      "maximum": 920
+    },
+    "capacity_note": "46 tuần tính đến thời gian học, thi, nghỉ và gián đoạn; 20% công suất tiếp tục dành cho lỗi khó, tích hợp và làm lại. Đây là giả định lập lịch, chưa phải giờ làm đã xác nhận.",
+    "replanning_rule": "Sau hai tuần đầu, dùng giờ làm thực tế và kết quả thử đồ họa để cập nhật. Nếu duy trì dưới 20 giờ/tuần hoặc thiếu tài nguyên 3D, giảm nội dung phụ trước; không bỏ kiểm thử và bảo vệ bản lưu để giữ ngày phát hành."
+  },
+  "capability_and_commitment": {
+    "direct_answer": "Có thể tiếp tục lập trình DreamHouse hướng tới chất lượng một game indie xây dựng hoàn chỉnh. Mức giống concept phải được chứng minh qua các cảnh chạy thật và người chơi duyệt, không thể xác nhận chỉ từ ảnh AI.",
+    "assistant_can_contribute": [
+      "Thiết kế và triển khai hệ xây dựng, biến đổi khối, liên kết kiến trúc, địa hình, nước và trình chỉnh sửa bằng Java.",
+      "Viết công cụ nhập tài nguyên, sinh mô hình, vật liệu, shader và các cấu hình đồ họa khi thư viện và phần cứng được kiểm chứng.",
+      "Tối ưu hình học, bộ đệm, mức chi tiết và quá trình dựng lại; đo hiệu năng trong cảnh chuẩn.",
+      "Viết kiểm thử hồi quy, kiểm tra dữ liệu, sửa lỗi và đóng gói bản Windows có runtime.",
+      "Hỗ trợ đặc tả mỹ thuật, tạo concept và chuẩn bị yêu cầu cho tài nguyên; tích hợp mô hình 3D và kiểm tra kỹ thuật."
+    ],
+    "requires_human_participation": [
+      "Bạn chốt phong cách, mở game chơi thử và đánh giá cảm giác chuột, thẩm mỹ, âm thanh.",
+      "Bạn cùng mình tạo hoặc lựa chọn tài nguyên 3D phù hợp; việc làm mô hình, UV và vật liệu đạt chuẩn cần thời gian riêng.",
+      "Cần người mới thử và thiết bị Windows khác để nghiệm thu độ dễ dùng, cấu hình và đóng gói.",
+      "Nếu đặt yêu cầu tài nguyên mỹ thuật quá sức một người, cần thu hẹp thư viện hoặc bổ sung người phụ trách mỹ thuật."
+    ],
+    "limits": [
+      "Ảnh concept được tạo bằng AI; chưa phải bằng chứng engine đang dựng được cảnh đó theo thời gian thực.",
+      "Không cam kết sao chép toàn bộ Tiny Glade/Townscaper hay đạt mọi chi tiết trong ảnh trong một năm.",
+      "Không coi thêm thật nhiều tính năng là bằng chứng chất lượng hoàn thiện.",
+      "Việc phát triển tiếp diễn qua các phiên làm việc; trợ lý không tự làm liên tục một năm giữa các lượt trò chuyện."
+    ],
+    "proof_strategy": "Thử một căn nhà và một đoạn vườn trước; chỉ mở rộng quy mô sau khi phong cách, quy trình tài nguyên và hiệu năng đạt cổng kiểm chứng."
+  },
+  "reference": {
+    "concept_file": "docs/concepts/dreamhouse-year-1-concept.png",
+    "role": "Ảnh mục tiêu mỹ thuật và bố cục cho bản phát triển dài hạn",
+    "is_runtime_screenshot": false,
+    "generated_with": "Công cụ tạo ảnh tích hợp",
+    "generation_prompt_summary": "Ngôi làng xây dựng thư giãn 3D hoạt hình: nhà vữa sáng, khung gỗ, mái ngói nổi, tháp tròn, vườn hoa, suối mềm, cầu gỗ; ánh chiều, bóng mềm; hộp dụng cụ và bản thiết kế; thanh công cụ gọn, tay kéo trắng trên một nhà được chọn.",
+    "inspirations": [
+      "Cơ chế xây tự do của Tiny Glade",
+      "Phản ứng khối ghép của Townscaper",
+      "Phong cách DreamHouse đã thống nhất"
+    ],
+    "asset_policy": "Mô hình và nội dung dùng trong game cần có nguồn gốc, quyền sử dụng rõ ràng. Dùng cảm hứng về cơ chế và phong cách để xây bộ tài nguyên riêng.",
+    "capture_policy": "Không tự chụp màn hình sau mỗi lần sửa. Các mốc mỹ thuật được duyệt trực tiếp trong game; chỉ tạo ảnh chụp hoặc báo cáo hình khi bạn yêu cầu. Yêu cầu ảnh concept hiện tại không mở quyền chụp tự động cho các lượt sau."
+  },
+  "verified_baseline": {
+    "as_of": "2026-11-07",
+    "technology": "Java, jMonkeyEngine và bản đóng gói Windows có runtime",
+    "release_manifest": "../game-code/release/current.json",
+    "build_id": "20261107-222140-595",
+    "regression_report": "../glade/test-results/20261107-221805-518/summary.json",
+    "automated_checks_passed": 14,
+    "existing_functionality": [
+      "Sáu cấu trúc cơ bản, tay kéo trắng, biến đổi mái/thân, tầng chồng và căn mép.",
+      "Cắt mặt chung và lỗ cửa trong phạm vi đã kiểm thử, bao gồm khối vuông và tháp tròn.",
+      "Địa hình đắp/hạ và nới mép, vẽ đường, nguồn nước có bờ mềm.",
+      "Bảng vật liệu, cây/hoa, ánh sáng chuyển êm, cảnh mẫu.",
+      "Hộp mẫu công trình cá nhân, khung đặt lại, hoàn tác, hướng dẫn thực hành.",
+      "Lưu/mở, tự lưu phục hồi, cài đặt và exe kèm runtime."
+    ],
+    "evidence_limits": "Bộ hồi quy và lần mở exe xác nhận các ca cụ thể trên máy hiện tại. Chưa xác nhận hình ảnh tương đương concept, cấu hình tối thiểu, mọi kiểu giao khối hoặc nghiệm thu bằng người mới.",
+    "reference_frame_time_sample": {
+      "report": "../glade/test-results/20261106-210006-465/player-AtmosphereStyleCheck/scene-frame-times.json",
+      "scene_objects": 13,
+      "resolution": "1000x680",
+      "sample_frames": 120,
+      "beautiful_median_ms": 19.003,
+      "low_median_ms": 16.693,
+      "note": "Số đo lịch sử tại camera cố định; không suy ra FPS ở 1080p, cảnh lớn hoặc trên phần cứng khác."
+    }
+  },
+  "product_scope": {
+    "target": "Game xây dựng thư giãn ngoại thất trên Windows, chơi ngoại tuyến, tập trung vào sáng tạo kiến trúc và cảnh quan.",
+    "core_loop": [
+      "Dựng khối",
+      "Kéo biến đổi",
+      "Ghép kiến trúc",
+      "Tô vật liệu",
+      "Tạo cảnh quan",
+      "Cất mẫu và lưu cảnh",
+      "Ngắm hoặc chụp khi người chơi chọn"
+    ],
+    "release_1_0_must_have": [
+      "Một phong cách kiến trúc hoàn chỉnh",
+      "Một quần thể cảnh quan đồng bộ",
+      "Trình xây dựng dễ điều khiển",
+      "Bản lưu tin cậy",
+      "Thư viện cá nhân",
+      "Chế độ đồ họa phù hợp máy đã kiểm tra"
+    ],
+    "secondary_styles": "Chỉ bổ sung một bảng biến thể màu/vật liệu sau khi bộ vữa-gỗ-ngói chủ đạo đạt nghiệm thu.",
+    "outside_this_year_baseline": [
+      "AI kiến trúc sư",
+      "Multiplayer thời gian thực",
+      "Kinh tế và sinh tồn",
+      "Thành phố quy mô lớn",
+      "Hệ nội thất đầy đủ",
+      "Mô phỏng kết cấu xây dựng thực",
+      "Bắt buộc phát hành Steam"
+    ],
+    "identity": "Tạo nét riêng từ tỷ lệ chibi, cảm giác biến đổi khối, bảng màu và cảnh quan; giữ phạm vi nhỏ để có thể đánh bóng bằng nguồn lực một người."
+  },
+  "art_direction": {
+    "style": "3D hoạt hình ấm áp, chibi vừa phải, mềm và có khối; chi tiết vật liệu đọc rõ ở góc camera chơi bình thường.",
+    "shape_language": {
+      "architecture": "Khối chắc, tỷ lệ cửa/mái hơi phóng đại; góc và mép được vát có kiểm soát, độ cong nhất quán.",
+      "roofs": "Mái có độ dày, hàng ngói nổi, đường nóc và diềm; tránh mái phẳng mỏng như giấy.",
+      "foliage": "Tán phân cụm tự nhiên, có vùng sáng/tối và khoảng trống; hình cây giữ dáng rõ khi nhìn xa.",
+      "props": "Đồ sân vườn có mép bo, tỷ lệ mũm mĩm vừa phải và điểm nhấn màu.",
+      "avoid": [
+        "Mặt vuông phẳng đơn điệu",
+        "Bóng nhựa gắt trên mọi vật",
+        "Chi tiết nhỏ gây nhiễu",
+        "Phong cách lẫn lộn giữa các nhóm tài nguyên",
+        "Ánh sáng cháy trắng",
+        "Làm mờ che lỗi hình học"
+      ]
+    },
+    "palette": {
+      "plaster": [
+        "#EADBB4",
+        "#D8C9A6"
+      ],
+      "timber": [
+        "#8E6543",
+        "#BD9769"
+      ],
+      "roof": [
+        "#BA6D45",
+        "#D5915F"
+      ],
+      "stone": [
+        "#B7B39F",
+        "#8E968D"
+      ],
+      "vegetation": [
+        "#718C4D",
+        "#A5B76C",
+        "#C7CC86"
+      ],
+      "water": [
+        "#6BB6BB",
+        "#A8D2C4"
+      ],
+      "flowers": [
+        "#D996AE",
+        "#A998CA",
+        "#E2C465"
+      ],
+      "ui": [
+        "#FFF2D7",
+        "#D9BC8D",
+        "#73543C"
+      ],
+      "note": "Màu là định hướng đầu vào; chốt sau khi kiểm tra trong pipeline màu và ánh sáng của game."
+    },
+    "material_scale": {
+      "world_unit_definition": "Chốt tỷ lệ một đơn vị game trước khi chuẩn hóa cả bộ tài nguyên; chưa coi đơn vị hiện tại là mét xây dựng thực.",
+      "consistency_rules": [
+        "Gạch/ngói giữ kích thước cảm nhận khi kéo dài khối",
+        "Vân gỗ theo hướng cấu kiện",
+        "Vữa có biến thiên nhẹ",
+        "Đá móng có lớp và mạch",
+        "Bề mặt kim loại/kính có phản sáng riêng"
+      ]
+    },
+    "standard_showcase": {
+      "composition": "Khoảng bốn công trình nhỏ: nhà chính ghép hai khối, tháp tròn, nhà vườn; sân trong, suối, cầu, bậc và cây bao quanh.",
+      "camera": "Góc ba phần tư đủ gần để đọc vật liệu; xoay toàn vòng vẫn giữ hình học hợp lý ở phía sau.",
+      "lighting": "Ban ngày, nắng chiều và chạng vạng; một cấu hình chuẩn dùng để so sánh trước/sau.",
+      "ui": "Hai hộp công cụ/bản thiết kế, thanh dưới gọn, một công trình được chọn với tay kéo trắng.",
+      "authoring_rule": "Cảnh được dựng và lưu bằng các công cụ người chơi sử dụng; không chỉ tạo một cảnh đặc biệt không thể tái dựng trong game."
+    }
+  },
+  "asset_pipeline": {
+    "status": "Cần hoàn thiện và chứng minh bằng thử nghiệm trước khi sản xuất toàn bộ tài nguyên",
+    "steps": [
+      "Lập bảng kích thước, tỷ lệ, điểm tựa và quy tắc đặt tên cho mỗi nhóm.",
+      "Tạo bản khối và thử silhouette ngay trong game trước khi làm chi tiết.",
+      "Dựng mô hình/UV/vật liệu; tách phần cố định và phần cần biến đổi theo tham số.",
+      "Thử nhập một gói nhà, cây và đồ trang trí thật; đánh giá GLB/glTF hoặc định dạng native phù hợp rồi chốt loader qua kiểm thử.",
+      "Kiểm tra trục, đơn vị, normal/tangent, gamma, UV, alpha và mặt bị cull trong bản exe.",
+      "Tạo các mức chi tiết hoặc phiên bản giảm chi phí cho tài nguyên nặng.",
+      "Gắn metadata: kích thước, điểm bám, hộp chọn, vật liệu, LOD, quyền sử dụng và biến thể.",
+      "Duyệt một họ tài nguyên hoàn chỉnh trước khi nhân rộng bằng công cụ và biến thể."
+    ],
+    "material_inputs": [
+      "Màu nền/albedo",
+      "Normal khi cần",
+      "Độ nhám hoặc tham số phản sáng tương ứng renderer đã chọn",
+      "AO khi có ích",
+      "Mask màu người chơi",
+      "Mask rêu/bụi/biến thiên nếu được đo là đủ nhẹ"
+    ],
+    "renderer_decision": "So sánh pipeline vật liệu hiện có với phương án bổ sung phù hợp. Chọn dựa trên mẫu chạy thật và hiệu năng; chưa coi renderer hiện tại đã có đầy đủ PBR.",
+    "delivery_rule": "Mỗi tài nguyên phải vào được build thật, có collision/picking phù hợp và có phiên bản nguồn để chỉnh sửa. Concept AI và sprite UI không thay cho mô hình 3D có thể xoay.",
+    "initial_inventory": [
+      {
+        "family": "Cấu trúc tham số",
+        "target_variants": 6,
+        "examples": [
+          "Khối vuông",
+          "Khối trụ",
+          "Tường",
+          "Hàng rào",
+          "Nền/craft",
+          "Bậc thang"
+        ]
+      },
+      {
+        "family": "Mái",
+        "target_variants": 4,
+        "examples": [
+          "Hai dốc",
+          "Bốn dốc",
+          "Nón",
+          "Sân thượng có thành"
+        ]
+      },
+      {
+        "family": "Vật liệu thân",
+        "target_variants": 4,
+        "examples": [
+          "Vữa/khung gỗ",
+          "Gạch",
+          "Đá",
+          "Gỗ"
+        ]
+      },
+      {
+        "family": "Cửa chính",
+        "target_variants": 4
+      },
+      {
+        "family": "Cửa sổ",
+        "target_variants": 6
+      },
+      {
+        "family": "Ống khói",
+        "target_variants": 2
+      },
+      {
+        "family": "Cửa mái",
+        "target_variants": 2
+      },
+      {
+        "family": "Ban công",
+        "target_variants": 2
+      },
+      {
+        "family": "Cầu thang và lan can",
+        "target_variants": 4
+      },
+      {
+        "family": "Cây",
+        "target_families": 4,
+        "variation_method": "Biến thể dáng/tỷ lệ/màu có kiểm soát"
+      },
+      {
+        "family": "Bụi cây",
+        "target_variants": 3
+      },
+      {
+        "family": "Hoa",
+        "target_variants": 4
+      },
+      {
+        "family": "Đá sân vườn",
+        "target_variants": 6
+      },
+      {
+        "family": "Hàng rào sân",
+        "target_variants": 3
+      },
+      {
+        "family": "Cầu",
+        "target_variants": 2
+      },
+      {
+        "family": "Ghế",
+        "target_variants": 2
+      },
+      {
+        "family": "Đèn",
+        "target_variants": 2
+      },
+      {
+        "family": "Giếng và giàn hoa",
+        "target_variants": 2
+      }
+    ],
+    "inventory_rule": "Số lượng là trần kế hoạch ban đầu để ước lượng. Mỗi nhóm chỉ mở rộng khi biến thể hiện có đạt chuẩn và còn thời gian dự phòng."
+  },
+  "feature_backlog": [
+    {
+      "id": "GFX-01",
+      "area": "Đồ họa",
+      "priority": "P0",
+      "title": "Pipeline màu và vật liệu thống nhất",
+      "status": "Có nền tảng, cần nâng cấp",
+      "deliverables": [
+        "Màu vật liệu nhất quán trong game và exe",
+        "Tham số riêng cho vữa/gỗ/ngói/đá/kính/kim loại",
+        "Mẫu kiểm chứng normal/độ nhám khi pipeline được chọn"
+      ],
+      "acceptance": [
+        "Đổi màu không làm mất mặt/culling hoặc rách UV",
+        "Độ lớn vân không bị kéo giãn theo chiều rộng nhà",
+        "Mở/lưu và hoàn tác giữ lựa chọn vật liệu"
+      ],
+      "depends_on": [],
+      "milestone": "M2"
+    },
+    {
+      "id": "GFX-02",
+      "area": "Đồ họa",
+      "priority": "P0",
+      "title": "Khối có độ mềm và chiều dày",
+      "status": "Có bo mép/chi tiết nền tảng",
+      "deliverables": [
+        "Quy tắc bevel theo loại cấu kiện",
+        "Diềm, nóc và hàng ngói nổi",
+        "Khung cửa, bậu và cạnh ô cửa có chiều dày"
+      ],
+      "acceptance": [
+        "Mép đọc rõ ở góc camera thường dùng",
+        "Co giãn không tạo NaN, mặt đảo hoặc khe nhìn xuyên ngoài thiết kế",
+        "Khối ép phẳng vẫn nâng lại và lưu được"
+      ],
+      "depends_on": [
+        "GFX-01",
+        "ARC-01"
+      ],
+      "milestone": "M3"
+    },
+    {
+      "id": "GFX-03",
+      "area": "Đồ họa",
+      "priority": "P0",
+      "title": "Ánh sáng và bóng mềm",
+      "status": "Đã có nắng, ambient, shadow và SSAO",
+      "deliverables": [
+        "Ba bối cảnh ánh sáng được cân màu",
+        "Bóng tiếp xúc đúng tỷ lệ",
+        "Bóng nắng có chất lượng theo cấu hình",
+        "Chuyển thời gian liên tục và có thể ngắt"
+      ],
+      "acceptance": [
+        "Nhà/cây chạm đất có chiều sâu mà không đen bẩn",
+        "Không nhấp nháy đáng kể khi xoay/zoom trên cảnh chuẩn",
+        "Mức Nhẹ vẫn đủ sáng để xây và đọc vật liệu"
+      ],
+      "depends_on": [
+        "GFX-01"
+      ],
+      "milestone": "M4"
+    },
+    {
+      "id": "GFX-04",
+      "area": "Đồ họa",
+      "priority": "P0",
+      "title": "Cảnh quan và chiều sâu không gian",
+      "status": "Có nền, cần bộ mỹ thuật hoàn chỉnh",
+      "deliverables": [
+        "Tán cây phân cụm",
+        "Cỏ/hoa theo vùng",
+        "Đá, bờ và lớp đất có hình dáng nhất quán",
+        "Nền xa và sương nhẹ giữ khả năng đọc cảnh"
+      ],
+      "acceptance": [
+        "Toàn bộ cảnh chuẩn cùng phong cách",
+        "Cây và cỏ không xuyên đáng kể qua đường/công trình trong ca chuẩn",
+        "Nền xa không cản picking hoặc giới hạn camera"
+      ],
+      "depends_on": [
+        "GFX-01",
+        "WRLD-01"
+      ],
+      "milestone": "M4"
+    },
+    {
+      "id": "GFX-05",
+      "area": "Đồ họa",
+      "priority": "P1",
+      "title": "Nước có chiều sâu và chuyển động mềm",
+      "status": "Có nguồn nước, bờ mềm và sóng cơ bản",
+      "deliverables": [
+        "Màu theo độ sâu",
+        "Bờ chuyển tiếp",
+        "Chuyển động bề mặt nhẹ",
+        "Phản sáng và tùy chọn phản chiếu nếu đủ ngân sách"
+      ],
+      "acceptance": [
+        "Không có đường biên ô vuông lộ rõ ở camera chơi",
+        "Không chồng mặt gây nhấp nháy ở hai nguồn giao nhau trong ca hỗ trợ",
+        "Xóa nguồn và sửa đất cập nhật hình học đúng",
+        "Tắt hiệu ứng nặng vẫn giữ được hình dạng nước"
+      ],
+      "depends_on": [
+        "GFX-01",
+        "WRLD-02"
+      ],
+      "milestone": "M4"
+    },
+    {
+      "id": "GFX-06",
+      "area": "Đồ họa",
+      "priority": "P1",
+      "title": "Chuyển động môi trường và VFX",
+      "status": "Một số hiệu ứng cơ bản đã có",
+      "deliverables": [
+        "Khói ống khói",
+        "Gió nhẹ cho lá/cỏ",
+        "Hiệu ứng đặt khối ngắn",
+        "Điểm nhấn nhỏ cho nước/côn trùng khi còn ngân sách"
+      ],
+      "acceptance": [
+        "Giảm hoặc tắt được",
+        "Không đổi dữ liệu hình học lưu chỉ để tạo hiệu ứng",
+        "Không tạo texture/đối tượng mới liên tục mỗi frame",
+        "Không gây che tay kéo và vật đang chọn"
+      ],
+      "depends_on": [
+        "GFX-03",
+        "GFX-04"
+      ],
+      "milestone": "M5"
+    },
+    {
+      "id": "GFX-07",
+      "area": "Đồ họa",
+      "priority": "P1",
+      "title": "Đèn ấm lúc chạng vạng",
+      "status": "Chưa hoàn thiện trong bản Glade",
+      "deliverables": [
+        "Một họ đèn sân và ô cửa có ánh ấm",
+        "Giới hạn số đèn động",
+        "Phiên bản emissive/giả sáng cho mức Nhẹ"
+      ],
+      "acceptance": [
+        "Đèn bám đúng công trình khi dời/chồng/ép phẳng",
+        "Không cần hàng trăm nguồn sáng động",
+        "Mức Nhẹ và Đẹp đều đọc được cảnh đêm"
+      ],
+      "depends_on": [
+        "GFX-01",
+        "GFX-03"
+      ],
+      "milestone": "M5"
+    },
+    {
+      "id": "ARC-01",
+      "area": "Kiến trúc",
+      "priority": "P0",
+      "title": "Biến đổi khối nhất quán",
+      "status": "Đã có, cần hoàn thiện phạm vi",
+      "deliverables": [
+        "Rộng/sâu/cao/đáy/cốt/xiên mái theo công cụ được hỗ trợ",
+        "Tay kéo trắng co giãn theo khối",
+        "Kéo mái xuống tạo sân thượng",
+        "Dời/xoay giữ tầng và cấu kiện"
+      ],
+      "acceptance": [
+        "Tay kéo bám đúng cả khi xoay camera",
+        "Khối cao tối thiểu không làm game văng",
+        "Hủy kéo phục hồi trạng thái trước thao tác",
+        "Một thao tác kéo tạo một bước hoàn tác"
+      ],
+      "depends_on": [],
+      "milestone": "M3"
+    },
+    {
+      "id": "ARC-02",
+      "area": "Kiến trúc",
+      "priority": "P0",
+      "title": "Ghép thân, mái và tầng có phạm vi rõ",
+      "status": "Có khối vuông/trụ và L/T cùng cốt",
+      "deliverables": [
+        "Hợp mặt tường bị che",
+        "Giao mái chữ L/T và các góc được chọn trong ma trận",
+        "Giao khối ở nhiều cốt theo từng ca được nghiệm thu",
+        "Giữ phần sân thượng ngoài tầng chồng"
+      ],
+      "acceptance": [
+        "Không có mặt trùng nhấp nháy hoặc lỗ hở ngoài ý muốn trong ma trận hỗ trợ",
+        "Kiểm tra 0/15/30/45/90 độ và tỷ lệ lệch",
+        "Xóa một khối tái tạo mặt ngoài khối còn lại",
+        "Ca chưa hỗ trợ có phản hồi hoặc giới hạn rõ thay vì hình học vỡ"
+      ],
+      "depends_on": [
+        "ARC-01"
+      ],
+      "milestone": "M3"
+    },
+    {
+      "id": "ARC-03",
+      "area": "Kiến trúc",
+      "priority": "P0",
+      "title": "Cửa, cửa mái và ô xuyên tường thích nghi",
+      "status": "Có cắt cửa và ẩn/hiện theo mặt đỡ",
+      "deliverables": [
+        "Cửa vòm/tròn/chữ nhật trong thư viện đã chốt",
+        "Đường tạo vòm hoặc lối mở khi phù hợp",
+        "Cửa mái và ống khói bám mái chung",
+        "Bậu/khung điều chỉnh theo bề mặt"
+      ],
+      "acceptance": [
+        "Cửa có lỗ thật và không bị chi tiết vữa/gỗ bịt lại",
+        "Mất mái hoặc mặt đỡ không để lại cấu kiện lơ lửng",
+        "Khôi phục hình khối hiện lại cấu kiện hợp lệ",
+        "Cấu kiện có mã/host đúng sau sao chép và đặt mẫu"
+      ],
+      "depends_on": [
+        "ARC-02",
+        "GFX-02"
+      ],
+      "milestone": "M3"
+    },
+    {
+      "id": "ARC-04",
+      "area": "Kiến trúc",
+      "priority": "P1",
+      "title": "Ban công, hiên, cầu thang và kết cấu gỗ",
+      "status": "Có một phần phản ứng kiến trúc",
+      "deliverables": [
+        "Hiên có chân đỡ",
+        "Ban công và lan can",
+        "Bậc thang thích nghi chênh cốt",
+        "Biến thể craft từ khối gỗ"
+      ],
+      "acceptance": [
+        "Không để cột/lan can xuyên ô cửa trong ca chuẩn",
+        "Đổi kích thước không tăng số chi tiết vô hạn",
+        "Các phần sinh tự động không thành rác độc lập trong bản lưu"
+      ],
+      "depends_on": [
+        "ARC-01",
+        "ARC-03"
+      ],
+      "milestone": "M5"
+    },
+    {
+      "id": "ARC-05",
+      "area": "Kiến trúc",
+      "priority": "P0",
+      "title": "Bộ kiến trúc chủ đạo hoàn chỉnh",
+      "status": "Cần nâng chất lượng tài nguyên",
+      "deliverables": [
+        "Vữa sáng, gỗ, ngói và đá móng đồng bộ",
+        "Thư viện cửa/cửa sổ/mái theo inventory",
+        "Một cảnh quần thể có thể dựng bằng công cụ người chơi"
+      ],
+      "acceptance": [
+        "Cả mặt trước/sau và góc khuất có mức hoàn thiện nhất quán",
+        "Tài nguyên không lệch tỷ lệ và màu giữa các nhóm",
+        "Người chơi đổi vật liệu vẫn giữ đúng silhouette và cơ chế"
+      ],
+      "depends_on": [
+        "GFX-01",
+        "GFX-02",
+        "ARC-03"
+      ],
+      "milestone": "M5"
+    },
+    {
+      "id": "WRLD-01",
+      "area": "Thế giới",
+      "priority": "P0",
+      "title": "Đất mượt và mở rộng vùng xây",
+      "status": "Đã có công cụ cơ bản",
+      "deliverables": [
+        "Trái đắp/phải hạ đất trong chế độ Địa hình",
+        "Mép đất độc lập",
+        "Bút thay cỡ chậm và dễ kiểm soát",
+        "Làm mượt địa hình cục bộ nếu thử cho kết quả tốt"
+      ],
+      "acceptance": [
+        "Giữ/rê bút tạo nét liên tục ở tốc độ chuột khác nhau",
+        "Chỉ cập nhật vùng ảnh hưởng",
+        "Cây, đường, chân móng và nước phản ứng nhất quán",
+        "Hủy/hoàn tác cả nét không mất bản lưu"
+      ],
+      "depends_on": [],
+      "milestone": "M4"
+    },
+    {
+      "id": "WRLD-02",
+      "area": "Thế giới",
+      "priority": "P0",
+      "title": "Nguồn nước và dòng chảy có giới hạn",
+      "status": "Đã có nguồn nước mềm",
+      "deliverables": [
+        "Lan theo cao độ, quanh vật cản",
+        "Nối vùng nước theo các ca hỗ trợ",
+        "Rút nước khi xóa nguồn",
+        "Giới hạn chi phí và vùng mô phỏng"
+      ],
+      "acceptance": [
+        "Tái tạo cùng kết quả sau lưu/mở",
+        "Không tạo nước dạng khối vuông",
+        "Không phụ thuộc số frame để thay dữ liệu lưu",
+        "Nhiều nguồn trong cảnh M không gây treo"
+      ],
+      "depends_on": [
+        "WRLD-01"
+      ],
+      "milestone": "M4"
+    },
+    {
+      "id": "WRLD-03",
+      "area": "Thế giới",
+      "priority": "P0",
+      "title": "Đường, cầu và bậc liên tục",
+      "status": "Có đường và phản ứng qua nước/dốc",
+      "deliverables": [
+        "Nét đường cong mượt",
+        "Đổi vật liệu đường",
+        "Cầu qua nước",
+        "Bậc trên đoạn chênh cao",
+        "Giao đường và cửa tương thích"
+      ],
+      "acceptance": [
+        "Đường bám mặt đất và cập nhật khi sửa đất",
+        "Không nhảy cốt khó hiểu giữa các đoạn",
+        "Độ rộng và họa tiết giữ tỷ lệ ở các độ dài nét",
+        "Cảnh chuẩn không có cầu hoặc bậc lơ lửng"
+      ],
+      "depends_on": [
+        "WRLD-01",
+        "WRLD-02",
+        "ARC-03"
+      ],
+      "milestone": "M5"
+    },
+    {
+      "id": "WRLD-04",
+      "area": "Thế giới",
+      "priority": "P1",
+      "title": "Vườn có biến thể và phân bố tự nhiên",
+      "status": "Có cây/hoa và bút tô",
+      "deliverables": [
+        "Bút tô/xóa cây và hoa",
+        "Biến thể có seed ổn định",
+        "Khoảng cách/ràng buộc đơn giản theo đường và công trình",
+        "Một bộ props sân vườn"
+      ],
+      "acceptance": [
+        "Lưu/mở không đổi hình dáng ngẫu nhiên ngoài ý muốn",
+        "Tô/xóa cả nét dùng hoàn tác nhất quán",
+        "Mô hình và vùng chọn luôn trùng vị trí",
+        "Các biến thể giữ phong cách chủ đạo"
+      ],
+      "depends_on": [
+        "GFX-04",
+        "WRLD-01"
+      ],
+      "milestone": "M5"
+    },
+    {
+      "id": "UX-01",
+      "area": "Trình chỉnh sửa",
+      "priority": "P0",
+      "title": "Camera tự do và thao tác không tranh nhau",
+      "status": "Đã có nền và hồi quy",
+      "deliverables": [
+        "Phải xoay, giữa kéo, WASD di chuyển",
+        "Zoom theo độ nhạy có thể chỉnh",
+        "Tâm nhìn di chuyển được",
+        "Đi bộ và trở về xây dựng"
+      ],
+      "acceptance": [
+        "Chuột trái giữ vai trò dựng/chọn/dời",
+        "Không xoay ngoài ý muốn khi kéo tay nắm hoặc hạ đất",
+        "Mất tiêu điểm giải phóng cử chỉ",
+        "DPI và kích thước màn hình đã kiểm tra có cảm giác nhất quán"
+      ],
+      "depends_on": [],
+      "milestone": "M5"
+    },
+    {
+      "id": "UX-02",
+      "area": "Trình chỉnh sửa",
+      "priority": "P0",
+      "title": "Giao diện game gọn và đọc được",
+      "status": "Có giao diện hộp và thanh biểu tượng",
+      "deliverables": [
+        "Hộp công cụ/bản thiết kế đồng bộ mỹ thuật",
+        "Nhóm cấu kiện mở tự nhiên",
+        "Gợi ý ngắn theo công cụ",
+        "Trạng thái chọn, đặt hợp lệ và kết quả thao tác rõ"
+      ],
+      "acceptance": [
+        "Không lặp cùng bộ công cụ ở nhiều nơi",
+        "Không có nút bị nền che hoặc bấm xuyên hộp xuống cảnh",
+        "Chữ đọc được ở độ phân giải/DPI được hỗ trợ",
+        "Bảng màu không bị hướng dẫn che"
+      ],
+      "depends_on": [],
+      "milestone": "M5"
+    },
+    {
+      "id": "UX-03",
+      "area": "Trình chỉnh sửa",
+      "priority": "P0",
+      "title": "Bảng vật liệu và màu cho từng khối",
+      "status": "Đã có bảng màu theo lựa chọn",
+      "deliverables": [
+        "Chọn thân hoặc mái",
+        "Xem trước vật liệu/màu",
+        "Các mẫu hiển thị đúng tài nguyên thật",
+        "Áp dụng và hoàn tác không mất kết cấu"
+      ],
+      "acceptance": [
+        "Cùng màu hiển thị có quan hệ nhất quán giữa ô chọn và vật thể",
+        "Không thay nhầm công trình",
+        "Không tạo vô hạn bản sao vật liệu/texture khi đổi liên tục"
+      ],
+      "depends_on": [
+        "GFX-01",
+        "UX-02"
+      ],
+      "milestone": "M5"
+    },
+    {
+      "id": "UX-04",
+      "area": "Trình chỉnh sửa",
+      "priority": "P1",
+      "title": "Mẫu công trình và cụm nhiều khối",
+      "status": "Đã có mẫu một gốc cùng tầng/cấu kiện",
+      "deliverables": [
+        "Giữ luồng lưu/đặt/đổi tên/xóa hiện có",
+        "Đánh giá chọn nhiều khối độc lập và lưu thành cụm",
+        "Đặt, xoay và sao chép cả cụm",
+        "Tệp chia sẻ ngoại tuyến"
+      ],
+      "acceptance": [
+        "Mã và liên kết nội bộ được ánh xạ riêng ở mỗi lần đặt",
+        "Một bước hoàn tác cho một lần đặt",
+        "Mẫu lỗi không làm mất cảnh",
+        "Cụm vượt mép có phản hồi dễ hiểu"
+      ],
+      "depends_on": [
+        "ARC-02",
+        "UX-02",
+        "QA-01"
+      ],
+      "milestone": "M5"
+    },
+    {
+      "id": "UX-05",
+      "area": "Trình chỉnh sửa",
+      "priority": "P1",
+      "title": "Photo Mode do người chơi chủ động bật",
+      "status": "Có nút chụp cơ bản",
+      "deliverables": [
+        "Ẩn HUD khi chụp",
+        "Vài preset camera và màu nhẹ",
+        "Chọn nơi lưu",
+        "Phản hồi đường dẫn ảnh và lỗi ghi"
+      ],
+      "acceptance": [
+        "Không tự chụp trong quá trình phát triển nếu chưa được yêu cầu",
+        "Thoát Photo Mode khôi phục HUD và điều khiển",
+        "Tạo ảnh không sửa thiết kế hoặc ghi đè ảnh cũ ngoài lựa chọn người chơi"
+      ],
+      "depends_on": [
+        "GFX-03",
+        "UX-01"
+      ],
+      "milestone": "M6"
+    },
+    {
+      "id": "UX-06",
+      "area": "Trình chỉnh sửa",
+      "priority": "P0",
+      "title": "Học nhanh và tiếp cận người mới",
+      "status": "Đã có năm mục tiêu thực hành",
+      "deliverables": [
+        "Hướng dẫn theo thao tác thật",
+        "Tạm ẩn/mở lại",
+        "Nhắc điều khiển đúng chế độ",
+        "Kiểm tra với ít nhất ba người mới"
+      ],
+      "acceptance": [
+        "Ít nhất 3 người mới đều mở game, dựng, chỉnh, lưu và mở lại với hướng dẫn ngắn",
+        "Ghi thời gian và số lần cần trợ giúp; mục tiêu hoàn thành lượt cơ bản trong 10 phút",
+        "Sửa các chỗ từ ngữ hoặc thao tác khiến người thử hiểu sai"
+      ],
+      "depends_on": [
+        "UX-01",
+        "UX-02",
+        "UX-04",
+        "QA-01"
+      ],
+      "milestone": "M7"
+    },
+    {
+      "id": "SND-01",
+      "area": "Âm thanh",
+      "priority": "P1",
+      "title": "Âm môi trường và thao tác nhất quán",
+      "status": "Có âm tổng hợp cơ bản",
+      "deliverables": [
+        "Âm đặt/xóa/chọn mềm",
+        "Gió/nước/chim có lớp và khoảng nghỉ",
+        "Âm lượng và tắt nhóm âm"
+      ],
+      "acceptance": [
+        "Không lặp gắt khi giữ bút hoặc kéo nhiều khối",
+        "Tắt âm có hiệu lực và lưu cài đặt",
+        "Đổi/rút thiết bị không làm mất thiết kế",
+        "Có thông tin quyền sử dụng tài nguyên âm thanh"
+      ],
+      "depends_on": [
+        "UX-02"
+      ],
+      "milestone": "M6"
+    },
+    {
+      "id": "QA-01",
+      "area": "Độ tin cậy",
+      "priority": "P0",
+      "title": "Dữ liệu và phục hồi có phiên bản",
+      "status": "Đã có glade-9, ghi nguyên tử và phục hồi",
+      "deliverables": [
+        "Giữ tệp cũ và kiểm tra chuyển phiên bản",
+        "Giới hạn nhập an toàn",
+        "Tự lưu/phục hồi",
+        "Thông báo lỗi dễ hiểu"
+      ],
+      "acceptance": [
+        "Bộ fixture tệp cũ mở được hoặc có thông báo chuyển đổi rõ",
+        "Tệp lỗi không thay cảnh đang chơi",
+        "Lỗi ghi không thay bản tốt trước đó",
+        "Mô phỏng ngắt ghi và thử phục hồi sau khởi động lại"
+      ],
+      "depends_on": [],
+      "milestone": "M2"
+    },
+    {
+      "id": "QA-02",
+      "area": "Hiệu năng",
+      "priority": "P0",
+      "title": "Cập nhật cục bộ và tránh khựng",
+      "status": "Đã có cache, batching và một mẫu đo",
+      "deliverables": [
+        "Tách tác vụ nặng khỏi vòng vẽ khi cần",
+        "Chỉ dựng lại vùng/cụm bị ảnh hưởng",
+        "Hủy kết quả dựng cũ khi người chơi kéo tiếp",
+        "Cache có ngân sách và giải phóng được"
+      ],
+      "acceptance": [
+        "Kéo nhà không dựng lại toàn bộ vườn không liên quan",
+        "Kéo liên tục không tích hàng đợi tăng vô hạn",
+        "Không có tăng bộ nhớ vô hạn trong phiên hai giờ",
+        "Kết quả cũ không ghi đè trạng thái mới"
+      ],
+      "depends_on": [
+        "ARC-02",
+        "WRLD-02"
+      ],
+      "milestone": "M6"
+    },
+    {
+      "id": "QA-03",
+      "area": "Hiệu năng",
+      "priority": "P0",
+      "title": "LOD, batching và cấu hình Đẹp/Nhẹ",
+      "status": "Có batching và hai mức cơ bản",
+      "deliverables": [
+        "LOD hoặc rút chi tiết theo khoảng cách",
+        "Gom/instance tài nguyên phù hợp",
+        "Giảm bóng, nước và thực vật theo cấu hình",
+        "Bảng đo frame-time, hình học và bộ nhớ"
+      ],
+      "acceptance": [
+        "Tối ưu không làm lệch mô hình với vùng chọn",
+        "Mức Nhẹ vẫn giữ khả năng xây chính xác",
+        "Có số đo cùng scene/camera ở 1080p trên ít nhất hai máy",
+        "Không công bố cấu hình tối thiểu trước khi có máy thử thật"
+      ],
+      "depends_on": [
+        "GFX-04",
+        "QA-02"
+      ],
+      "milestone": "M6"
+    },
+    {
+      "id": "QA-04",
+      "area": "Kiểm thử",
+      "priority": "P0",
+      "title": "Bộ nghiệm thu kiến trúc và thao tác",
+      "status": "Đã có 14 bài nền tảng",
+      "deliverables": [
+        "Ma trận khối giao/khối xoay/tầng chồng",
+        "Các độ cao sát phẳng và mái về 0",
+        "Chuột nhanh/chậm và mất tiêu điểm",
+        "Chuỗi lưu/hoàn tác/phục hồi dài"
+      ],
+      "acceptance": [
+        "Mỗi lỗi nghiêm trọng có ca tái hiện và kiểm tra sửa lỗi",
+        "Kết quả cần mã thoát, marker và timeout nhất quán",
+        "Không coi marker PASS đơn lẻ là toàn bộ bằng chứng",
+        "Không có lỗi văng hoặc mất dữ liệu đã biết trong kịch bản trình diễn"
+      ],
+      "depends_on": [
+        "ARC-01",
+        "QA-01"
+      ],
+      "milestone": "M7"
+    },
+    {
+      "id": "QA-05",
+      "area": "Đóng gói",
+      "priority": "P0",
+      "title": "Bản Windows dễ mở và cập nhật",
+      "status": "Có exe kèm runtime",
+      "deliverables": [
+        "Build lặp lại được",
+        "Lưu dữ liệu ngoài thư mục ứng dụng",
+        "Mở không cần JDK ngoài",
+        "Cài đặt và dữ liệu sống qua cập nhật"
+      ],
+      "acceptance": [
+        "Thử bằng tài khoản Windows khác và một máy khác",
+        "Thử đường dẫn có khoảng trắng/ký tự tiếng Việt",
+        "Mở game khi thư mục cài không có quyền ghi",
+        "Giữ một bản dự phòng đã được nghiệm thu"
+      ],
+      "depends_on": [
+        "QA-01",
+        "QA-04"
+      ],
+      "milestone": "M8"
+    }
+  ],
+  "provisional_performance_targets": {
+    "status": "Mục tiêu để đo và điều chỉnh, chưa phải kết quả hiện tại",
+    "hardware_profiles": {
+      "beautiful_reference": "Chọn từ máy có thể thử thực tế trong M1; ghi CPU, GPU, RAM, driver và hệ điều hành vào báo cáo.",
+      "low_reference": "Một máy yếu hơn có thể mượn/thử thật; cấu hình tối thiểu chỉ chốt sau M6."
+    },
+    "scene_presets": [
+      {
+        "id": "S",
+        "architecture_modules": 10,
+        "placed_decorations": 60,
+        "water_sources": 1,
+        "purpose": "Kiểm chứng phong cách và thao tác cơ bản"
+      },
+      {
+        "id": "M",
+        "architecture_modules": 40,
+        "placed_decorations": 300,
+        "water_sources": 3,
+        "purpose": "Cảnh mục tiêu một khu làng nhỏ"
+      },
+      {
+        "id": "L",
+        "architecture_modules": 100,
+        "placed_decorations": 1000,
+        "water_sources": 6,
+        "purpose": "Thử giới hạn, không mặc định cam kết chất lượng tối đa"
+      }
+    ],
+    "scene_count_note": "Module kiến trúc là một khối chỉnh sửa, không đồng nghĩa một căn nhà hoàn chỉnh. Thực vật nền sinh tự động cần được thống kê riêng.",
+    "beautiful_scene_M": {
+      "resolution": "1920x1080",
+      "target_fps": 60,
+      "median_frame_ms_max": 16.7,
+      "p95_frame_ms_max": 25,
+      "p99_frame_ms_max": 40
+    },
+    "low_scene_M": {
+      "resolution": "1920x1080 hoặc mức thực tế được chốt trên máy yếu",
+      "target_fps_minimum": 30,
+      "p95_frame_ms_max": 40
+    },
+    "interactive_rebuild_target": {
+      "unit": "ms",
+      "p95_max": 50,
+      "note": "Tác vụ nặng cần preview nhẹ và chốt kết quả nền; không để giao diện đứng chờ toàn bộ mesh."
+    },
+    "initial_render_budgets": {
+      "beauty_main_pass_draw_calls": 250,
+      "beauty_visible_triangles": 1500000,
+      "low_main_pass_draw_calls": 120,
+      "low_visible_triangles": 600000,
+      "texture_memory_budget_MB_beauty": 512,
+      "texture_memory_budget_MB_low": 256,
+      "note": "Ngân sách ban đầu để định hướng tài nguyên, không phải giới hạn cứng cho mọi cảnh. Đo riêng chi phí shadow, post-processing, transparency và GPU thực tế rồi hiệu chỉnh."
+    },
+    "measurement_protocol": [
+      "Cùng tệp scene và đường camera có thể lặp lại",
+      "Ghi độ phân giải, DPI, chất lượng và vsync",
+      "Làm nóng shader trước khi đo",
+      "Thu ít nhất 3000 khung cho mốc nghiệm thu hiệu năng",
+      "Đo camera tĩnh và thao tác kéo/chỉnh",
+      "Phân biệt frame-time, thời gian dựng mesh và FPS bị khóa bởi màn hình"
+    ]
+  },
+  "visual_acceptance_rubric": {
+    "method": "Bạn và ít nhất một người chơi khác duyệt cảnh chuẩn trực tiếp trong game; chấm 1–5 và ghi lý do cụ thể.",
+    "dimensions": [
+      "Silhouette và tỷ lệ chibi",
+      "Chất liệu và tỷ lệ vân",
+      "Độ sạch của mối ghép",
+      "Ánh sáng/bóng",
+      "Cây/vườn và phân bố",
+      "Đất/nước/đường",
+      "Độ nhất quán UI",
+      "Mức dễ đọc khi xoay và zoom"
+    ],
+    "proposed_gate": "Tổng ít nhất 32/40, không mục nào dưới 3; đồng thời không có lỗi hình học hoặc thao tác nghiêm trọng trong cảnh chuẩn.",
+    "not_a_claim": "Điểm là công cụ thảo luận chất lượng, không quy đổi thành phần trăm giống concept và chưa phải điểm game hiện tại.",
+    "runtime_checks": [
+      "Xoay quanh cảnh 360 độ",
+      "Xem gần và xa",
+      "Thử cả ba ánh sáng",
+      "Dời một nhà và đổi mái ngay trong cảnh",
+      "Lưu, mở và kiểm tra lại",
+      "Thử cấu hình Nhẹ để kiểm tra phần nghệ thuật còn giữ được"
+    ]
+  },
+  "milestones": [
+    {
+      "id": "M0",
+      "start": "2026-11-07",
+      "due": "2026-11-12",
+      "title": "Giữ bản đồ án ổn định",
+      "outputs": [
+        "Bản exe và cảnh trình bày hiện tại",
+        "Bản lưu dự phòng",
+        "Hướng dẫn mở/chơi ngắn",
+        "Bộ hồi quy đang dùng đạt"
+      ],
+      "gate": "Luồng mở → dựng → sửa → lưu → thoát → tiếp tục không có lỗi nghiêm trọng đã biết.",
+      "scope_rule": "Ưu tiên sửa lỗi, không đưa thử nghiệm renderer lớn vào bản trình bày.",
+      "status": "in_progress"
+    },
+    {
+      "id": "M1",
+      "start": "2026-11-13",
+      "due": "2026-11-30",
+      "title": "Thử đồ họa một căn nhà",
+      "outputs": [
+        "Một nhà, cây và đoạn sân có vật liệu/ánh sáng mục tiêu chạy trong game",
+        "Thử quy trình tài nguyên",
+        "Số đo trên máy tham chiếu và danh sách điểm khác concept"
+      ],
+      "gate": "Bạn duyệt được hướng phong cách trong cảnh thật; xác định pipeline và ngân sách có khả thi không.",
+      "fallback": "Nếu chưa đạt, dành thời gian sửa hướng mỹ thuật/pipeline, giảm chi tiết hoặc quy mô; chưa sản xuất hàng loạt tài nguyên.",
+      "status": "planned"
+    },
+    {
+      "id": "M2",
+      "start": "2026-12-01",
+      "due": "2026-12-31",
+      "title": "Một lát cắt sản phẩm hoàn chỉnh",
+      "outputs": [
+        "Căn nhà được dựng, đổi hình, tô vật liệu, lưu và mở lại với mỹ thuật đã duyệt",
+        "Quy chuẩn asset và bảng vật liệu",
+        "Đo cảnh S ở cấu hình đã chọn"
+      ],
+      "gate": "Một họ tài nguyên từ nguồn tới exe được kiểm chứng, không còn chỉ là cảnh render tĩnh.",
+      "status": "planned"
+    },
+    {
+      "id": "M3",
+      "start": "2027-01-01",
+      "due": "2027-02-28",
+      "title": "Hoàn thiện kiến trúc tham số",
+      "outputs": [
+        "Khối vuông/trụ, mái, cửa và tầng chồng",
+        "Ma trận ghép có phạm vi rõ",
+        "Chi tiết bo/mép và kết cấu thích nghi",
+        "Kiểm thử biến đổi liên tục"
+      ],
+      "gate": "Các kiểu giao hỗ trợ không vỡ hình hoặc làm văng game; ca ngoài phạm vi được giới hạn rõ.",
+      "status": "planned"
+    },
+    {
+      "id": "M4",
+      "start": "2027-03-01",
+      "due": "2027-04-30",
+      "title": "Đất, nước và vườn đạt phong cách",
+      "outputs": [
+        "Địa hình, nước mềm, cỏ/hoa/cây đồng bộ",
+        "Ánh sáng/bóng ba chế độ",
+        "Cảnh S và một phần cảnh M"
+      ],
+      "gate": "Cảnh đọc rõ khi xoay toàn vòng và đạt rubric mỹ thuật cho phần đã hoàn thiện.",
+      "status": "planned"
+    },
+    {
+      "id": "M5",
+      "start": "2027-05-01",
+      "due": "2027-06-30",
+      "title": "Alpha: khu làng nhỏ xây được hoàn chỉnh",
+      "outputs": [
+        "Bộ kiến trúc chủ đạo và vườn theo inventory",
+        "Cầu/hiên/bậc/ban công",
+        "Camera, UI, bảng màu, hộp mẫu và học nhanh",
+        "Cảnh M dựng bằng công cụ người chơi"
+      ],
+      "gate": "Toàn bộ vòng chơi ngoại tuyến hoạt động; các tính năng cốt lõi đã tích hợp và lưu được.",
+      "status": "planned"
+    },
+    {
+      "id": "M6",
+      "start": "2027-07-01",
+      "due": "2027-08-31",
+      "title": "Beta và chốt nội dung",
+      "outputs": [
+        "LOD/batching/cache được đo",
+        "Âm thanh và Photo Mode",
+        "Bản lưu có phiên bản",
+        "Cấu hình Đẹp/Nhẹ trên hai máy nếu có thiết bị thử"
+      ],
+      "gate": "Cảnh M đạt ngân sách đã chốt hoặc có quyết định giảm phạm vi rõ. Khóa thêm cơ chế lớn từ 31/08/2027.",
+      "fallback": "Nếu thiếu máy thử, ghi rõ mục chưa nghiệm thu và chưa công bố cấu hình tối thiểu.",
+      "status": "planned"
+    },
+    {
+      "id": "M7",
+      "start": "2027-09-01",
+      "due": "2027-10-07",
+      "title": "Bản ứng viên và thử người chơi",
+      "outputs": [
+        "Ít nhất ba người mới thực hành",
+        "Thử phiên hai giờ và thao tác lặp",
+        "Kiểm tra DPI, cửa sổ và hộp thoại",
+        "Danh sách lỗi có mức độ và ca tái hiện"
+      ],
+      "gate": "Không còn lỗi mất dữ liệu, văng hoặc kẹt thao tác nghiêm trọng đã biết; người mới hoàn thành luồng cơ bản.",
+      "status": "planned"
+    },
+    {
+      "id": "M8",
+      "start": "2027-10-08",
+      "due": "2027-11-07",
+      "title": "DreamHouse 1.0 ngoại tuyến",
+      "outputs": [
+        "Bản Windows kèm runtime",
+        "Cảnh và mẫu trình bày",
+        "Hướng dẫn, nguồn tài nguyên và thông tin quyền sử dụng",
+        "Bản dự phòng, báo cáo phạm vi và các hạn chế còn lại"
+      ],
+      "gate": "Nghiệm thu tính năng, thẩm mỹ, hiệu năng và dữ liệu theo tiêu chí đã chốt; nếu chưa đạt thì chốt bản beta và lịch sửa, không đổi nhãn để tuyên bố hoàn thiện.",
+      "status": "planned"
+    },
+    {
+      "id": "M9",
+      "start_after": "Bản M8 được chốt phạm vi",
+      "title": "Hồi quy và sửa lỗi bản ngoại tuyến",
+      "outputs": [
+        "Chạy lại bộ kiểm thử từ launcher đến lưu, thoát và mở lại cảnh",
+        "Xác nhận các lỗi đã sửa trên bản đóng gói",
+        "Ghi các mục còn cần người chơi hoặc máy khác xác nhận"
+      ],
+      "gate": "Có bằng chứng kiểm thử cho bản đã đóng gói. Các mục chưa nghiệm thu giữ nguyên trạng thái chờ xác nhận.",
+      "status": "planned"
+    }
+  ],
+  "effort_estimate_hours": [
+    {
+      "workstream": "Kiến trúc tham số",
+      "minimum": 120,
+      "maximum": 160
+    },
+    {
+      "workstream": "Tài nguyên và mỹ thuật",
+      "minimum": 170,
+      "maximum": 220
+    },
+    {
+      "workstream": "Renderer, vật liệu, ánh sáng",
+      "minimum": 90,
+      "maximum": 120
+    },
+    {
+      "workstream": "Địa hình, nước và cảnh quan",
+      "minimum": 60,
+      "maximum": 90
+    },
+    {
+      "workstream": "UI, camera và thư viện",
+      "minimum": 60,
+      "maximum": 80
+    },
+    {
+      "workstream": "Âm thanh",
+      "minimum": 15,
+      "maximum": 25
+    },
+    {
+      "workstream": "Kiểm thử, tối ưu và sửa lỗi",
+      "minimum": 110,
+      "maximum": 140
+    },
+    {
+      "workstream": "Đóng gói, tài liệu và điều phối",
+      "minimum": 30,
+      "maximum": 45
+    }
+  ],
+  "effort_estimate_total_hours": {
+    "minimum": 655,
+    "maximum": 880,
+    "note": "Ước lượng sơ bộ trong công suất có dự phòng; phải cập nhật bằng giờ thực tế sau M1. Không phải báo giá hoặc bảo đảm tiến độ."
+  },
+  "risks_and_scope_controls": [
+    {
+      "risk": "Tài nguyên không đạt phong cách hoặc thiếu thời gian làm art",
+      "signal": "M1/M2 không được duyệt",
+      "response": "Thu hẹp còn một họ kiến trúc, làm lại mẫu chuẩn trước, giảm số biến thể; không thêm nhiều nội dung thô."
+    },
+    {
+      "risk": "Hợp mái/khối tùy ý quá phức tạp",
+      "signal": "Ma trận giao khối liên tục sinh lỗi ngoài kiểm soát",
+      "response": "Giữ tập góc/kiểu giao có thể nghiệm thu, tách các trường hợp chưa hỗ trợ và hoãn CSG tổng quát."
+    },
+    {
+      "risk": "Cảnh đẹp vượt cấu hình mục tiêu",
+      "signal": "Cảnh M không đạt frame-time sau tối ưu cơ bản",
+      "response": "Giảm cây/hiệu ứng nền, điều chỉnh bóng và LOD, hạn chế phản chiếu trước khi giảm độ rõ của khối đang chỉnh."
+    },
+    {
+      "risk": "Thay đổi định dạng làm hỏng thiết kế",
+      "signal": "Fixture cũ hoặc chuỗi lưu/phục hồi không đạt",
+      "response": "Dừng mở rộng dữ liệu, giữ bản sao và sửa đường chuyển phiên bản trước."
+    },
+    {
+      "risk": "Lịch học và thi làm thiếu giờ",
+      "signal": "Hai tuần liên tiếp thấp hơn giờ giả định",
+      "response": "Cập nhật mốc còn lại bằng năng suất thực tế; hoãn nội dung P1 và nội dung phụ trước, giữ chất lượng P0."
+    },
+    {
+      "risk": "Ảnh concept tạo kỳ vọng không thực tế",
+      "signal": "Cảnh thật khác xa nhưng không có đánh giá định kỳ",
+      "response": "Duyệt game thật ở M1/M2 và mỗi mốc lớn; ghi rõ khoảng cách còn lại, không dùng ảnh AI thay cho bằng chứng tiến độ."
+    }
+  ],
+  "release_acceptance": {
+    "required": [
+      "P0 đã đạt tiêu chí",
+      "Không còn lỗi nghiêm trọng đã biết trong vòng chơi chính",
+      "Bản lưu cũ/phục hồi được kiểm chứng",
+      "Cảnh M đạt ngân sách trên cấu hình được công bố",
+      "Rubric mỹ thuật đạt với người duyệt thật",
+      "Luồng người mới được thử",
+      "Exe chạy trên máy khác với dữ liệu riêng"
+    ],
+    "optional_can_defer": [
+      "Phong cách kiến trúc thứ hai",
+      "Mùa và thời tiết đầy đủ",
+      "Nhiều động vật/NPC",
+      "Chợ mẫu trực tuyến",
+      "Nội thất",
+      "Bộ lọc ảnh nâng cao"
+    ],
+    "completion_percent": null,
+    "completion_rule": "Theo dõi tiêu chí đạt/chưa đạt và lỗi còn mở. Không ghi 98% hay 100% chỉ vì số lượng tính năng hoặc bộ tự động đã qua."
+  },
+  "collaboration_workflow": {
+    "session_cycle": [
+      "Đọc tiến độ và lỗi đang mở",
+      "Chọn một kết quả cụ thể từ mốc hiện hành",
+      "Triển khai trong phạm vi đó",
+      "Chạy các kiểm tra liên quan và hồi quy cần thiết",
+      "Đóng gói khi có bản review được",
+      "Cập nhật bằng chứng và việc còn thiếu"
+    ],
+    "weekly_review": "Trong các buổi làm việc chủ động, xem lại giờ thực tế, cảnh chuẩn, lỗi P0/P1 và mức đã đạt. Đây là quy trình đề xuất, chưa tạo nhắc lịch hoặc tác vụ tự động.",
+    "definition_of_done": [
+      "Có hành vi hoạt động trong game thật",
+      "Có ca kiểm tra phù hợp hoặc buổi thử được ghi nhận",
+      "Lưu/mở/hoàn tác liên quan được giữ",
+      "Không tăng chi phí vượt ngân sách mà không ghi nhận",
+      "Có bản chạy review được",
+      "Ghi rõ phần chưa nghiệm thu"
+    ],
+    "approval_points": [
+      "Bạn duyệt phong cách mẫu ở M1/M2",
+      "Bạn duyệt giảm/thay phạm vi khi một cổng kiểm chứng không đạt",
+      "Bạn và người thử đánh giá mỹ thuật/cảm giác chơi ở các mốc lớn"
+    ],
+    "immediate_next_steps": [
+      "Hoàn tất kiểm thử và bản trình bày cho 12/11/2026",
+      "Chốt giờ thực tế mỗi tuần và thiết bị có thể thử",
+      "Chọn một nhà mẫu làm chuẩn",
+      "Lập bảng tài nguyên và thử nhập trong game",
+      "Đến 30/11/2026 đánh giá mẫu chạy thật trước khi mở rộng"
+    ]
+  },
+  "execution": {
+    "progress_file": "TIEN-DO-DREAMHOUSE-1-NAM.json",
+    "started_date": "2026-11-07",
+    "active_milestone": "M0",
+    "last_delivered_part": "M0-02",
+    "next_part": "M0-03",
+    "updated_date": "2026-11-11",
+    "progress_report": "reports/BAO-CAO-TIEN-DO-2026-11-11.md"
+  }
+}

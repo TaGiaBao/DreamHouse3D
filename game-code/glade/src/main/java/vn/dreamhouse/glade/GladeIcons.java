@@ -107,6 +107,32 @@ final class GladeIcons {
                 house(g,key);
                 if(key.equals("LOG_CABIN")) {g.setColor(Color.decode("#95744e"));for(int i=0;i<5;i++) g.drawLine(24,53+i*5,53,62+i*5);}
             }
+            case "PENTAGON" -> {
+                poly(g,"#c6a478",19,42,46,53,46,81,19,68);
+                poly(g,"#ad805b",46,53,79,37,79,65,46,81);
+                poly(g,"#f1d2a1",19,42,35,23,57,17,79,37,46,53);
+                poly(g,"#6e9890",25,51,35,56,35,66,25,61);
+            }
+            case "ROOF_FLAT" -> {
+                poly(g,"#a88d70",12,51,51,66,85,48,85,58,51,76,12,61);
+                poly(g,"#e4cba5",12,51,46,31,85,48,51,66);
+            }
+            case "ROOF_SHED" -> {
+                poly(g,"#ac6947",15,56,59,80,88,65,43,40);
+                poly(g,"#db9462",15,51,59,75,88,60,43,35);
+                g.setColor(Color.decode("#f2b885"));
+                for(int i=0;i<4;i++)g.drawLine(20+i*7,54-i*4,63+i*7,77-i*4);
+            }
+            case "ROOF_PYRAMID","ROOF_PENTAGON" -> {
+                if(key.equals("ROOF_PENTAGON")){
+                    poly(g,"#dc9561",13,54,30,39,50,15,53,70);
+                    poly(g,"#ae6344",50,15,86,46,72,61,53,70);
+                    poly(g,"#bd7652",50,15,72,30,86,46);
+                }else{
+                    poly(g,"#e3a377",14,56,45,20,52,74);
+                    poly(g,"#b66b48",45,20,86,52,52,74);
+                }
+            }
             case "ROOF_TILE","ROOF_SLATE" -> {
                 boolean slate=key.equals("ROOF_SLATE");
                 poly(g,slate?"#5b737c":"#a96947",10,63,46,25,88,42,54,83);

@@ -11,12 +11,12 @@ final class GladeDesign {
         HOUSE, MANOR, CANAL_HOUSE, BRICK_HOUSE, TOWER, PAVILION, BRIDGE, WALL, FENCE, PATH, TREE, FLOWERS, WATER,
         LOG_CABIN, BRICK_WALL, TIMBER_WALL, HEDGE, ROOF_TILE, ROOF_SLATE, CHIMNEY_BRICK, CHIMNEY_STONE,
         WINDOW_ARCH, WINDOW_ROUND, DOOR_ARCH, DOOR_DOUBLE, STAIRS_STONE, STAIRS_WOOD, DECK, PERGOLA,
-        PLANTER, WELL, BENCH;
+        PLANTER, WELL, BENCH, PENTAGON, ROOF_FLAT, ROOF_PYRAMID, ROOF_PENTAGON, ROOF_SHED;
 
-        boolean building() { return this==HOUSE || this==MANOR || this==CANAL_HOUSE || this==BRICK_HOUSE || this==TOWER || this==PAVILION || this==LOG_CABIN; }
+        boolean building() { return this==HOUSE || this==MANOR || this==CANAL_HOUSE || this==BRICK_HOUSE || this==TOWER || this==PAVILION || this==LOG_CABIN || this==PENTAGON; }
         boolean footprint() { return !stroke(); }
         boolean stroke() { return this==WALL || this==FENCE || this==BRIDGE || this==PATH || this==BRICK_WALL || this==TIMBER_WALL || this==HEDGE; }
-        boolean roof() { return this==ROOF_TILE || this==ROOF_SLATE; }
+        boolean roof() { return this==ROOF_TILE || this==ROOF_SLATE || RoofProfiles.shaped(this); }
         boolean chimney() { return this==CHIMNEY_BRICK || this==CHIMNEY_STONE; }
         boolean opening() { return this==WINDOW_ARCH || this==WINDOW_ROUND || this==DOOR_ARCH || this==DOOR_DOUBLE; }
         boolean mounted() { return roof() || chimney() || opening(); }
@@ -37,7 +37,7 @@ final class GladeDesign {
         Finish variant(int value){return new Finish(material,color,roofMaterial,roofColor,value);}
         static final Finish DEFAULT=new Finish("original","","original","");
         Finish {
-            if(variant<0 || variant>20 || !Set.of("original","plaster","brick","stone","wood").contains(material)
+            if(variant<0 || variant>20 || !Set.of("original","plaster","brick","stone","wood","dirt","concrete","gravel").contains(material)
                 || !Set.of("original","tile","slate","wood","metal").contains(roofMaterial)
                 || !color.matches("(#[0-9a-fA-F]{6})?") || !roofColor.matches("(#[0-9a-fA-F]{6})?"))
                 throw new IllegalArgumentException("Vật liệu hoặc màu không hợp lệ.");
@@ -169,8 +169,16 @@ final class GladeDesign {
         return item.form().roof();
     }
     float roofLocalHeight(Item host,float x,float z) {
-        float rise=roofRise(host);var custom=items.stream().filter(part->part.kind().roof() && part.mount()!=null && part.mount().hostId()==host.id()).findFirst().orElse(null);
-        if(custom!=null){float span=custom.width()/2+.32f;return host.height()+span*.62f*custom.height()/.5f*Math.max(0,1-Math.abs(x)/span);}
+        if(hasUpper(host.id()))return host.height();
+        float rise=roofRise(host);var custom=attachedRoof(host.id());
+        if(custom!=null){
+            if(RoofProfiles.shaped(custom.kind()))return host.height()+RoofProfiles.surface(custom.kind(),host,custom.height(),
+                    x-custom.mount().u()*host.width(),z-custom.mount().v()*host.depth(),custom.rotation());
+            float span=custom.width()/2+.32f;double angle=Math.toRadians(custom.rotation());
+            float across=(float)(Math.cos(angle)*x-Math.sin(angle)*z);
+            return host.height()+span*.62f*custom.height()/.5f*Math.max(0,1-Math.abs(across)/span);
+        }
+        if(host.kind()==Kind.PENTAGON)return host.height()+(rise>.02f?RoofProfiles.surface(Kind.ROOF_PENTAGON,host,rise,x,z,0):0);
         if(host.kind()==Kind.TOWER)return host.height()+rise*Math.max(0,1-(float)Math.sqrt(Math.pow(x/(host.width()/2+.12f),2)+Math.pow(z/(host.depth()/2+.12f),2)));
         var fusion=new BlockFusion(this);
         if(fusion.joined(host.id()))return fusion.surfaceHeight(host,x,z);
@@ -209,26 +217,20 @@ final class GladeDesign {
         var center=new Point(host.center().x()+(float)(Math.cos(angle)*x+Math.sin(angle)*z),
                 host.center().z()+(float)(-Math.sin(angle)*x+Math.cos(angle)*z));
         float y=mount.lift()*host.height();
-        var custom=items.stream().filter(part->part.mount()!=null && part.mount().hostId()==host.id() && part.kind().roof()).findFirst().orElse(null);
-        boolean pitched=!hasUpper(host.id()) && (custom!=null || roofRise(host)>.02f);
         if(item.kind().opening() && mount.lift()>=1) {
-            float span=host.width()/2+.32f;
             y=roofLocalHeight(host,x,z)+item.height()*.25f;
         }
         if(item.kind().roof()) y=host.height();
-        if(item.kind().chimney()) {
-            double roofAngle=Math.toRadians(custom==null?0:custom.rotation());
-            float across=(float)(Math.cos(roofAngle)*x-Math.sin(roofAngle)*z);
-            float span=(custom==null?host.width():custom.width())/2+.32f;
-            float scale=custom==null?roofRise(host)/(span*.62f):custom.height()/.5f;
-            y=custom==null?roofLocalHeight(host,x,z)-.12f:host.height()+(pitched?span*.62f*scale*Math.max(0,1-Math.abs(across)/span):0)-.12f;
-        }
+        if(item.kind().chimney()) y=roofLocalHeight(host,x,z)-.12f;
         return new Placement(center,host.rotation()+item.rotation(),placement(host).elevation()+Math.max(0,y),
                 item.width(),item.depth());
     }
 
     boolean customRoof(long hostId) {
-        return items.stream().anyMatch(item->item.kind().roof() && item.mount()!=null && item.mount().hostId()==hostId);
+        return attachedRoof(hostId)!=null;
+    }
+    Item attachedRoof(long hostId) {
+        return items.stream().filter(item->item.kind().roof() && item.mount()!=null && item.mount().hostId()==hostId).findFirst().orElse(null);
     }
 
     boolean blocksOpening(Item host,float x,float z,float elevation,float clearance) {
@@ -323,8 +325,10 @@ final class GladeDesign {
     }
 
     boolean nearPath(float x,float z,float radius) {
-        for(var item:items) if(item.kind()==Kind.PATH)
-            for(var point:item.points()) if(Math.hypot(x-point.x(),z-point.z())<radius) return true;
+        for(var item:items) if(item.kind()==Kind.PATH){
+            float edge=Math.max(.10f,radius+(PathSurface.width(item)-1)/2);
+            for(var point:item.points()) if(Math.hypot(x-point.x(),z-point.z())<edge) return true;
+        }
         return false;
     }
 

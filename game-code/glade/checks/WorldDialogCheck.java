@@ -30,7 +30,8 @@ final class WorldDialogCheck extends ProceduralMechanicsCheck {
                 for (Window window : Window.getWindows()) if (window.isShowing()) {
                     T match = find(window, type);
                     if (match != null) {
-                        action.accept(match);
+                        // Approving an existing filename can enter a nested confirmation loop.
+                        SwingUtilities.invokeLater(() -> action.accept(match));
                         return true;
                     }
                 }

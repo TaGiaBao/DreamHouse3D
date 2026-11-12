@@ -6,6 +6,10 @@ import java.util.*;
 import static vn.dreamhouse.glade.GladeDesign.*;
 
 class WaterDrawingCheck extends ProceduralMechanicsCheck {
+    private static void drawBentStroke()throws Exception{
+        var a=screen(new Vector3f(-3,0,0));var b=screen(new Vector3f(0,0,0));var c=screen(new Vector3f(0,0,3));
+        mouse((int)a.x,(int)a.y,true);mouse((int)b.x,(int)b.y,null);mouse((int)c.x,(int)c.y,null);mouse((int)c.x,(int)c.y,false);
+    }
     public static void main(String[] args)throws Exception{
         var empty=new GladeDesign(List.of(),2);var points=List.of(new Point(-3,0),new Point(-1,0),new Point(0,1),new Point(0,3));
         var drawn=WaterGesture.draft(empty,points,points.getLast(),.7f,0);ok(WaterFlow.source(drawn) && drawn.points().equals(points),"free polyline remains saved as one flowing item");
@@ -19,10 +23,22 @@ class WaterDrawingCheck extends ProceduralMechanicsCheck {
         var file=PlayerFiles.directory("checks").resolve("drawn-water.glade");hill.add(new Item(2,drawn.kind(),drawn.center(),drawn.width(),drawn.depth(),drawn.height(),false,drawn.points(),0,null,drawn.form())).save(file);ok(GladeDesign.load(file).items().size()==2,"source and drawn line survive signed save");
         app=new GladeApp();var settings=new AppSettings(true);settings.setResolution(1100,720);settings.setRenderer(AppSettings.LWJGL_OPENGL33);settings.setAudioRenderer(null);settings.setTitle("DreamHouse · Kiểm tra vẽ nước và thác");app.setSettings(settings);app.setShowSettings(false);app.setPauseOnLostFocus(false);app.start();
         try{
-            engine(()->true);fixture(empty);clickRaw("water");var a=screen(new Vector3f(-3,0,0));var b=screen(new Vector3f(0,0,0));var c=screen(new Vector3f(0,0,3));mouse((int)a.x,(int)a.y,true);mouse((int)b.x,(int)b.y,null);Thread.sleep(120);mouse((int)c.x,(int)c.y,null);Thread.sleep(120);mouse((int)c.x,(int)c.y,false);
+            engine(()->true);fixture(empty);clickRaw("water");
+            var worker=(java.util.concurrent.ExecutorService)field("waterWorker");
+            var hold=new java.util.concurrent.CountDownLatch(1);
+            worker.submit(()->{hold.await();return null;});
+            try{
+                drawBentStroke();
+                ok(field("pendingWater")!=null && design().items().isEmpty(),"long water prepares in background before entering history");
+                chord(com.jme3.input.KeyInput.KEY_Z);
+                ok(field("pendingWater")==null && design().items().isEmpty(),"undo cancels pending stroke without editing the scene");
+            }finally{hold.countDown();}
+            drawBentStroke();
+            long until=System.nanoTime()+8_000_000_000L;
+            while(design().items().isEmpty() && System.nanoTime()<until)Thread.sleep(30);
             ok(design().items().size()==1 && item(0).points().size()>5 && WaterFlow.source(item(0)),"actual left drag commits one flowing stroke");chord(com.jme3.input.KeyInput.KEY_Z);ok(design().items().isEmpty(),"one undo removes entire stroke");
             click(new Vector3f(1,0,1));ok(design().items().size()==1 && item(0).points().size()==1,"actual click places a single source");fixture(new GladeDesign(List.of(platform),2));clickRaw("water");click(new Vector3f(0,3,0));ok(design().items().size()==2 && design().items().getLast().form().base()>2.9f,"actual click on raised construction places water at contact height");fixture(hill);Thread.sleep(350);ok(tagged("waterfall","true"),"waterfall renders in actual game");
-            System.out.println("WATER_DRAWING_PASS: click and continuous drag, one-step undo, free L-shaped flow, edge placement, downhill terrain, falling ribbons, raised construction spill and save roundtrip; no screenshots");
+            System.out.println("WATER_DRAWING_PASS: background preparation and cancellation, one-step undo, free flow, downhill falls and save roundtrip");
         }finally{app.stop();}
     }
 }

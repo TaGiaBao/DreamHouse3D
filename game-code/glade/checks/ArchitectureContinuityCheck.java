@@ -12,7 +12,36 @@ class ArchitectureContinuityCheck extends ProceduralMechanicsCheck {
     static boolean hit(Spatial root,Vector3f origin,Vector3f direction,float limit){var hits=new CollisionResults();root.collideWith(new Ray(origin,direction),hits);for(var h:hits)if(h.getDistance()<limit && h.getDistance()>.0001f)return true;return false;}
     static Geometry body(Node root){var found=new ArrayList<Geometry>();root.depthFirstTraversal(s->{if(s instanceof Geometry g && Boolean.TRUE.equals(g.getUserData("structuralShell")))found.add(g);});return found.getFirst();}
     static void finite(Node root){root.depthFirstTraversal(s->{if(s instanceof Geometry g){var data=g.getMesh().getBuffer(VertexBuffer.Type.Position);if(data==null)return;var values=(java.nio.FloatBuffer)data.getData();for(int i=0;i<values.limit();i++)ok(Float.isFinite(values.get(i)),"finite geometry");}});}
+    private static void terrainChecks(){
+        var cells=new HashMap<TerrainField.Cell,Float>();
+        for(int x=-4;x<=4;x++)for(int z=-4;z<=4;z++)cells.put(new TerrainField.Cell(x,z),2-z*.45f);
+        var land=LandBounds.level(2);
+        var field=new TerrainField(cells);
+        for(var kind:List.of(GladeDesign.Kind.HOUSE,GladeDesign.Kind.PENTAGON,GladeDesign.Kind.TOWER)){
+            var house=new GladeDesign.Item(0,kind,new GladeDesign.Point(0,0),4,3,2.6f,true,List.of(),0,null,block(0,0,0,4,3,2.6f,1).form());
+            var scene=new GladeDesign(List.of(house),land,field);
+            var built=render(scene);
+            var foundation=built.getChild("Móng theo độ dốc");
+            float floor=field.height(0,1.5f),base=scene.placement(house).elevation();
+            ok(foundation!=null && hit(foundation,new Vector3f(0,(floor+base)/2,2),Vector3f.UNIT_Z.negate(),.8f),
+                    "downhill gap is filled across the front of "+kind);
+            var upstairs=new GladeDesign.Item(1,kind,house.center(),2,2,2,true,List.of(),0,null,house.form().support(0));
+            var stacked=render(scene.add(upstairs));
+            ok(((Node)stacked.getChild(1)).getChild("Móng theo độ dốc")==null,"upper storeys keep their parent support");
+        }
+        var raised=new TerrainField().brush(land.maxX()-.1f,0,3,3,null);
+        var terrain=TerrainMesh.build(ART,new GladeDesign(List.of(),land,raised));
+        terrain.updateGeometricState();
+        var outside=terrain.getChild("Đồng cỏ ngoài khu xây");
+        var innerHits=new CollisionResults();var outerHits=new CollisionResults();
+        terrain.getChild("Mặt đất").collideWith(new Ray(new Vector3f(land.maxX()-.001f,9,0),Vector3f.UNIT_Y.negate()),innerHits);
+        outside.collideWith(new Ray(new Vector3f(land.maxX()+.001f,9,0),Vector3f.UNIT_Y.negate()),outerHits);
+        ok(innerHits.size()>0 && outerHits.size()>0 && Math.abs(innerHits.getClosestCollision().getContactPoint().y
+                -outerHits.getClosestCollision().getContactPoint().y)<.03f,"outside meadow shares the height at a sculpted plot boundary");
+        ok(terrain.getChild("Viền khu xây dựng")!=null && terrain.getChild("Lớp đất")==null,"visible plot line replaces the vertical skirt");
+    }
     public static void main(String[]args)throws Exception {
+        terrainChecks();
         var a=block(0,0,0,4,3,2.6f,1.4f);var b=block(1,3,0,2,3,2.6f,1.4f);var scene=new GladeDesign(List.of(a,b),2);var root=render(scene);
         ok(!hit(root,new Vector3f(1.7f,1,0),Vector3f.UNIT_X,.65f),"flush join has no interior wall or timber post");
         b=block(1,3.137f,.219f,3,2.2f,2.6f,1.4f);scene=new GladeDesign(List.of(a,b),2);root=render(scene);

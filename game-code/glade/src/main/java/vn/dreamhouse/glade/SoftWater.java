@@ -18,30 +18,53 @@ final class SoftWater {
     }
     private static final class Batch {
         final List<Float> positions=new ArrayList<>(),colors=new ArrayList<>();
+        final List<Integer> indices=new ArrayList<>();
+        final Map<Sample,Integer> vertices=new HashMap<>();
         void vertex(Sample p,GladeDesign.Item source,GladeDesign scene,float base){
+            indices.add(vertices.computeIfAbsent(p,point->addVertex(point,source,scene,base)));
+        }
+        private int addVertex(Sample p,GladeDesign.Item source,GladeDesign scene,float base){
+            int index=positions.size()/3;
             float ground=scene.terrain().height(p.x,p.z),height=Math.max(ground+.022f,p.level);
             positions.add(p.x-source.center().x());positions.add(height-base);positions.add(p.z-source.center().z());
             float depth=FastMath.clamp((height-ground)/.46f,0,1),edge=FastMath.clamp((p.coverage-EDGE)/.35f,0,1);
             colors.add(FastMath.interpolateLinear(depth,SHALLOW.r,DEEP.r));colors.add(FastMath.interpolateLinear(depth,SHALLOW.g,DEEP.g));colors.add(FastMath.interpolateLinear(depth,SHALLOW.b,DEEP.b));colors.add(.08f+.80f*edge);
+            return index;
         }
     }
+    record Surface(int band,float[] positions,float[] colors,int[] indices) {}
     static Node render(GladeArt art,GladeDesign.Item source,GladeDesign scene,WaterFlow.Result water){
-        var root=new Node("Mặt nước mềm");root.setUserData("softWater",true);
-        if(water.cells().isEmpty())return root;
+        return render(art,prepare(source,scene,water));
+    }
+    static List<Surface> prepare(GladeDesign.Item source,GladeDesign scene,WaterFlow.Result water){
+        if(water.cells().isEmpty())return List.of();
         // Sparse sampling limits work to the neighborhood of wet cells, even on a very large plot.
         var squares=new HashSet<WaterFlow.Cell>();
         for(var cell:water.cells().keySet())for(int x=-2;x<=4;x++)for(int z=-2;z<=4;z++)squares.add(new WaterFlow.Cell(cell.x()*3+x,cell.z()*3+z));
         var samples=new HashMap<WaterFlow.Cell,Sample>();var batches=new TreeMap<Integer,Batch>();float base=scene.placement(source).elevation();
-        for(var square:squares){int x=square.x(),z=square.z();
+        for(var square:squares){
+            if(Thread.currentThread().isInterrupted())throw new java.util.concurrent.CancellationException();
+            int x=square.x(),z=square.z();
             var a=sample(samples,water,x,z);var b=sample(samples,water,x,z+1);var c=sample(samples,water,x+1,z+1);var d=sample(samples,water,x+1,z);
             clip(a,b,c,batches,source,scene,base);clip(a,c,d,batches,source,scene,base);
         }
+        var surfaces=new ArrayList<Surface>();
         for(var entry:batches.entrySet()){
-            var batch=entry.getValue();float[] positions=array(batch.positions),normals=new float[positions.length];for(int i=1;i<normals.length;i+=3)normals[i]=1;
-            var mesh=new Mesh();mesh.setBuffer(VertexBuffer.Type.Position,3,positions);mesh.setBuffer(VertexBuffer.Type.Normal,3,normals);mesh.setBuffer(VertexBuffer.Type.Color,4,array(batch.colors));mesh.setDynamic();mesh.updateBound();REST.put(mesh,positions);
+            var batch=entry.getValue();
+            var indices=new int[batch.indices.size()];for(int i=0;i<indices.length;i++)indices[i]=batch.indices.get(i);
+            surfaces.add(new Surface(entry.getKey(),array(batch.positions),array(batch.colors),indices));
+        }
+        return List.copyOf(surfaces);
+    }
+    static Node render(GladeArt art,List<Surface> surfaces){
+        var root=new Node("Mặt nước mềm");root.setUserData("softWater",true);
+        for(var surface:surfaces){
+            var positions=surface.positions();float[] normals=new float[positions.length];for(int i=1;i<normals.length;i+=3)normals[i]=1;
+            var mesh=new Mesh();mesh.setBuffer(VertexBuffer.Type.Position,3,positions);mesh.setBuffer(VertexBuffer.Type.Normal,3,normals);mesh.setBuffer(VertexBuffer.Type.Color,4,surface.colors());
+            mesh.setBuffer(VertexBuffer.Type.Index,3,surface.indices());mesh.setDynamic();mesh.updateBound();REST.put(mesh,positions);
             var geo=new Geometry("Nước liền mặt",mesh);var material=art.material("#ffffff").clone();material.setBoolean("UseVertexColor",true);material.setColor("Specular",new ColorRGBA(.6f,.7f,.67f,1));material.setFloat("Shininess",96);material.setTransparent(true);
             material.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);material.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);material.getAdditionalRenderState().setDepthWrite(false);
-            geo.setMaterial(material);geo.setQueueBucket(RenderQueue.Bucket.Transparent);geo.setShadowMode(RenderQueue.ShadowMode.Receive);geo.setUserData("softSurface",true);geo.setUserData("flowDelay",entry.getKey()*.045f);root.attachChild(geo);
+            geo.setMaterial(material);geo.setQueueBucket(RenderQueue.Bucket.Transparent);geo.setShadowMode(RenderQueue.ShadowMode.Receive);geo.setUserData("softSurface",true);geo.setUserData("flowDelay",surface.band()*.045f);root.attachChild(geo);
         }
         return root;
     }

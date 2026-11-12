@@ -5,7 +5,7 @@ import com.jme3.scene.shape.Cylinder;
 /** Procedural catalog variations and continuous upper/lower-bound craft forms. */
 final class GladeVariants {
  static boolean craft(GladeArt art,Node node,GladeDesign.Item item) {
-  if(item.kind().stroke() || item.kind().mounted() || item.kind()==GladeDesign.Kind.WATER)return false;
+  if(item.kind().stroke() || item.kind().mounted() || item.kind()==GladeDesign.Kind.WATER || item.kind()==GladeDesign.Kind.PENTAGON)return false;
   float w=item.width(),d=item.depth(),h=item.height();var finish=item.form().finish();
   boolean template=(finish.variant()>=7 && finish.variant()<=9 && item.kind().building()) || finish.variant()==18 && item.kind()==GladeDesign.Kind.DECK;
   if(h<=.12f){art.box(node,w,h,d,0,h/2,0,finish.material().equals("wood")?"#be9c70":"#c4baa2").setUserData("wallSurface",true);node.setUserData("craftShape","Tấm phẳng");return true;}
