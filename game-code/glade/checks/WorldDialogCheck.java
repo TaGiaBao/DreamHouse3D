@@ -13,7 +13,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-/** Drives the actual modal dialogs in the test process, using an isolated player directory. */
 final class WorldDialogCheck extends ProceduralMechanicsCheck {
     private static <T extends Component> T find(Component root, Class<T> type) {
         if (type.isInstance(root)) return type.cast(root);
@@ -30,7 +29,6 @@ final class WorldDialogCheck extends ProceduralMechanicsCheck {
                 for (Window window : Window.getWindows()) if (window.isShowing()) {
                     T match = find(window, type);
                     if (match != null) {
-                        // Approving an existing filename can enter a nested confirmation loop.
                         SwingUtilities.invokeLater(() -> action.accept(match));
                         return true;
                     }

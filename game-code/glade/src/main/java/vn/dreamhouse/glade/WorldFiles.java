@@ -8,7 +8,6 @@ import java.nio.file.*;
 import java.security.*;
 import java.util.*;
 
-/** Optional integrity for glade-9 plus same-directory, validated replacement of a world file. */
 final class WorldFiles {
     static final String HEADER="DreamHouse Glade integrity=v1",DIGEST="integrity.sha256",FORMAT="integrity.format";
     @FunctionalInterface interface Content {void write(OutputStream output)throws IOException;}

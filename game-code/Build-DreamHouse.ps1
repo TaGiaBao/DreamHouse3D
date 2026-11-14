@@ -19,7 +19,6 @@ $jars = Get-ChildItem -LiteralPath "$root\glade\lib" -Filter '*.jar'
 $jars | Copy-Item -Destination "$inputDir\lib"
 $classpath = ($jars | ForEach-Object { "lib/$($_.Name)" }) -join ' '
 $manifest = Join-Path $build 'manifest.mf'
-# jar wraps manifest attributes to the required line length.
 $manifestLines = @('Manifest-Version: 1.0', 'Main-Class: vn.dreamhouse.glade.GladeLauncher')
 $line = "Class-Path: $classpath"
 while ($line.Length -gt 68) { $manifestLines += $line.Substring(0,68); $line = ' ' + $line.Substring(68) }

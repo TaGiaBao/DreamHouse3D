@@ -5,7 +5,6 @@ try {
     . "$PSScriptRoot\Resolve-DreamHouse.ps1"
     $exe = Resolve-DreamHouseRelease -Root $PSScriptRoot
     if ($CheckOnly) { Write-Output $exe; exit 0 }
-    # Open the verified package. Rebuilding is an explicit development command.
     Start-Process -FilePath $exe -WorkingDirectory (Split-Path $exe -Parent) -WindowStyle Normal
 } catch {
     $message = "Không mở được DreamHouse.`r`n`r`n$($_.Exception.Message)"

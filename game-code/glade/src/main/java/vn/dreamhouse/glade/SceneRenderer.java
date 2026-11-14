@@ -2,7 +2,6 @@ package vn.dreamhouse.glade;
 import com.jme3.scene.*;
 import java.util.*;
 
-/** Cache the previous scene only. Invalidate procedural dependencies rather than unrelated scenery. */
 final class SceneRenderer {
     private record Signature(TerrainField terrain,LandBounds land,List<GladeDesign.Item> buildings,List<GladeDesign.Item> paths,List<GladeDesign.Item> flora,List<GladeDesign.Item> mounts){
         static Signature of(GladeDesign scene){return new Signature(scene.terrain(),scene.land(),filter(scene,i->i.kind().building() || i.kind()==GladeDesign.Kind.DECK || i.form().support()>=0),filter(scene,i->i.kind()==GladeDesign.Kind.PATH),filter(scene,i->i.kind()==GladeDesign.Kind.TREE || i.kind()==GladeDesign.Kind.FLOWERS || i.kind()==GladeDesign.Kind.HEDGE),filter(scene,i->i.mount()!=null));}
@@ -71,7 +70,6 @@ final class SceneRenderer {
             }
             if(node.getParent()!=root){
                 root.attachChildAt(node,index);
-                // Batching may have consumed the lighting flags before the node was attached.
                 node.depthFirstTraversal(part->part.forceRefresh(false,false,true));
             }else if(root.getChild(index)!=node)root.swapChildren(index,root.getChildIndex(node));
             index++;
@@ -105,7 +103,6 @@ final class SceneRenderer {
 
     private static boolean unchangedNear(GladeDesign.Item item,List<WaterFlow.Cell> changed){
         if(changed==null)return false;
-        // Include foundation probes, entrances at the ends of a wall, and the cell containing each probe.
         float x=item.halfWidth()+1.6f,z=item.halfDepth()+1.6f;
         return changed.stream().noneMatch(cell->Math.abs(cell.wx()-item.center().x())<=x && Math.abs(cell.wz()-item.center().z())<=z);
     }

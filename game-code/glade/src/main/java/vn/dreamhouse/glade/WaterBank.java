@@ -2,7 +2,6 @@ package vn.dreamhouse.glade;
 import com.jme3.scene.*;
 import com.jme3.math.*;
 
-/** Sparse natural bank details follow the painted stroke and keep paths open. */
 final class WaterBank {
     static void decorate(GladeArt art,Node root,GladeDesign.Item item,GladeDesign scene){
         if(item.points().size()<3)return;

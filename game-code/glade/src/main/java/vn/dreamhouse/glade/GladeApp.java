@@ -448,7 +448,6 @@ public final class GladeApp extends SimpleApplication {
         if(button==MouseInput.BUTTON_RIGHT) rotating=pressed;else panning=pressed;
         var mode=rotating?CameraDrag.Mode.ORBIT:panning?CameraDrag.Mode.PAN:CameraDrag.Mode.NONE;
         cameraDrag.begin(mode,x,y);
-        // Keep the pointer at the user's press location; never recenter/capture it.
         inputManager.setCursorVisible(true);
     }
 
@@ -739,7 +738,6 @@ public final class GladeApp extends SimpleApplication {
         leftPress.set(pointer());leftGround=ground();
     }
     private void updateLeftGesture() {
-        // Left drag only edits an already selected block; empty-space drags never orbit.
         if(!pendingLeft || !pendingSelected || pointer().distance(leftPress)<=8)return;
         pendingLeft=false;
         if(leftGround==null)return;
@@ -1054,7 +1052,6 @@ public final class GladeApp extends SimpleApplication {
 
     private String pickTag(Node group,String key) {
         var cursor=pointer();
-        // Pick the visible ruler point nearest the cursor, rather than an overlapping invisible sphere.
         if(group==objectHandles && key.equals("resizeAxis")){
             String[] nearest={null};float[] best={64};
             group.depthFirstTraversal(part->{if(part.getName().startsWith("Đầu thước ")){var screen=cam.getScreenCoordinates(part.getWorldTranslation());float distance=cursor.distanceSquared(new Vector2f(screen.x,screen.y));if(screen.z>=0 && screen.z<=1 && distance<best[0]){best[0]=distance;nearest[0]=part.getUserData(key);}}});
@@ -1197,7 +1194,6 @@ public final class GladeApp extends SimpleApplication {
                     dashed(frame,new Vector3f(w,h,side*d),new Vector3f(0,top,side*d));
                 }
             }
-            // The vertical ruler spans the complete live block, rather than a fixed .8 m.
             float rx=w+1.05f,rz=-d-.6f;
             whiteLine(frame,.025f,h-bottom,.025f,rx,(h+bottom)/2,rz);
             float spread=h-bottom<.4f?.45f:0;

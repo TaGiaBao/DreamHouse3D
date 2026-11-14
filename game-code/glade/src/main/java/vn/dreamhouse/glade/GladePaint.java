@@ -6,7 +6,6 @@ import com.jme3.util.MipMapGenerator;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
-/** Locally generated material patterns; no downloaded textures or external service. */
 final class GladePaint {
  private static final Map<String,Texture2D> textures=new HashMap<>();
  static void apply(GladeArt art,Node node,GladeDesign.Finish finish) {

@@ -4,7 +4,6 @@ import com.jme3.math.*;
 import com.jme3.scene.*;
 import java.util.*;
 
-/** Bounded, deterministic source-water flood: downhill first, attenuated sideways, no uphill flow. */
 final class WaterFlow {
     static final float STEP=.65f;
     record Cell(int x,int z) {float wx(){return (x+.5f)*STEP;} float wz(){return (z+.5f)*STEP;}}

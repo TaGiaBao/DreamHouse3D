@@ -6,7 +6,6 @@ import com.jme3.bounding.BoundingBox;
 import java.nio.FloatBuffer;
 import java.util.*;
 
-/** Subtract hidden surfaces at real building intersections, preserving each editable item ID. */
 final class ArchitectureJoin {
     private record Plane(Vector3f n,float d){float distance(Vector3f p){return n.dot(p)+d;}}
     private record Vertex(Vector3f p,Vector3f n,Vector2f uv,ColorRGBA color){
@@ -30,7 +29,6 @@ final class ArchitectureJoin {
             var attached=shapedRoofs.get(other.id());
             if(attached!=null)margin+=(float)Math.hypot(attached.mount().u()*other.width(),attached.mount().v()*other.depth());
             float xExtent=other.halfWidth()+margin,zExtent=other.halfDepth()+margin;
-            // Use the true mesh extents so overhanging eaves remain eligible to intersect.
             if(bounds instanceof BoundingBox box && (Math.abs(box.getCenter().x-other.center().x())>box.getXExtent()+xExtent
                     || Math.abs(box.getCenter().z-other.center().z())>box.getZExtent()+zExtent))continue;
             var placement=scene.placement(other);
@@ -64,7 +62,6 @@ final class ArchitectureJoin {
         var form=owner.form();
         float x=(form.roofRight()-form.roofLeft())/2,z=(form.roofFront()-form.roofBack())/2;
         float rise=RoofProfiles.rise(kind,height),bias=priority?.002f:-.002f;
-        // The winning surface owns the shallow decorative layer at coincident seams.
         float detailClearance=priority?RoofDetail.MAX_RISE:0;
         boolean flat=kind==GladeDesign.Kind.ROOF_FLAT;
         var shed=kind==GladeDesign.Kind.ROOF_SHED?RoofProfiles.shed(outline,rise):null;

@@ -61,7 +61,6 @@ class ManualBuildCheck extends DirectEditCheck {
    pull("ROOF",-200);require(item(0).form().roof()==0,"pull top down removes roof");
    engine(()->{var f=GladeApp.class.getDeclaredField("objectHandles");f.setAccessible(true);var root=(Node)f.get(app);root.depthFirstTraversal(s->{require(!Set.of("ROOF_FRONT","ROOF_BACK").contains(Objects.toString(s.getUserData("resizeAxis"))),"removed roof removes two end handles");});return true;});
    pull("BASE",50);require(item(0).form().stilts()>.3,"bottom ruler creates stilts");
-   // Custom/slate roof follows the same roof-height control and is actually removed.
    var host=new GladeDesign.Item(0,GladeDesign.Kind.HOUSE,new GladeDesign.Point(0,0),4,3,2.3f,false,List.of());
    var custom=new GladeDesign.Item(1,GladeDesign.Kind.ROOF_SLATE,host.center(),4,3,.5f,true,List.of(),0,new GladeDesign.Mount(0,0,0,0));
    fixture(new GladeDesign(List.of(host,custom),2));select(0);pull("ROOF",-240);

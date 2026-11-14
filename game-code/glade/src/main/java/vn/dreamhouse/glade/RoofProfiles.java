@@ -6,7 +6,6 @@ import com.jme3.scene.Node;
 import java.util.List;
 import static vn.dreamhouse.glade.GladeDesign.Kind;
 
-/** Footprint and height shared by the mesh and mounted openings/chimneys. */
 final class RoofProfiles {
     static final float SLAB=.18f;
     static boolean shaped(Kind kind){return kind==Kind.ROOF_FLAT || kind==Kind.ROOF_PYRAMID || kind==Kind.ROOF_PENTAGON || kind==Kind.ROOF_SHED;}

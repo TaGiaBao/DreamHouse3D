@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import static vn.dreamhouse.glade.GladeDesign.*;
 
-/** An editable village made from the public building tools and the normal save model. */
 final class RiversideVillage {
     static GladeDesign create() {
         var land=new LandBounds(-28,28,-18,18);

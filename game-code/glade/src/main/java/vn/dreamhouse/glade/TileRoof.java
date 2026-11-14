@@ -2,7 +2,6 @@ package vn.dreamhouse.glade;
 import com.jme3.math.*;
 import com.jme3.scene.*;
 
-/** Curved terracotta courses built directly in one lit mesh with valid normals and UVs. */
 final class TileRoof {
     static void build(GladeArt art,Node roof,float width,float depth,float height,boolean slate){
         float span=width/2+.32f,run=depth/2+.32f,rise=span*.62f;
@@ -28,7 +27,6 @@ final class TileRoof {
     static void course(PlainStructure.Builder mesh,Vector3f eaveLeft,Vector3f eaveRight,
             Vector3f ridgeLeft,Vector3f ridgeRight,int tiles,boolean slate,float relief){
         boolean upward=eaveRight.subtract(eaveLeft).cross(ridgeLeft.subtract(eaveLeft)).y>0;
-        // Raise the downhill edge so it sits over the neighboring course.
         float curve=(slate?.013f:.053f)*relief;
         float eave=.043f*relief,ridge=.012f*relief;
         float lowCurve=Math.min(curve,eaveLeft.distance(eaveRight)*.24f/tiles);

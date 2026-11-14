@@ -4,14 +4,12 @@ import com.jme3.math.*;
 import com.jme3.scene.*;
 import java.util.*;
 
-/** Material changes produce exposed structural details, not only a new flat tint. */
 final class FacadeDetails {
     static void build(GladeArt art,Node root,GladeDesign.Item item,GladeDesign scene){
         if(item.form().finish().variant()!=18 || !item.kind().building() || item.height()<=.12f || root.getUserData("craftShape")!=null)return;
         String style=item.form().finish().material();
         if(item.kind()==GladeDesign.Kind.PENTAGON){pentagonalTrim(art,root,item,scene,style);return;}
         var foundation=new Node("Móng đá thích ứng");
-        // A raised upper floor must not acquire a second ground foundation.
         if(item.form().support()<0 && item.form().stilts()<.02f && item.form().base()<.2f){
             float height=Math.min(.32f,item.height()*.35f);
             panels(art,foundation,item,scene,height,Math.min(2,Math.max(1,(int)Math.ceil(height/.18f))),"foundation");
@@ -126,7 +124,6 @@ final class FacadeDetails {
         boolean round=item.kind()==GladeDesign.Kind.TOWER;int faces=round?32:4;
         String base=style.equals("foundation")?"#a9aaa0":item.form().finish().color();if(base.isEmpty())base=style.equals("wood")?"#be9c70":style.equals("brick")?"#c08369":"#a8afa4";
         var tint=GladeArt.color(base);String[] shades=new String[3];
-        // Keep a small fixed palette so all relief blocks batch into three draw calls.
         for(int i=0;i<3;i++){var c=tint.mult(.92f+i*.05f);int rgba=c.getAsSrgb().asIntRGBA();shades[i]=String.format(Locale.ROOT,"#%06x",(rgba>>>8)&0xffffff);}
         for(int face=0;face<faces;face++){
             float span=round?FastMath.TWO_PI*Math.max(item.width(),item.depth())/2/faces:face%2==0?item.width():item.depth();
@@ -159,7 +156,6 @@ final class FacadeDetails {
         var place=scene.placement(item);var world=new Quaternion().fromAngleAxis(place.rotation()*FastMath.DEG_TO_RAD,Vector3f.UNIT_Y).mult(p).addLocal(place.center().x(),place.elevation(),place.center().z());
         float door=Math.min(2.1f,item.height()*.9f),path=SceneRules.pathDistance(scene,world.x,world.z);
         if(path<.65f+clearance && p.y<door+.08f)return false;
-        // Decorations must not cover the shared face of joined blocks, including ground trim.
         for(var other:scene.items())if(other.id()!=item.id() && StructureShell.solid(other) && SceneRules.contains(other,world.x,world.z,.015f)){
             float base=scene.placement(other).elevation();if(world.y>=base-.02f && world.y<=base+other.height()+.02f)return false;
         }

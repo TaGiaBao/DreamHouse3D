@@ -2,7 +2,6 @@ package vn.dreamhouse.glade;
 
 import java.util.*;
 
-/** Optional goals observe committed actions; reading a help page never completes a goal. */
 final class BuildGuide {
     enum Goal { BUILD, SHAPE, PAINT, BLUEPRINT, SAVE }
     private final EnumSet<Goal> completed=EnumSet.noneOf(Goal.class);

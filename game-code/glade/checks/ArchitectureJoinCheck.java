@@ -5,7 +5,6 @@ import com.jme3.scene.*;
 import java.nio.FloatBuffer;
 import java.util.*;
 
-/** Roof/tower regressions using actual transformed mesh triangles, not saved dimensions alone. */
 class ArchitectureJoinCheck {
     static void ok(boolean value,String message){if(!value)throw new AssertionError(message);}
     static int roofVertices(Node node){int[] count={0};node.depthFirstTraversal(s->{if(s instanceof Geometry g && Boolean.TRUE.equals(g.getUserData("roofSurface")) && g.getCullHint()!=Spatial.CullHint.Always)count[0]+=g.getMesh().getVertexCount();});return count[0];}

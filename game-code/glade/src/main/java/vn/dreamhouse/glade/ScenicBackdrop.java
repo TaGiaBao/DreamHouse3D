@@ -8,7 +8,6 @@ import com.jme3.scene.*;
 import com.jme3.scene.shape.Sphere;
 import java.nio.FloatBuffer;
 
-/** Noninteractive distant scenery. Never inserted into the editable/pickable content node. */
 final class ScenicBackdrop {
     final Node node=new Node("Chân trời thung lũng");
     private final Geometry sky;

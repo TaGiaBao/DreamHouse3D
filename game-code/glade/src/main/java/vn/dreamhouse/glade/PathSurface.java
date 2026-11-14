@@ -35,7 +35,6 @@ final class PathSurface {
         return ribbon(item)?item.width():1;
     }
 
-    /** Mesh follows the terrain across the full width and breaks where steps or bridges take over. */
     static void render(GladeArt art,Node root,GladeDesign.Item item,GladeDesign scene,boolean[] flat) {
         var points=item.points();
         if(points.isEmpty())return;

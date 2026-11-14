@@ -8,7 +8,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-/** One child owned by this launcher. Observing another game never grants permission to stop it. */
 final class GameLaunchService {
     enum State { READY, ALREADY_RUNNING, FAILED, WAITING, CANCELLED }
     record Result(State state,String message,Path log,long pid){}

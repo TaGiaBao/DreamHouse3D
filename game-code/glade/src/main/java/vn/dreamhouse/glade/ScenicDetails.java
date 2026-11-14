@@ -7,7 +7,6 @@ import com.jme3.material.RenderState;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.renderer.*;
 
-/** Small-scale, dimension-driven details shared by the actual player catalog. */
 final class ScenicDetails {
     static void smoke(GladeArt art,Node node,float height){
         var plume=new Node("Khói ống khói");plume.setShadowMode(RenderQueue.ShadowMode.Off);
@@ -24,7 +23,6 @@ final class ScenicDetails {
             float a=i*2.4f,x=FastMath.sin(a)*w*.25f,z=FastMath.cos(a)*w*.25f,y=h*(.62f+i%3*.085f);
             art.beam(root,new Vector3f(0,h*.34f,0),new Vector3f(x,y,z),.055f,"#876641");
         }
-        // Main volume plus smaller overlapping lobes: silhouette reads as leaves, not five balls.
         for(int i=0;i<35;i++){
             float a=i*2.399963f,ring=i<7?.19f:.34f,r=w*(i<7?.29f:.115f),y=h*(.62f+(i%5)*.058f);
             var leaf=art.sphere(root,r,FastMath.sin(a)*w*ring,y,FastMath.cos(a)*w*ring,tint);

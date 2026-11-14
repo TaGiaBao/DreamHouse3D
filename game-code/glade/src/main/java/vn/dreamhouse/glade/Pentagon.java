@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-/** Local XZ perimeter, beginning with the straight front façade. */
 final class Pentagon {
     record Edge(Vector2f from,Vector2f to) {
         Vector2f normal(){var d=to.subtract(from).normalizeLocal();return new Vector2f(-d.y,d.x);}

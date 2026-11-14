@@ -6,7 +6,6 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.post.filters.FogFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 
-/** A bounded, reversible lighting transition; no changes to scene geometry or player data. */
 final class CozyAtmosphere {
     record Look(ColorRGBA sunlight,ColorRGBA ambient,ColorRGBA sky,Vector3f direction,float shadow){}
     private static final Look[] LOOKS={

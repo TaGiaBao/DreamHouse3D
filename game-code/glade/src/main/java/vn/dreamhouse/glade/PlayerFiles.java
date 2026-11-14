@@ -3,7 +3,6 @@ import java.nio.file.*;
 import java.io.*;
 import java.util.*;
 
-/** Writable player data never lives in the installed application directory. */
 final class PlayerFiles {
     static Path root(){
         String override=System.getProperty("dreamhouse.userDir");

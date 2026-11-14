@@ -3,7 +3,6 @@ package vn.dreamhouse.glade;
 import com.jme3.math.*;
 import com.jme3.scene.Node;
 
-/** Original modular scenery; all dimensions follow the same editable design data as houses. */
 final class GladeParts {
     private final GladeArt art;
     GladeParts(GladeArt art) { this.art=art; }
@@ -34,7 +33,6 @@ final class GladeParts {
             }
             case WINDOW_ROUND -> {
                 art.cylinder(node,w/2,0.13f,0,0,0,"#d3ba85");
-                // Cylinder axes start vertical; rotate a separate face to look out from the wall.
                 node.getChild(0).rotate(FastMath.HALF_PI,0,0);
                 node.getChild(0).setLocalScale(1,h/w,1);
                 var glass=art.sphere(node,1,0,0,0.08f,"#7eacb4");glass.setLocalScale(w*.38f,h*.38f,0.06f);

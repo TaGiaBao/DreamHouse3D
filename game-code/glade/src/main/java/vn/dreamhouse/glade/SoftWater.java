@@ -7,7 +7,6 @@ import com.jme3.scene.*;
 import java.nio.FloatBuffer;
 import java.util.*;
 
-/** Continuous shoreline extracted from the flood field, independent of its simulation cells. */
 final class SoftWater {
     private static final float STEP=WaterFlow.STEP/3, EDGE=.42f;
     private static final ColorRGBA SHALLOW=GladeArt.color("#b7e4cb"),DEEP=GladeArt.color("#398b9d"),FOAM=GladeArt.color("#e4f5e5");
@@ -45,7 +44,6 @@ final class SoftWater {
     }
     static List<Surface> prepare(GladeDesign.Item source,GladeDesign scene,WaterFlow.Result water){
         if(water.cells().isEmpty())return List.of();
-        // Sparse sampling limits work to the neighborhood of wet cells, even on a very large plot.
         var squares=new HashSet<WaterFlow.Cell>();
         for(var cell:water.cells().keySet())for(int x=-2;x<=4;x++)for(int z=-2;z<=4;z++)squares.add(new WaterFlow.Cell(cell.x()*3+x,cell.z()*3+z));
         var samples=new HashMap<WaterFlow.Cell,Sample>();var batches=new TreeMap<Integer,Batch>();float base=scene.placement(source).elevation();

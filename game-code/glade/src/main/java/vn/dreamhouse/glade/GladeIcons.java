@@ -3,7 +3,6 @@ package vn.dreamhouse.glade;
 import java.awt.*;
 import java.awt.geom.*;
 
-/** Original, scalable illustrations for the tool chest. Coordinates are in a 100-unit tile. */
 final class GladeIcons {
     private GladeIcons() {}
     static void paint(Graphics2D source,String key,int x,int y,int size) {

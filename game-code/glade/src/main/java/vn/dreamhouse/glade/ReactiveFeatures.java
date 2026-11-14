@@ -4,7 +4,6 @@ import com.jme3.scene.*;
 import com.jme3.scene.VertexBuffer.Type;
 import java.util.*;
 
-/** Local architectural reactions derived from the saved scene, not replacement prefab objects. */
 final class ReactiveFeatures {
     static void path(GladeArt art,Node root,GladeDesign.Item item,GladeDesign scene){
         var rules=SceneRules.of(scene);int index=0;

@@ -2,7 +2,6 @@ package vn.dreamhouse.glade;
 import com.jme3.math.*;
 import com.jme3.scene.*;
 
-/** Four sloping roof faces derived continuously from footprint and roof rise. */
 final class HipRoof {
  static void build(GladeArt art,Node parent,GladeDesign.Item item,float rise) {
   var form=item.form();float width=item.width()+.24f+form.roofLeft()+form.roofRight(),depth=item.depth()+.24f+form.roofFront()+form.roofBack();boolean swap=depth>width;

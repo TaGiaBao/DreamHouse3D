@@ -1,6 +1,5 @@
 package vn.dreamhouse.glade;
 import java.util.*;
-/** Shared, derived scene rules. Nothing here changes the player's saved objects. */
 final class SceneRules {
     private static final Map<GladeDesign,SceneRules> CACHE=new LinkedHashMap<>(){protected boolean removeEldestEntry(Map.Entry<GladeDesign,SceneRules> e){return size()>6;}};
     static SceneRules of(GladeDesign scene){return CACHE.computeIfAbsent(scene,key->new SceneRules(key,null));}

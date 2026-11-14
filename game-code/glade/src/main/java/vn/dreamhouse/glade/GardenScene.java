@@ -3,7 +3,6 @@ package vn.dreamhouse.glade;
 import java.util.*;
 import static vn.dreamhouse.glade.GladeDesign.*;
 
-/** An authored garden made from ordinary, editable and serializable player items. */
 final class GardenScene {
     static GladeDesign island() {
         var items = new ArrayList<Item>();
@@ -28,14 +27,12 @@ final class GardenScene {
         add(a,Kind.TOWER,.9f,-3.3f,2.5f,2.5f,5.5f,1.9f,stone);
         add(a,Kind.HOUSE,6,-1.6f,3.4f,3,2.4f,1.45f,cream);
         add(a,Kind.PAVILION,-.5f,-1.3f,2.1f,2.2f,2.4f,1.3f,cream);
-        // A raised, usable balcony and its columns remain separately editable.
         add(a,Kind.DECK,-2.8f,.12f,3.8f,1.4f,.18f,0,new Finish("wood","#b78e59","original",""));
         int balcony=a.size()-1;var b=a.get(balcony);a.set(balcony,new Item(b.id(),b.kind(),b.center(),b.width(),b.depth(),b.height(),false,List.of(),0,null,b.form().stilts(1.65f)));
         mounted(a,Kind.CHIMNEY_BRICK,0,-.30f,-.05f,1,.62f,.62f,1.25f);
         mounted(a,Kind.CHIMNEY_BRICK,3,.26f,-.10f,1,.50f,.50f,1);
         mounted(a,Kind.WINDOW_ARCH,0,.15f,.5f,.73f,.9f,.5f,1.05f);
         mounted(a,Kind.WINDOW_ARCH,0,-.20f,.2f,1,.8f,.5f,1);
-        // Soft, freely painted stream; its samples are saved, not a circular pond prefab.
         var stream=new ArrayList<Point>();for(int i=0;i<=90;i++){float t=i/90f;stream.add(new Point(-10.8f+21.6f*t,5.2f+(float)Math.sin(t*6.2f)*.75f));}
         a.add(new Item(a.size(),Kind.WATER,new Point(0,5.2f),21.6f,3.8f,1.05f,false,stream));
         var bridge=List.of(new Point(-1.2f,3.5f),new Point(-1.2f,6.9f));

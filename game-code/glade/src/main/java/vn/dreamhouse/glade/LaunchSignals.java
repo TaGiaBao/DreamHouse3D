@@ -4,7 +4,6 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
-/** Per-attempt readiness receipt. Never reports readiness just because a process exists. */
 final class LaunchSignals {
     static final String TOKEN_PROPERTY="dreamhouse.launchToken";
     static Path path(String token)throws IOException{
@@ -20,7 +19,6 @@ final class LaunchSignals {
                 for(int attempt=0;;attempt++){
                     try{PlayerFiles.move(temporary,destination);break;}
                     catch(AccessDeniedException busy){
-                        // A concurrent Windows reader can briefly hold the previous receipt open.
                         if(attempt==5)throw busy;
                         Thread.sleep(12L*(attempt+1));
                     }

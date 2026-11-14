@@ -4,7 +4,6 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
-/** One atomic .glade file per personal template; a damaged entry never blocks the other entries. */
 final class BlueprintShelf {
     static final int MAX_BYTES=2*1024*1024,MAX_ENTRIES=128;
     record Entry(String id,String name,BlueprintModule module){}

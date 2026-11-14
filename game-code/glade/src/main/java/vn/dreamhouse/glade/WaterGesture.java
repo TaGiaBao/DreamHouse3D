@@ -2,7 +2,6 @@ package vn.dreamhouse.glade;
 import java.util.*;
 import static vn.dreamhouse.glade.GladeDesign.*;
 
-/** One click or one continuous stroke is one saved, undoable water item. */
 final class WaterGesture {
     static final int VARIABLE_WIDTH=19;
     static Item draft(GladeDesign scene,List<Point> stroke,Point current,float radius,float lift){

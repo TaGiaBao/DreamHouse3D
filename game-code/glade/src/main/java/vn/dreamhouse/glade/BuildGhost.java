@@ -6,7 +6,6 @@ import com.jme3.material.*;
 import com.jme3.renderer.queue.RenderQueue;
 import java.util.*;
 
-/** A construction cage, never a saved structure and never part of world picking. */
 final class BuildGhost extends Node {
  enum State { READY, SNAPPED, BLOCKED }
  private final Material frame,footprint;

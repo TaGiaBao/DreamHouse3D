@@ -4,7 +4,6 @@ import com.jme3.math.*;
 import com.jme3.scene.*;
 import java.util.*;
 
-/** A shared roof envelope for touching rectangular blocks at the same storey. Blocks retain their IDs. */
 final class BlockFusion {
     private final GladeDesign design;
     private final Map<Long,List<GladeDesign.Item>> groups=new HashMap<>();
@@ -30,7 +29,6 @@ final class BlockFusion {
     private static int find(int[] parents,int x) {while(parents[x]!=x) {parents[x]=parents[parents[x]];x=parents[x];}return x;}
     private boolean touches(GladeDesign.Item a,GladeDesign.Item b) {
         if(Math.abs(design.top(a)-design.top(b))>.08f) return false;
-        // Test actual rotated footprints; AABBs alone join separated rotated houses.
         for(float angle:new float[]{a.rotation(),a.rotation()+90,b.rotation(),b.rotation()+90}){
             double t=Math.toRadians(angle);float ax=(float)Math.cos(t),az=-(float)Math.sin(t);
             float ra=projection(a,ax,az),rb=projection(b,ax,az);
@@ -59,8 +57,6 @@ final class BlockFusion {
     }
     private float envelope(List<GladeDesign.Item> group,float x,float z,float fallback) {
         float y=Float.NEGATIVE_INFINITY;for(var item:group)y=Math.max(y,height(item,x,z));if(Float.isFinite(y))return y;
-        // Every shared lattice vertex must get the same height, including just outside the eaves.
-        // A per-cell fallback gives adjacent triangles different endpoints and tears the roof open.
         float closest=Float.POSITIVE_INFINITY,result=fallback;
         var point=new GladeDesign.Point(x,z);
         for(var item:group){float lx=item.localX(point),lz=item.localZ(point),span=item.width()/2+.20f,depth=item.depth()/2+.20f;
@@ -76,7 +72,6 @@ final class BlockFusion {
         var vertices=new ArrayList<Float>();var normals=new ArrayList<Float>();var indices=new ArrayList<Integer>();
         var gableVertices=new ArrayList<Float>();var gableNormals=new ArrayList<Float>();var gableIndices=new ArrayList<Integer>();
         float step=Math.max(.22f,Math.max(item.width(),item.depth())/100);
-        // A common lattice avoids cracks where two roofs meet.
         step=Math.max(.22f,group.stream().map(roof->Math.max(roof.width(),roof.depth())).max(Float::compare).orElse(1f)/100);
         float base=design.placement(item).elevation();
         double angle=Math.toRadians(item.rotation());
@@ -95,7 +90,6 @@ final class BlockFusion {
                     if(owner(group,nx,nz)!=null) continue;
                     Vector3f p=side==0?a:side==1?d:side==2?b:c;
                     Vector3f q=side==0?c:side==1?b:side==2?a:d;
-                    // Strip order must face outward. The former p,q order pointed all gables inward.
                     quad(item,base,angle,q,p,new Vector3f(q.x,design.top(item),q.z),new Vector3f(p.x,design.top(item),p.z),gableVertices,gableNormals,gableIndices);
                 }
             }

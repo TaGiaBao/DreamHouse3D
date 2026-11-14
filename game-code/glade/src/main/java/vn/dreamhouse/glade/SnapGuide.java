@@ -6,7 +6,6 @@ import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.*;
 import java.util.*;
 
-/** White transient guides are never saved or included in object picking. */
 final class SnapGuide extends Node {
     private final Material material;
     private List<BuildSnap.Line> shown=List.of();

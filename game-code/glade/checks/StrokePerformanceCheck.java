@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Locale;
 import static vn.dreamhouse.glade.GladeDesign.*;
 
-/** Repeatable frame-time sample using the same live tools as the game. */
 class StrokePerformanceCheck extends ProceduralMechanicsCheck {
     public static void main(String[] args)throws Exception {
         var scene=switch(args[0]){

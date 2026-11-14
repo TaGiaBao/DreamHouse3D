@@ -6,7 +6,6 @@ import com.jme3.scene.*;
 import java.util.*;
 import java.nio.file.*;
 
-/** Real renderer, authored scene persistence and editable-scene smoke check. */
 class GardenStyleCheck extends ProceduralMechanicsCheck {
     public static void main(String[] args)throws Exception{
         var scene=GardenScene.create();var file=PlayerFiles.directory("checks").resolve("garden.glade");scene.save(file);

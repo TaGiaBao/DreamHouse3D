@@ -3,7 +3,6 @@ package vn.dreamhouse.glade;
 import javax.sound.sampled.*;
 import java.util.concurrent.Executors;
 
-/** Original PCM cues for the Swing launcher, played off its event thread. */
 final class LauncherAudio implements AutoCloseable {
     private static final int RATE=22050;
     private static final AudioFormat FORMAT=new AudioFormat(RATE,16,1,true,false);

@@ -7,7 +7,6 @@ import java.util.*;
 class FreeCameraAndFlattenCheck extends ProceduralMechanicsCheck {
  static Vector3f vector(String name)throws Exception{return ((Vector3f)field(name)).clone();}
  public static void main(String[] args)throws Exception {
-  // This is the exact former crash input: float subtraction produces 0.03999996, below the item minimum.
   ok(2.3f-(2.3f-.04f)<.04f,"original floating-point failure reproduced");
   app=new GladeApp();var settings=new AppSettings(true);settings.setResolution(1360,860);settings.setRenderer(AppSettings.LWJGL_OPENGL33);settings.setAudioRenderer(null);settings.setTitle("DreamHouse · Kiểm thử camera và ép phẳng");app.setSettings(settings);app.setShowSettings(false);app.setPauseOnLostFocus(false);app.start();
   try {engine(()->true);Thread.sleep(350);fixture(new GladeDesign(List.of(block(0,0,0,4,3,2.3f,1.4f)),2));esc();

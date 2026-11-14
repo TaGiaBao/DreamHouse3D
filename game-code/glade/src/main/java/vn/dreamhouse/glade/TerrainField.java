@@ -2,7 +2,6 @@ package vn.dreamhouse.glade;
 
 import java.util.*;
 
-/** Sparse, immutable sculpting data. Each brush stroke remains one undoable design edit. */
 final class TerrainField {
     static final float STEP=.75f;
     record Cell(int x,int z) {}

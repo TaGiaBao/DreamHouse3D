@@ -2,7 +2,6 @@ package vn.dreamhouse.glade;
 import com.jme3.scene.*;
 import com.jme3.math.*;
 import java.util.*;
-/** A single continuous surface cut from the union of a painted water stroke. */
 final class WaterMesh {
  static Geometry build(GladeArt art,GladeDesign.Item item,GladeDesign scene) {
   float radius=item.height(),step=Math.max(Math.max(.15f,radius/20),Math.max(item.width(),item.depth())/150);
@@ -43,7 +42,6 @@ final class WaterMesh {
   return result;
  }
 
- /** Follow the cursor with a flat ribbon. The finished stroke still uses the simulated shore. */
  static Geometry preview(GladeArt art,GladeDesign.Item item,GladeDesign scene) {
   var points=item.points();
   var mesh=new PlainStructure.Builder();

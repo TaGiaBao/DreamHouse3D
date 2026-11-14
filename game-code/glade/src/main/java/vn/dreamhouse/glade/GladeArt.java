@@ -51,7 +51,6 @@ final class GladeArt {
             var p=child.getLocalTranslation();
             child.move(0,design.terrain().height(p.x+design.land().centerX(),p.z+design.land().centerZ()),0);
         }
-        // Keep editable terrain/grass separate; batch only fixed scenery after height adjustment.
         var scenery=new Node("Trang trí thung lũng");
         for(var child:new ArrayList<>(land.getChildren())){child.removeFromParent();scenery.attachChild(child);}
         scenery.updateGeometricState();jme3tools.optimize.GeometryBatchFactory.optimize(scenery,false);land.attachChild(scenery);
@@ -271,7 +270,6 @@ final class GladeArt {
         if(!design.customRoof(item.id()) && !joinedRoof(item,design) && design.roofRise(item)>.02f) {
             buildingRoof(roofParts,item,design,true,brick);
             if(!brick && design.roofRise(item)>w*.25f) {
-                // Stepped Dutch-inspired gables, built separately at both ends of the ridge.
                 int steps=5;
                 for(int end:new int[]{-1,1}) for(int step=0;step<steps;step++) {
                     float sw=(w+0.12f)*(1-step/(float)steps);
@@ -281,7 +279,6 @@ final class GladeArt {
                     box(roofParts,sw+0.09f,0.055f,0.23f,0,y+sh/2,end*(d/2+0.35f),trim);
                 }
             } else if(brick && design.roofRise(item)>w*.25f) {
-                // A side-facing dormer emerges from the slope, rather than sitting on the ridge.
                 float dw=Math.min(1.05f,d*0.40f),scale=Math.min(1,w/2);
                 var dormer=new Node("Cửa áp mái");
                 box(dormer,dw,0.80f,0.70f,0,0.40f,-0.18f,trim);

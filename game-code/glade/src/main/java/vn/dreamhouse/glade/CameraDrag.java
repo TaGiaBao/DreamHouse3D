@@ -1,5 +1,4 @@
 package vn.dreamhouse.glade;
-/** Drag starts exactly at the press coordinate. Normal pointer mode avoids GLFW recenter jumps. */
 final class CameraDrag {
  enum Mode {NONE,ORBIT,PAN}
  record Delta(Mode mode,float x,float y) {}

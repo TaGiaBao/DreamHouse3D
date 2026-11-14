@@ -1,6 +1,5 @@
 package vn.dreamhouse.glade;
 import java.util.*;
-/** Catalog templates describe original procedural assets, not images copied from other games. */
 final class GladeCatalog {
  record Entry(String tool,String label,int variant){}
  static Entry e(String tool,String label){return new Entry(tool,label,0);}

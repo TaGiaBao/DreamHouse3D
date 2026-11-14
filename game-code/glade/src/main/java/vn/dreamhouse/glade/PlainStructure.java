@@ -3,7 +3,6 @@ import com.jme3.scene.*;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.math.*;
 import java.util.*;
-/** Bare structural solids: exposed walls only, with path-cut openings and material chosen separately. */
 final class PlainStructure {
     static boolean render(GladeArt art,Node node,GladeDesign.Item item,GladeDesign scene){
         if(item.kind()!=GladeDesign.Kind.PENTAGON && (item.form().finish().variant()!=18 || !item.kind().building() && item.kind()!=GladeDesign.Kind.DECK))return false;

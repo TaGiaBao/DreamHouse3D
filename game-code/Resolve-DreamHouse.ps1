@@ -1,5 +1,4 @@
-﻿# Use the bundled Windows PowerShell utility module even when called from another PowerShell version.
-Import-Module -Name (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
+﻿Import-Module -Name (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
 function Resolve-DreamHouseRelease {
     param([Parameter(Mandatory=$true)][string]$Root)
     $manifest = Join-Path $Root 'release\current.json'

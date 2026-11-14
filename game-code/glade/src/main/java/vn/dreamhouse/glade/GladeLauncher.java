@@ -8,7 +8,6 @@ import java.nio.file.*;
 import java.util.Arrays;
 import java.util.List;
 
-/** Java launcher shipped in the same portable executable as the game. */
 public final class GladeLauncher {
     private static GameSessionLock session;
     private static GameSessionLock launcherSession;

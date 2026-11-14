@@ -1,6 +1,5 @@
 package vn.dreamhouse.glade;
 
-/** Controlled subprocess for launch lifecycle checks; never renders or modifies a world. */
 class LauncherChildProbe {
     public static void main(String[]args)throws Exception{
         System.setProperty(LaunchSignals.TOKEN_PROPERTY,args[0]);System.setProperty("dreamhouse.userDir",new String(java.util.Base64.getUrlDecoder().decode(args[1]),java.nio.charset.StandardCharsets.UTF_8));String mode=args[2];

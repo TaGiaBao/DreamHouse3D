@@ -2,7 +2,6 @@ package vn.dreamhouse.glade;
 import com.jme3.math.Vector2f;
 import java.util.*;
 
-/** Convex polygon subtraction in a wall/floor plane; no voxel-sized missing wall fragments. */
 final class PolyCuts {
     static List<Vector2f> rectangle(float x0,float y0,float x1,float y1){return List.of(new Vector2f(x0,y0),new Vector2f(x1,y0),new Vector2f(x1,y1),new Vector2f(x0,y1));}
     static float side(Vector2f a,Vector2f b,Vector2f p){return (b.x-a.x)*(p.y-a.y)-(b.y-a.y)*(p.x-a.x);}

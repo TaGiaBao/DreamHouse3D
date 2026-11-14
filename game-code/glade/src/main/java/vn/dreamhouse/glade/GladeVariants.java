@@ -2,7 +2,6 @@ package vn.dreamhouse.glade;
 import com.jme3.scene.*;
 import com.jme3.math.*;
 import com.jme3.scene.shape.Cylinder;
-/** Procedural catalog variations and continuous upper/lower-bound craft forms. */
 final class GladeVariants {
  static boolean craft(GladeArt art,Node node,GladeDesign.Item item) {
   if(item.kind().stroke() || item.kind().mounted() || item.kind()==GladeDesign.Kind.WATER || item.kind()==GladeDesign.Kind.PENTAGON)return false;

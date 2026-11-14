@@ -2,7 +2,6 @@ package vn.dreamhouse.glade;
 import com.jme3.math.*;
 import java.util.*;
 
-/** Gridless, nearest-neighbor alignment. Preview and committed placement share this calculation. */
 final class BuildSnap {
     record Line(Vector3f a,Vector3f b){}
     record Result(GladeDesign.Point center,long neighbor,Float x,Float z,List<Line> lines,EdgePair edges){}

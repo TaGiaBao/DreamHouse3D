@@ -13,7 +13,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import static vn.dreamhouse.glade.GladeDesign.*;
 
-/** Real wall-clock render/edit soak in an isolated player directory; intentionally separate from quick regression. */
 class SessionSoakCheck extends ProceduralMechanicsCheck {
     static final List<Float> frameTimes=new ArrayList<>();
     static final AtomicBoolean diagnostic=new AtomicBoolean();

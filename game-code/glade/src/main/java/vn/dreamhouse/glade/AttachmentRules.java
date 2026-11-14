@@ -1,7 +1,6 @@
 package vn.dreamhouse.glade;
 import com.jme3.math.*;
 
-/** Preserve attachment data while its supporting face is temporarily absent or covered. */
 final class AttachmentRules {
     static boolean hidden(GladeDesign.Item part,GladeDesign scene){
         if(part.mount()==null)return false;
