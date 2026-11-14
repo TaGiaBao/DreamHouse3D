@@ -17,21 +17,3 @@ jobs:
         with:
           name: qa-results
           path: game-code/glade/test-results/**
-  windows-portable:
-    if: github.ref == 'refs/heads/feature/m2-m9-terrain' && github.event_name != 'pull_request'
-    needs: data-and-cache
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-      - name: Package DreamHouse Glade for Windows
-        shell: powershell
-        run: ./game-code/Build-DreamHouse.ps1
-      - uses: actions/upload-artifact@v4
-        with:
-          name: DreamHouse-Glade-Windows
-          path: game-code/release/build-*/bundled/DreamHouse/
-          if-no-files-found: error
