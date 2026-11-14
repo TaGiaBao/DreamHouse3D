@@ -14,7 +14,9 @@ class ProceduralMechanicsCheck extends InteractionExpansionCheck {
  static void scroll(int delta)throws Exception {engine(()->{var input=app.getInputManager();var gate=com.jme3.input.InputManager.class.getDeclaredField("eventsPermitted");gate.setAccessible(true);gate.setBoolean(input,true);try{input.onMouseMotionEvent(new com.jme3.input.event.MouseMotionEvent(800,440,0,0,delta,delta));}finally{gate.setBoolean(input,false);}return true;});Thread.sleep(150);}
  static void modelChecks()throws Exception {
   var forms=GladeCatalog.entries("architecture");
-  ok(forms.stream().anyMatch(e->e.tool().equals("PENTAGON")) && forms.stream().allMatch(e->GladeCatalog.finish(e).variant()==18),"library offers neutral forms including a pentagon");
+  ok(forms.stream().anyMatch(e->e.tool().equals("PENTAGON"))
+          && forms.stream().filter(e->e.variant()==0).allMatch(e->GladeCatalog.finish(e).variant()==18),"library retains neutral forms including a pentagon");
+  ok(forms.stream().anyMatch(e->e.tool().equals("HOUSE") && GladeCatalog.finish(e).variant()==GladeDesign.HILLSIDE_STYLE),"library offers a separate hillside house");
   var flat=new GladeDesign(List.of(source(0,0,0)),2);var water=WaterFlow.simulate(flat,flat.items().getFirst());ok(water.cells().size()>25 && water.cells().size()<200,"finite Minecraft-style spread");ok(water.at(.2f,.2f)!=null && water.at(10,10)==null,"flow from source, bounded lateral reach");
   var ridge=new TerrainField().brush(1.5f,0,1.5f,4,null);var scene=new GladeDesign(flat.items(),flat.land(),ridge);ok(WaterFlow.simulate(scene,scene.items().getFirst()).at(1.5f,0)==null,"water cannot climb high terrain");
   var hill=new TerrainField().brush(0,0,1.5f,2.8f,null);scene=new GladeDesign(flat.items(),flat.land(),hill);var downhill=WaterFlow.simulate(scene,scene.items().getFirst());ok(downhill.cells().values().stream().anyMatch(w->w.level()<1),"source runs down cliff and changes water level");
@@ -39,6 +41,16 @@ class ProceduralMechanicsCheck extends InteractionExpansionCheck {
    chord(com.jme3.input.KeyInput.KEY_Z);
    ok(design().attachedRoof(pentagon.id()).kind()==GladeDesign.Kind.ROOF_PYRAMID,"undo restores the previous roof");
    chord(com.jme3.input.KeyInput.KEY_Y);
+   clickRaw("palette");
+   click(new Vector3f(pentagon.center().x(),1.4f,pentagon.center().z()+pentagon.depth()/2));
+   clickRaw("paintStyle:east");
+   ok(design().hillside(item(pentagon.id())) && design().attachedRoof(pentagon.id()).kind()==GladeDesign.Kind.ROOF_CURVED
+           && item(pentagon.id()).form().finish().roofMaterial().equals("slate"),"eastern style changes shape and finish");
+   clickRaw("paintStyle:west");
+   ok(!design().hillside(item(pentagon.id())) && design().attachedRoof(pentagon.id()).kind()==GladeDesign.Kind.ROOF_TILE,"western style applies a gable roof");
+   chord(com.jme3.input.KeyInput.KEY_Z);
+   ok(design().attachedRoof(pentagon.id()).kind()==GladeDesign.Kind.ROOF_CURVED
+           && item(pentagon.id()).form().finish().roofMaterial().equals("slate"),"one undo restores curved roof and finish");
    var polygonFile=PlayerFiles.directory("checks").resolve("polygon-roof.glade");design().save(polygonFile);
    ok(GladeDesign.load(polygonFile).items().equals(design().items()),"pentagon and attached roof survive reopening");
  }

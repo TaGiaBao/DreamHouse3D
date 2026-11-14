@@ -64,7 +64,8 @@ final class StructureShell {
             float t;if(da*db<=0)t=da/(da-db);else if(Math.min(Math.abs(da),Math.abs(db))<.55f)t=Math.abs(da)<Math.abs(db)?0:1;else continue;
             float x=a.x()+(b.x()-a.x())*t,z=a.z()+(b.z()-a.z())*t,u=(x-origin.x)*tangent.x+(z-origin.z)*tangent.z;
             if(Math.abs(u)>face.span/2+.55f || entrances.stream().anyMatch(old->Math.abs(old-u)<.30f))continue;
-            float walkLevel=scene.terrain().height(x,z)+.03f;Float water=SceneRules.of(scene).water(x+normal.x*.25f,z+normal.z*.25f);if(water!=null)walkLevel=Math.max(walkLevel,water+.18f);
+            var rules=SceneRules.of(scene);
+            float walkLevel=rules.walkSurface(x,z)+.03f;Float water=rules.water(x+normal.x*.25f,z+normal.z*.25f);if(water!=null)walkLevel=Math.max(walkLevel,water+.18f);
             if(Math.abs(elevation-walkLevel)>.65f)continue;
             entrances.add(u);cuts.add(arch(u,0,1.12f,Math.min(2.1f,h*.9f)));
         }
@@ -114,11 +115,24 @@ final class StructureShell {
         if(item.kind()!=GladeDesign.Kind.TOWER)return PolyCuts.rectangle(-item.width()/2,-item.depth()/2,item.width()/2,item.depth()/2);
         var polygon=new ArrayList<Vector2f>();for(int i=0;i<48;i++){float a=i*FastMath.TWO_PI/48;polygon.add(new Vector2f(FastMath.cos(a)*item.width()/2,FastMath.sin(a)*item.depth()/2));}return polygon;
     }
+    static boolean overlapsFootprint(GladeDesign.Item first,GladeDesign.Item second){
+        if(Math.abs(first.center().x()-second.center().x())>=first.halfWidth()+second.halfWidth()
+                || Math.abs(first.center().z()-second.center().z())>=first.halfDepth()+second.halfDepth())return false;
+        double angle=Math.toRadians(second.rotation());
+        float cos=(float)Math.cos(angle),sin=(float)Math.sin(angle);
+        var local=new ArrayList<Vector2f>();
+        for(var vertex:footprint(second)){
+            var world=new GladeDesign.Point(second.center().x()+cos*vertex.x+sin*vertex.y,
+                    second.center().z()-sin*vertex.x+cos*vertex.y);
+            local.add(new Vector2f(first.localX(world),first.localZ(world)));
+        }
+        return Math.abs(PolyCuts.area(PolyCuts.intersection(footprint(first),local)))>.0001f;
+    }
     private static void cap(PlainStructure.Builder mesh,GladeDesign.Item host,GladeDesign scene,boolean top){
         float y=top?host.height():0,worldY=scene.placement(host).elevation()+y;List<List<Vector2f>> fragments=new ArrayList<>();fragments.add(footprint(host));
         for(var other:scene.items())if(other.id()!=host.id() && solid(other)){
             float low=scene.placement(other).elevation(),high=low+other.height();boolean interior=worldY>low+.001f && worldY<high-.001f;
-            boolean stacked=top?other.form().support()==host.id() && Math.abs(worldY-low)<.002f:host.form().support()==other.id() && Math.abs(worldY-high)<.002f;
+            boolean stacked=top?other.form().support()>=0 && Math.abs(worldY-low)<.002f:host.form().support()>=0 && Math.abs(worldY-high)<.002f;
             boolean duplicate=other.id()<host.id() && Math.abs(worldY-(top?high:low))<.002f;
             if(!interior && !stacked && !duplicate)continue;
             var cut=new ArrayList<Vector2f>();for(var p:footprint(other)){var wp=world(other,scene,new Vector3f(p.x,0,p.y));var point=new GladeDesign.Point(wp.x,wp.z);cut.add(new Vector2f(host.localX(point),host.localZ(point)));}fragments=PolyCuts.subtract(fragments,cut);

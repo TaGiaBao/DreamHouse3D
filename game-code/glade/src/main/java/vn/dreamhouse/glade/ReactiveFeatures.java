@@ -12,20 +12,27 @@ final class ReactiveFeatures {
         boolean ribbon=PathSurface.ribbon(item);
         boolean[] flat=new boolean[item.points().size()];
         float width=PathSurface.width(item);
+        var buildings=scene.items().stream().filter(part->part.kind().building())
+                .map(part->Map.entry(part,scene.placement(part))).toList();
         for(var p:item.points()){
-            boolean inside=false;for(var house:scene.items())if(house.kind().building() && SceneRules.contains(house,p.x(),p.z(),0)){inside=true;break;}if(inside){index++;continue;}
+            float ground=rules.walkSurface(p.x(),p.z());
+            boolean inside=false;for(var entry:buildings)if(SceneRules.contains(entry.getKey(),p.x(),p.z(),0)){
+                var house=entry.getKey();
+                float base=entry.getValue().elevation();
+                if(ground>=base-.10f && ground<base+house.height()-.05f){inside=true;break;}
+            }if(inside){index++;continue;}
             var next=item.points().get(Math.min(item.points().size()-1,index+1));var prev=item.points().get(Math.max(0,index-1));
             float dx=next.x()-prev.x(),dz=next.z()-prev.z(),length=(float)Math.hypot(dx,dz);if(length<.01f){dx=0;dz=1;length=1;}
-            float yaw=FastMath.atan2(dx,dz),ground=scene.terrain().height(p.x(),p.z());Float water=rules.water(p.x(),p.z());
-            float slope=Math.abs(scene.terrain().height(next.x(),next.z())-scene.terrain().height(prev.x(),prev.z()))/Math.max(.1f,length);
+            float yaw=FastMath.atan2(dx,dz);Float water=rules.water(p.x(),p.z());
+            float slope=Math.abs(rules.walkSurface(next.x(),next.z())-rules.walkSurface(prev.x(),prev.z()))/Math.max(.1f,length);
             if(ribbon && (water==null || water<=ground+.025f) && slope<=.32f){flat[index++]=true;continue;}
             var group=new Node("Đường thích ứng");group.setUserData("worldHeight",true);root.attachChild(group);
             if(water!=null && water>ground+.025f){
-                float y=water+.18f;var board=art.box(group,.88f*width,masonry?.16f:.10f,.24f,p.x(),y-(masonry?.08f:.05f),p.z(),masonry?masonryColor:"#c5a574");board.rotate(0,yaw,0);board.setUserData("wallSurface",true);group.setUserData("proceduralFeature","bridge");group.setUserData("bridgeMaterial",masonry?"stone":"wood");
+                float y=water+.18f;var board=art.box(group,.88f*width,masonry?.16f:.10f,.24f,p.x(),y-(masonry?.08f:.05f),p.z(),masonry?masonryColor:"#c5a574");board.rotate(0,yaw,0);board.setUserData("wallSurface",true);board.setUserData("walkFloor",true);group.setUserData("proceduralFeature","bridge");group.setUserData("bridgeMaterial",masonry?"stone":"wood");
                 if(index%6==0)for(int side:new int[]{-1,1}){float x=p.x()+FastMath.cos(yaw)*side*.43f*width,z=p.z()-FastMath.sin(yaw)*side*.43f*width;float floor=scene.terrain().height(x,z);art.box(group,masonry?.20f:.10f,Math.max(.08f,y-floor),masonry?.20f:.10f,x,(y+floor)/2,z,masonry?masonryColor:"#9a805c").setUserData("wallSurface",true);if(!masonry)art.box(group,.09f,.60f,.09f,x,y+.30f,z,"#bda276").setUserData("wallSurface",true);}
                 if(masonry)for(int side:new int[]{-1,1}){float x=p.x()+FastMath.cos(yaw)*side*.46f*width,z=p.z()-FastMath.sin(yaw)*side*.46f*width;var rail=art.box(group,.13f,.40f,.25f,x,y+.20f,z,masonryColor);rail.rotate(0,yaw,0);rail.setUserData("wallSurface",true);}
             }else{
-                if(slope>.32f){float level=(float)Math.ceil(ground/.16f)*.16f+.03f;var step=art.box(group,.85f*width,.17f,.28f,p.x(),level-.085f,p.z(),style.equals("wood")?"#c5a574":"#c6bda7");step.rotate(0,yaw,0);step.setUserData("wallSurface",true);group.setUserData("proceduralFeature","stairs");group.setUserData("stepMaterial",style.equals("wood")?"wood":"stone");}
+                if(slope>.32f){float level=(float)Math.ceil(ground/.16f)*.16f+.03f;var step=art.box(group,.85f*width,.17f,.28f,p.x(),level-.085f,p.z(),style.equals("wood")?"#c5a574":"#c6bda7");step.rotate(0,yaw,0);step.setUserData("wallSurface",true);step.setUserData("walkFloor",true);group.setUserData("proceduralFeature","stairs");group.setUserData("stepMaterial",style.equals("wood")?"wood":"stone");}
                 else for(int side:new int[]{-1,1}){var stone=art.sphere(group,.19f,p.x()+FastMath.cos(yaw)*side*.18f,ground+.025f,p.z()-FastMath.sin(yaw)*side*.18f,item.form().finish().variant()==1?"#c3987c":item.form().finish().variant()==2?"#a3ada8":"#c9c0a4");stone.setLocalScale(1.1f,.16f,.8f);stone.rotate(0,yaw,0);stone.setUserData("wallSurface",true);}
             }index++;
         }

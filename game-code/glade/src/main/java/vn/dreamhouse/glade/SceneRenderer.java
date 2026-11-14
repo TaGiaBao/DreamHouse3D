@@ -4,7 +4,7 @@ import java.util.*;
 
 final class SceneRenderer {
     private record Signature(TerrainField terrain,LandBounds land,List<GladeDesign.Item> buildings,List<GladeDesign.Item> paths,List<GladeDesign.Item> flora,List<GladeDesign.Item> mounts){
-        static Signature of(GladeDesign scene){return new Signature(scene.terrain(),scene.land(),filter(scene,i->i.kind().building() || i.kind()==GladeDesign.Kind.DECK || i.form().support()>=0),filter(scene,i->i.kind()==GladeDesign.Kind.PATH),filter(scene,i->i.kind()==GladeDesign.Kind.TREE || i.kind()==GladeDesign.Kind.FLOWERS || i.kind()==GladeDesign.Kind.HEDGE),filter(scene,i->i.mount()!=null));}
+        static Signature of(GladeDesign scene){return new Signature(scene.terrain(),scene.land(),filter(scene,i->i.kind().building() || i.kind()==GladeDesign.Kind.DECK || i.form().support()>=0 || i.kind()==GladeDesign.Kind.STAIRS_STONE || i.kind()==GladeDesign.Kind.STAIRS_WOOD),filter(scene,i->i.kind()==GladeDesign.Kind.PATH),filter(scene,i->i.kind()==GladeDesign.Kind.TREE || i.kind()==GladeDesign.Kind.FLOWERS || i.kind()==GladeDesign.Kind.HEDGE),filter(scene,i->i.mount()!=null));}
         static List<GladeDesign.Item> filter(GladeDesign scene,java.util.function.Predicate<GladeDesign.Item> filter){return scene.items().stream().filter(filter).toList();}
     }
     private record Cached(GladeDesign.Item item,GladeDesign.Placement placement,Node node,WaterFlow.Result flow){}
@@ -52,7 +52,7 @@ final class SceneRenderer {
             var flow=rules.flows.get(item.id());
             if(item.kind().building())stable=structure && flora && mounts && unchangedNear(item,changedWater)
                     && changedRoads.stream().noneMatch(area->area.overlaps(item));
-            else if(item.kind()==GladeDesign.Kind.DECK)stable=item.form().finish().variant()==18
+            else if(item.kind()==GladeDesign.Kind.DECK)stable=item.form().finish().variant()==18 || item.stonePlatform()
                 ? structure && mounts && (dry || unchangedNear(item,changedWater))
                     && changedRoads.stream().noneMatch(area->area.overlaps(item))
                 : ground && (dry || unchangedNear(item,changedWater));
@@ -60,6 +60,7 @@ final class SceneRenderer {
             else if(item.kind()==GladeDesign.Kind.WATER)stable=flow!=null?ground && old!=null && old.flow()==flow:ground && roads;
             else if(item.kind()==GladeDesign.Kind.PATH)stable=structure && (water || item.points().stream()
                     .allMatch(p->Objects.equals(rules.water(p.x(),p.z()),previousRules.water(p.x(),p.z()))));
+            else if(item.kind()==GladeDesign.Kind.BRIDGE)stable=structure;
             else if(item.kind().wallStroke())stable=structure && roads;
             Node node;
             if(stable && old!=null && old.item().equals(item) && old.placement().equals(placement)){node=old.node();reused++;}

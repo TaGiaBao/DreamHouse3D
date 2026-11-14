@@ -18,11 +18,8 @@ final class GladeArt {
         @Override protected boolean removeEldestEntry(Map.Entry<String,Mesh> eldest) { return size()>384; }
     };
     private final Random random=new Random(48);
-    private GladeDesign fusionDesign;
-    private BlockFusion fusion;
     boolean joinedRoof(GladeDesign.Item item,GladeDesign design) {
-        if(fusionDesign!=design) {fusionDesign=design;fusion=new BlockFusion(design);}
-        return fusion.joined(item.id());
+        return design.roofFusion().joined(item.id());
     }
 
     GladeArt(AssetManager assets) { this.assets=assets; }
@@ -96,7 +93,6 @@ final class GladeArt {
 
     Node render(GladeDesign.Item item,GladeDesign design) {
         if(item.kind()==GladeDesign.Kind.PATH)return renderPath(item,design);
-        joinedRoof(item,design);
         var node=new Node(item.kind().name());
         node.setUserData("itemId",item.id());
         if(AttachmentRules.hidden(item,design)){node.setUserData("hiddenAttachment",true);return node;}
@@ -107,7 +103,7 @@ final class GladeArt {
             case CANAL_HOUSE, BRICK_HOUSE -> urbanHouse(node,item,design,item.kind()==GladeDesign.Kind.BRICK_HOUSE);
             case TOWER -> tower(node,item,design);
             case PAVILION -> pavilion(node,item,design);
-            case BRIDGE -> bridge(node,item);
+            case BRIDGE -> bridge(node,item,design);
             case WALL -> wall(node,item,design);
             case FENCE -> fence(node,item,design);
             case TREE -> {
@@ -130,7 +126,14 @@ final class GladeArt {
             default -> new GladeParts(this).render(node,item,design);
         }
         if(!crafted) GladeVariants.apply(this,node,item);
-        if(fusion.joined(item.id())) {var joined=fusion.mesh(this,item);if(joined!=null){joined.depthFirstTraversal(part->{if(part instanceof Geometry && !Boolean.TRUE.equals(part.getUserData("wallSurface")))part.setUserData("roofSurface",true);});node.attachChild(joined);}}
+        boolean hasJoinedRoof=item.kind().roofHost() && joinedRoof(item,design);
+        if(hasJoinedRoof) {
+            var joined=design.roofFusion().mesh(this,item);
+            if(joined!=null){
+                joined.depthFirstTraversal(part->{if(part instanceof Geometry && !Boolean.TRUE.equals(part.getUserData("wallSurface")))part.setUserData("roofSurface",true);});
+                node.attachChild(joined);
+            }
+        }
         if(item.kind()==GladeDesign.Kind.WALL || item.kind()==GladeDesign.Kind.BRICK_WALL || item.kind()==GladeDesign.Kind.TIMBER_WALL || item.kind()==GladeDesign.Kind.FENCE)
             node.depthFirstTraversal(part->{if(part instanceof Geometry)part.setUserData("wallSurface",true);});
         if(Set.of(GladeDesign.Kind.DECK,GladeDesign.Kind.PERGOLA,GladeDesign.Kind.BENCH,GladeDesign.Kind.STAIRS_WOOD,GladeDesign.Kind.STAIRS_STONE).contains(item.kind()))
@@ -139,7 +142,14 @@ final class GladeArt {
         if(item.kind().roof() && item.mount()!=null) finish=design.items().stream().filter(host->host.id()==item.mount().hostId()).findFirst().orElseThrow().form().finish();
         if(item.kind().building())ScenicDetails.house(this,node,item,design);
         GladePaint.apply(this,node,finish);
+        var attachedRoof=item.kind().roofHost()?design.attachedRoof(item.id()):null;
+        if((design.hillside(item) || attachedRoof!=null && attachedRoof.kind()==GladeDesign.Kind.ROOF_CURVED)
+                && item.kind()!=GladeDesign.Kind.PENTAGON)
+            curvedRoofFrame(node,item,design);
+        else if(item.kind()==GladeDesign.Kind.HOUSE && finish.variant()==18 && (hasJoinedRoof || design.hasUpper(item.id()) || item.form().support()>=0))
+            streetFacade(node,item,design);
         ReactiveFeatures.decorate(this,node,item,design);
+        PlainStructure.terraceRail(this,node,item,design);
         if(item.kind().chimney())ScenicDetails.smoke(this,node,item.height());
         if(item.kind().roof() || item.kind().chimney()) node.setUserData("roofPart",true);
         if(!item.kind().stroke()) {
@@ -162,6 +172,58 @@ final class GladeArt {
         node.setShadowMode(item.kind()==GladeDesign.Kind.FLOWERS
             ?RenderQueue.ShadowMode.Receive:RenderQueue.ShadowMode.CastAndReceive);
         return node;
+    }
+
+    private void curvedRoofFrame(Node node,GladeDesign.Item item,GladeDesign design){
+        if(item.height()<=.4f)return;
+        float x=item.width()/2,z=item.depth()/2,h=item.height();
+        for(int side:new int[]{-1,1}){
+            for(int end:new int[]{-1,1}){
+                float px=side*x,pz=end*z;
+                if(!StructureShell.coveredDetail(item,design,new Vector3f(px,h/2,pz)))
+                    box(node,.14f,h,.14f,px,h/2,pz,"#4c342a");
+            }
+            if(!StructureShell.coveredDetail(item,design,new Vector3f(0,h-.1f,side*z)))
+                box(node,item.width(),.16f,.17f,0,h-.1f,side*z,"#594033");
+            if(!StructureShell.coveredDetail(item,design,new Vector3f(side*x,h-.1f,0)))
+                box(node,.17f,.16f,item.depth(),side*x,h-.1f,0,"#594033");
+        }
+        if(design.hillside(item) && h>1.6f){
+            int bays=Math.clamp((int)(item.width()/2f),1,5);
+            for(int i=0;i<bays;i++){
+                float px=((i+.5f)/bays-.5f)*item.width();
+                var hook=new Vector3f(px,h-.18f,z+.12f);
+                if(StructureShell.coveredDetail(item,design,hook))continue;
+                box(node,.026f,.14f,.026f,px,h-.17f,z+.18f,"#4c342a");
+                var lantern=sphere(node,.095f,px,h-.31f,z+.18f,"#ce492c");
+                lantern.setLocalScale(1,1.18f,1);
+                var lit=lantern.getMaterial().clone();
+                lit.setColor("GlowColor",new ColorRGBA(.54f,.09f,.025f,1));
+                lantern.setMaterial(lit);
+            }
+        }
+    }
+
+    private void streetFacade(Node node,GladeDesign.Item item,GladeDesign design){
+        if(item.height()<1.55f)return;
+        var facade=new Node("Mặt tiền Vieille Ville");
+        int bays=Math.clamp((int)(item.width()/.95f),1,16);
+        float y=item.height()*.60f,z=item.depth()/2+.025f;
+        var shutters=new String[]{"#6b7562","#6d7b82","#837363","#627a73"};
+        String color=shutters[(int)Math.floorMod(item.id(),shutters.length)];
+        for(int side:new int[]{-1,1})for(int i=0;i<bays;i++){
+            float x=((i+.5f)/bays-.5f)*item.width();
+            if(StructureShell.coveredDetail(item,design,new Vector3f(x,y,side*z))
+                    || design.blocksOpening(item,x,side*z,y,.31f))continue;
+            box(facade,.34f,.58f,.055f,x,y,side*z,"#4a5153");
+            box(facade,.24f,.44f,.065f,x,y,side*z,"#92acb0");
+            for(int leaf:new int[]{-1,1})box(facade,.12f,.55f,.057f,x+leaf*.23f,y,side*z,color);
+            box(facade,.53f,.07f,.15f,x,y-.32f,side*z,"#aa9a83");
+        }
+        if(facade.getQuantity()==0)return;
+        facade.updateGeometricState();
+        jme3tools.optimize.GeometryBatchFactory.optimize(facade,false);
+        node.attachChild(facade);
     }
 
     private void house(Node node,GladeDesign.Item item,GladeDesign design) {
@@ -384,18 +446,20 @@ final class GladeArt {
         node.setLocalTranslation(item.center().x(),0,item.center().z());
     }
 
-    private void bridge(Node node,GladeDesign.Item item) {
+    private void bridge(Node node,GladeDesign.Item item,GladeDesign design) {
         var a=item.points().getFirst();
         var b=item.points().getLast();
         float length=Math.max(0.30f,a.distance(b));
         float yaw=FastMath.atan2(b.x()-a.x(),b.z()-a.z());
         int planks=Math.max(3,(int)Math.ceil(length/0.23f));
         float width=Math.max(1,Math.min(3,item.width()));
+        var rules=SceneRules.of(design);
+        float start=rules.walkSurface(a.x(),a.z()),end=rules.walkSurface(b.x(),b.z());
         Vector3f previousLeft=null,previousRight=null;
         for(int i=0;i<=planks;i++) {
             float t=(float)i/planks;
-            float y=0.16f+FastMath.sin(t*FastMath.PI)*item.height()*0.45f;
-            box(node,width,0.10f,length/planks+0.025f,0,y,t*length,"#b58a5a");
+            float y=FastMath.interpolateLinear(t,start,end)+0.16f+FastMath.sin(t*FastMath.PI)*item.height()*0.45f;
+            box(node,width,0.10f,length/planks+0.025f,0,y,t*length,"#b58a5a").setUserData("walkFloor",true);
             if(i%3==0 || i==planks) {
                 var left=new Vector3f(-width/2,y+0.68f,t*length);
                 var right=new Vector3f(width/2,y+0.68f,t*length);

@@ -89,10 +89,10 @@ final class PathSurface {
     private static void write(GladeDesign scene,float x,float z,int vertex,float[] pos,float[] normals) {
         x=Math.max(scene.land().minX(),Math.min(scene.land().maxX(),x));
         z=Math.max(scene.land().minZ(),Math.min(scene.land().maxZ(),z));
-        var field=scene.terrain();
-        int at=vertex*3;pos[at]=x;pos[at+1]=field.height(x,z)+.035f;pos[at+2]=z;
-        var n=new Vector3f(field.height(x-.12f,z)-field.height(x+.12f,z),.24f,
-                field.height(x,z-.12f)-field.height(x,z+.12f)).normalizeLocal();
+        var rules=SceneRules.of(scene);
+        int at=vertex*3;pos[at]=x;pos[at+1]=rules.walkSurface(x,z)+.035f;pos[at+2]=z;
+        var n=new Vector3f(rules.walkSurface(x-.12f,z)-rules.walkSurface(x+.12f,z),.24f,
+                rules.walkSurface(x,z-.12f)-rules.walkSurface(x,z+.12f)).normalizeLocal();
         normals[at]=n.x;normals[at+1]=n.y;normals[at+2]=n.z;
     }
 

@@ -32,12 +32,24 @@ final class ArchitectureJoin {
             if(bounds instanceof BoundingBox box && (Math.abs(box.getCenter().x-other.center().x())>box.getXExtent()+xExtent
                     || Math.abs(box.getCenter().z-other.center().z())>box.getZExtent()+zExtent))continue;
             var placement=scene.placement(other);
+            boolean hillside=scene.hillside(other) && attached==null && !scene.customRoof(other.id()) && scene.roofRise(other)>.02f;
             var anchor=new BoundingBox(new Vector3f(placement.center().x(),placement.elevation()+other.height()/2,placement.center().z()),
                     xExtent,other.height()/2+.003f,zExtent);
             if(bounds.intersects(anchor))volumes.add(body(other,scene));
-            if(attached!=null && !scene.hasUpper(other.id()) && other.height()>.12f){
-                var candidate=profile(other,attached.kind(),attached.height(),scene.placement(attached),0,attached.id()<host.id());
-                if(bounds.intersects(candidate.bounds()))volumes.add(candidate);
+            if(hillside || attached!=null && !scene.hasUpper(other.id()) && other.height()>.12f){
+                var at=hillside?placement:scene.placement(attached);
+                boolean priority=(hillside?other.id():attached.id())<host.id();
+                if(hillside || attached.kind()==GladeDesign.Kind.ROOF_CURVED){
+                    float height=hillside?scene.roofRise(other):attached.height();
+                    float base=hillside?other.height():0;
+                    for(int band=0;band<RoofProfiles.CURVED_BANDS;band++){
+                        var candidate=profile(other,GladeDesign.Kind.ROOF_CURVED,height,at,base,priority,band);
+                        if(bounds.intersects(candidate.bounds()))volumes.add(candidate);
+                    }
+                }else{
+                    var candidate=profile(other,attached.kind(),attached.height(),at,0,priority);
+                    if(bounds.intersects(candidate.bounds()))volumes.add(candidate);
+                }
             }else if(scene.roofRise(other)>.02f && !scene.customRoof(other.id())){
                 if(other.kind()==GladeDesign.Kind.PENTAGON){
                     var candidate=profile(other,GladeDesign.Kind.ROOF_PENTAGON,scene.roofRise(other),placement,other.height(),other.id()<host.id());
@@ -58,6 +70,9 @@ final class ArchitectureJoin {
         var at=scene.placement(item);return new Volume(worldPlanes(at,local),new BoundingBox(new Vector3f(at.center().x(),at.elevation()+top/2,at.center().z()),item.halfWidth()+.35f,top/2+.02f,item.halfDepth()+.35f));
     }
     private static Volume profile(GladeDesign.Item owner,GladeDesign.Kind kind,float height,GladeDesign.Placement placement,float base,boolean priority){
+        return profile(owner,kind,height,placement,base,priority,-1);
+    }
+    private static Volume profile(GladeDesign.Item owner,GladeDesign.Kind kind,float height,GladeDesign.Placement placement,float base,boolean priority,int band){
         var outline=RoofProfiles.outline(kind,owner);
         var form=owner.form();
         float x=(form.roofRight()-form.roofLeft())/2,z=(form.roofFront()-form.roofBack())/2;
@@ -66,7 +81,16 @@ final class ArchitectureJoin {
         boolean flat=kind==GladeDesign.Kind.ROOF_FLAT;
         var shed=kind==GladeDesign.Kind.ROOF_SHED?RoofProfiles.shed(outline,rise):null;
         var planes=new ArrayList<Vector4f>();
-        planes.add(new Vector4f(0,-1,0,base-bias));
+        float slopeRise=rise,eave=0,low=0,high=rise;
+        if(band>=0){
+            low=RoofProfiles.curvedHeight(band,rise);
+            high=RoofProfiles.curvedHeight(band+1,rise);
+            slopeRise=(high-low)*RoofProfiles.CURVED_BANDS;
+            eave=low-slopeRise*band/RoofProfiles.CURVED_BANDS;
+            detailClearance=Math.min(detailClearance,.035f);
+            planes.add(new Vector4f(0,1,0,-base-high-.002f-detailClearance));
+        }
+        planes.add(new Vector4f(0,-1,0,base+low-(band>0?.002f:bias)));
         if(flat)planes.add(new Vector4f(0,1,0,-base-rise-bias-detailClearance));
         if(shed!=null)planes.add(new Vector4f(0,1,shed.slope(),-base-(shed.front()+z)*shed.slope()-bias-detailClearance));
         float radius=0;
@@ -74,12 +98,12 @@ final class ArchitectureJoin {
             var a=outline.get(i);
             var edge=new Pentagon.Edge(a,outline.get((i+1)%outline.size()));
             var n=edge.normal();float distance=n.dot(a);
-            float slope=flat || shed!=null?0:distance/rise;
-            planes.add(new Vector4f(n.x,slope,n.y,-distance-n.x*x-n.y*z-slope*(base+detailClearance)-bias));
+            float slope=flat || shed!=null?0:distance/slopeRise;
+            planes.add(new Vector4f(n.x,slope,n.y,-distance-n.x*x-n.y*z-slope*(base+eave+detailClearance)-bias));
             radius=Math.max(radius,(float)Math.hypot(a.x+x,a.y+z));
         }
-        var center=new Vector3f(placement.center().x(),placement.elevation()+base+rise/2,placement.center().z());
-        return new Volume(worldPlanes(placement,planes),new BoundingBox(center,radius+.025f,rise/2+RoofDetail.MAX_RISE,radius+.025f));
+        var center=new Vector3f(placement.center().x(),placement.elevation()+base+(low+high)/2,placement.center().z());
+        return new Volume(worldPlanes(placement,planes),new BoundingBox(center,radius+.025f,(high-low)/2+RoofDetail.MAX_RISE,radius+.025f));
     }
     private static Volume body(GladeDesign.Item item,GladeDesign scene){
         var p=new ArrayList<Vector4f>();p.add(new Vector4f(0,-1,0,-.003f));p.add(new Vector4f(0,1,0,-item.height()-.003f));

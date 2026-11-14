@@ -9,7 +9,8 @@ final class BlockFusion {
     private final Map<Long,List<GladeDesign.Item>> groups=new HashMap<>();
     BlockFusion(GladeDesign design) {
         this.design=design;
-        var roofs=design.items().stream().filter(item->item.kind().roofHost() && item.kind()!=GladeDesign.Kind.PENTAGON
+        var roofs=design.items().stream().filter(item->item.kind().roofHost() && item.kind()!=GladeDesign.Kind.PENTAGON && !design.hillside(item)
+                && !onStonePlatform(item)
                 && item.form().roofLeft()==0 && item.form().roofRight()==0 && item.form().roofFront()==0 && item.form().roofBack()==0 && design.roofRise(item)>.02f && !design.customRoof(item.id())).toList();
         int[] parents=new int[roofs.size()];for(int i=0;i<parents.length;i++) parents[i]=i;
         var bins=new HashMap<String,List<Integer>>();var checked=new HashSet<Long>();
@@ -27,6 +28,14 @@ final class BlockFusion {
         for(var group:components.values()) if(group.size()>1) for(var item:group) groups.put(item.id(),group);
     }
     private static int find(int[] parents,int x) {while(parents[x]!=x) {parents[x]=parents[parents[x]];x=parents[x];}return x;}
+    private boolean onStonePlatform(GladeDesign.Item item){
+        for(long parent=item.form().support();parent>=0;){
+            var support=design.item(parent);
+            if(support.stonePlatform())return true;
+            parent=support.form().support();
+        }
+        return false;
+    }
     private boolean touches(GladeDesign.Item a,GladeDesign.Item b) {
         if(Math.abs(design.top(a)-design.top(b))>.08f) return false;
         for(float angle:new float[]{a.rotation(),a.rotation()+90,b.rotation(),b.rotation()+90}){

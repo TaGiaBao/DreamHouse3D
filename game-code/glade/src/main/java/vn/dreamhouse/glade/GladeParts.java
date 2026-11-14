@@ -23,7 +23,7 @@ final class GladeParts {
                     shape.setLocalScale(1,h/.5f,1);node.attachChild(shape);
                 }
             }
-            case ROOF_FLAT,ROOF_PYRAMID,ROOF_PENTAGON,ROOF_SHED -> {
+            case ROOF_FLAT,ROOF_PYRAMID,ROOF_PENTAGON,ROOF_SHED,ROOF_CURVED -> {
                 var host=design.items().stream().filter(part->part.id()==item.mount().hostId()).findFirst().orElseThrow();
                 if(!design.hasUpper(host.id()))RoofProfiles.build(art,node,item.kind(),host,h);
             }
@@ -113,7 +113,7 @@ final class GladeParts {
     }
 
     private void stairs(Node node,float w,float d,float h,boolean wood) {
-        int steps=Math.max(3,Math.min(36,(int)Math.ceil(h/.19f)));
+        int steps=WalkController.stairSteps(h);
         for(int i=0;i<steps;i++) {
             float top=(i+1)*h/steps,z=d/2-(i+.5f)*d/steps;
             art.box(node,w,wood?.12f:top,d/steps+.025f,0,wood?top-.06f:top/2,z,wood?"#c29a67":"#b9b49b");

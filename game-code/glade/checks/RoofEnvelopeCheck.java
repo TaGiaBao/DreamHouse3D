@@ -36,7 +36,7 @@ class RoofEnvelopeCheck {
  }
 
  private static void checkRoofProfiles(GladeArt art,GladeDesign.Item host){
-  for(var kind:List.of(GladeDesign.Kind.ROOF_FLAT,GladeDesign.Kind.ROOF_PYRAMID,GladeDesign.Kind.ROOF_PENTAGON)){
+  for(var kind:List.of(GladeDesign.Kind.ROOF_FLAT,GladeDesign.Kind.ROOF_PYRAMID,GladeDesign.Kind.ROOF_PENTAGON,GladeDesign.Kind.ROOF_CURVED)){
    var part=new GladeDesign.Item(1,kind,host.center(),host.width(),host.depth(),1.1f,true,List.of(),0,new GladeDesign.Mount(host.id(),0,0,0));
    var design=new GladeDesign(List.of(host,part),2);
    var mesh=art.render(part,design);mesh.updateGeometricState();

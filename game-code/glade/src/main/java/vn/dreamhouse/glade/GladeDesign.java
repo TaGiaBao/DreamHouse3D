@@ -6,12 +6,14 @@ import java.util.*;
 
 final class GladeDesign {
     static final int MAX_FILE_BYTES=16*1024*1024,MAX_IMPORTED_ITEMS=10000,MAX_TOTAL_POINTS=250000;
+    static final int HILLSIDE_STYLE=19;
+    static final int STONE_PLATFORM=17;
 
     enum Kind {
         HOUSE, MANOR, CANAL_HOUSE, BRICK_HOUSE, TOWER, PAVILION, BRIDGE, WALL, FENCE, PATH, TREE, FLOWERS, WATER,
         LOG_CABIN, BRICK_WALL, TIMBER_WALL, HEDGE, ROOF_TILE, ROOF_SLATE, CHIMNEY_BRICK, CHIMNEY_STONE,
         WINDOW_ARCH, WINDOW_ROUND, DOOR_ARCH, DOOR_DOUBLE, STAIRS_STONE, STAIRS_WOOD, DECK, PERGOLA,
-        PLANTER, WELL, BENCH, PENTAGON, ROOF_FLAT, ROOF_PYRAMID, ROOF_PENTAGON, ROOF_SHED;
+        PLANTER, WELL, BENCH, PENTAGON, ROOF_FLAT, ROOF_PYRAMID, ROOF_PENTAGON, ROOF_SHED, ROOF_CURVED;
 
         boolean building() { return this==HOUSE || this==MANOR || this==CANAL_HOUSE || this==BRICK_HOUSE || this==TOWER || this==PAVILION || this==LOG_CABIN || this==PENTAGON; }
         boolean footprint() { return !stroke(); }
@@ -113,11 +115,22 @@ final class GladeDesign {
             double angle=Math.toRadians(rotation);
             return (float)(Math.sin(angle)*(point.x()-center.x())+Math.cos(angle)*(point.z()-center.z()));
         }
+        boolean stonePlatform(){return kind==Kind.DECK && form.finish().variant()==STONE_PLATFORM;}
     }
 
     private final List<Item> items;
     private final LandBounds land;
     private final TerrainField terrain;
+    private volatile BlockFusion roofFusion;
+
+    BlockFusion roofFusion() {
+        var cached=roofFusion;
+        if(cached!=null)return cached;
+        synchronized(this){
+            if(roofFusion==null)roofFusion=new BlockFusion(this);
+            return roofFusion;
+        }
+    }
     GladeDesign() { this(List.of()); }
     GladeDesign(List<Item> items) { this(items,1); }
     GladeDesign(List<Item> items,int landLevel) { this(items,LandBounds.level(landLevel)); }
@@ -164,6 +177,10 @@ final class GladeDesign {
     TerrainField terrain() {return terrain;}
     GladeDesign withTerrain(TerrainField field) {return new GladeDesign(items,land,field);}
     boolean hasUpper(long id) {return items.stream().anyMatch(other->other.form().support()==id);}
+    Item item(long id){return items.stream().filter(candidate->candidate.id()==id).findFirst().orElseThrow();}
+    boolean hillside(Item item) {
+        return item.kind().roofHost() && item.form().finish().variant()==HILLSIDE_STYLE;
+    }
     float roofRise(Item item) {
         if(hasUpper(item.id())) return 0;
         return item.form().roof();
@@ -178,9 +195,10 @@ final class GladeDesign {
             float across=(float)(Math.cos(angle)*x-Math.sin(angle)*z);
             return host.height()+span*.62f*custom.height()/.5f*Math.max(0,1-Math.abs(across)/span);
         }
+        if(hillside(host))return host.height()+(rise>.02f?RoofProfiles.surface(Kind.ROOF_CURVED,host,rise,x,z,0):0);
         if(host.kind()==Kind.PENTAGON)return host.height()+(rise>.02f?RoofProfiles.surface(Kind.ROOF_PENTAGON,host,rise,x,z,0):0);
         if(host.kind()==Kind.TOWER)return host.height()+rise*Math.max(0,1-(float)Math.sqrt(Math.pow(x/(host.width()/2+.12f),2)+Math.pow(z/(host.depth()/2+.12f),2)));
-        var fusion=new BlockFusion(this);
+        var fusion=roofFusion();
         if(fusion.joined(host.id()))return fusion.surfaceHeight(host,x,z);
         if(host.form().finish().variant()==18) {
             var form=host.form();float w=(host.width()+form.roofLeft()+form.roofRight())/2+.12f,d=(host.depth()+form.roofFront()+form.roofBack())/2+.12f;
@@ -198,7 +216,7 @@ final class GladeDesign {
     Placement placement(Item item) {
         if(item.mount()==null) {
             float ground=terrain.height(item.center().x(),item.center().z());
-            if(item.form().finish().variant()==18 && item.kind().building() && item.form().support()<0) {
+            if((item.stonePlatform() || (item.form().finish().variant()==18 || hillside(item)) && item.kind().building()) && item.form().support()<0) {
                 double angle=Math.toRadians(item.rotation());for(int sx:new int[]{-1,1})for(int sz:new int[]{-1,1}){
                     float x=sx*item.width()*.46f,z=sz*item.depth()*.46f;ground=Math.max(ground,terrain.height(item.center().x()+(float)(Math.cos(angle)*x+Math.sin(angle)*z),item.center().z()+(float)(-Math.sin(angle)*x+Math.cos(angle)*z)));
                 }
@@ -262,6 +280,51 @@ final class GladeDesign {
         return new GladeDesign(next,land,terrain);
     }
 
+    GladeDesign styleHouse(Item host,boolean eastern) {
+        var old=host.form();
+        var finish=eastern?GladeCatalog.hillside():GladeCatalog.plain();
+        var form=old.finish(finish);
+        if(form.roof()<=.02f && !hasUpper(host.id()))form=form.roof(Math.clamp(host.width()*.30f,.65f,2.5f));
+        var painted=new Item(host.id(),host.kind(),host.center(),host.width(),host.depth(),host.height(),host.pitched(),
+                host.points(),host.rotation(),host.mount(),form);
+        var prior=attachedRoof(host.id());
+        if(prior==null && painted.equals(host))return this;
+        if(prior!=null && !hasUpper(host.id())){
+            var styled=replace(painted);
+            var roof=new Item(prior.id(),eastern?Kind.ROOF_CURVED:Kind.ROOF_TILE,host.center(),host.width(),host.depth(),
+                    eastern?Math.clamp(host.width()*.30f,.65f,2.5f):.5f,true,List.of(),0,new Mount(host.id(),0,0,0));
+            return styled.add(roof);
+        }
+        return prior==null?replace(painted):replace(painted).remove(prior.id());
+    }
+
+    GladeDesign styleAssembly(Item root,boolean eastern){
+        var ids=assemblyIds(root.id());
+        var updated=this;
+        for(var item:items)if(ids.contains(item.id()) && item.kind().roofHost())
+            updated=updated.styleHouse(item,eastern);
+        return updated;
+    }
+
+    Item releaseUnsupportedMove(Item item) {
+        long supportId=item.form().support();
+        if(supportId<0)return item;
+        var support=items.stream().filter(candidate->candidate.id()==supportId).findFirst().orElseThrow();
+        if(StructureShell.overlapsFootprint(support,item))return item;
+        var assembly=assemblyIds(item.id());
+        float level=top(support);
+        long nextSupport=-1;
+        float best=.12f;
+        for(var candidate:items){
+            if(assembly.contains(candidate.id()) || !StructureShell.solid(candidate) || candidate.mount()!=null
+                    || !StructureShell.overlapsFootprint(candidate,item))continue;
+            float delta=Math.abs(top(candidate)-level);
+            if(delta<best){best=delta;nextSupport=candidate.id();}
+        }
+        return new Item(item.id(),item.kind(),item.center(),item.width(),item.depth(),item.height(),item.pitched(),
+                item.points(),item.rotation(),item.mount(),item.form().support(nextSupport));
+    }
+
     GladeDesign replace(Item item) {
         var next=new ArrayList<>(items);
         var original=items.stream().filter(old->old.id()==item.id()).findFirst().orElseThrow();
@@ -283,6 +346,22 @@ final class GladeDesign {
     }
 
     GladeDesign remove(long id) {
+        if(items.stream().anyMatch(part->part.id()==id && part.stonePlatform())){
+            var next=new ArrayList<Item>();
+            for(var part:items){
+                if(part.id()==id)continue;
+                if(part.form().support()==id){
+                    var form=part.form().support(-1);
+                    part=new Item(part.id(),part.kind(),part.center(),part.width(),part.depth(),part.height(),
+                            part.pitched(),part.points(),part.rotation(),part.mount(),form);
+                }
+                next.add(part);
+            }
+            return new GladeDesign(next,land,terrain);
+        }
+        return removeAssembly(id);
+    }
+    GladeDesign removeAssembly(long id){
         var removed=assemblyIds(id);
         return new GladeDesign(items.stream().filter(item->!removed.contains(item.id())).toList(),land,terrain);
     }

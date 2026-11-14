@@ -63,6 +63,21 @@ class ArchitectureContinuityCheck extends ProceduralMechanicsCheck {
         var upper=new GladeDesign.Item(1,a.kind(),a.center(),2,2,2,true,List.of(),0,null,a.form().support(0));scene=new GladeDesign(List.of(a,upper),2);root=render(scene);
         ok(!hit(root,new Vector3f(0,2.4f,0),Vector3f.UNIT_Y,.6f),"stack interface removes double floor inside upper footprint");
         ok(hit(root,new Vector3f(1.7f,2.4f,0),Vector3f.UNIT_Y,.4f),"terrace floor remains outside upper footprint");
+        var lower=(Node)root.getChild(0);
+        ok(lower.getChild("Lan can sân thượng")!=null && scene.roofRise(a)==0,"stack adds terrace rails and hides lower roof");
+        var fullFloor=new GladeDesign.Item(1,a.kind(),a.center(),a.width(),a.depth(),2,true,List.of(),0,null,upper.form());
+        ok(((Node)render(scene.replace(fullFloor)).getChild(0)).getChild("Lan can sân thượng")==null,"fully covered floor has no terrace rails");
+        var third=new GladeDesign.Item(2,a.kind(),upper.center(),1,1,2,true,List.of(),0,null,upper.form().support(1));
+        var triple=scene.add(third);
+        ok(triple.releaseUnsupportedMove(BuildSnap.copy(upper,new GladeDesign.Point(2.7f,0))).form().support()==0,"partial footprint overlap keeps support");
+        var detached=triple.replace(triple.releaseUnsupportedMove(BuildSnap.copy(upper,new GladeDesign.Point(7,0))));
+        ok(detached.items().get(1).form().support()==-1 && detached.placement(detached.items().get(1)).elevation()==0,"separated upper floor lands");
+        ok(detached.items().get(2).form().support()==1 && detached.items().get(2).center().x()==7 && detached.placement(detached.items().get(2)).elevation()==2,"third floor follows the detached upper floor");
+        var separatedRoot=render(detached);
+        ok(detached.roofRise(a)>0 && ((Node)separatedRoot.getChild(0)).getChild("Lan can sân thượng")==null,"detachment restores the original lower roof");
+        hillside();
+        polygonClipping();
+        steppedDistricts();
         var flatA=block(0,0,0,4,3,2.6f,0);var flatB=block(1,3,0,2,3,2.6f,0);root=render(new GladeDesign(List.of(flatA,flatB),2));ok(!hit(root,new Vector3f(1.7f,2.7f,0),Vector3f.UNIT_X,.65f),"joined flat roofs do not keep an interior parapet fence");
         var sharedWindow=new GladeDesign.Item(2,GladeDesign.Kind.WINDOW_ARCH,a.center(),.9f,.5f,1.08f,true,List.of(),90,new GladeDesign.Mount(0,.5f,0,.55f));scene=new GladeDesign(List.of(a,block(1,3,0,2,3,2.6f,1.4f),sharedWindow),2);ok(AttachmentRules.hidden(sharedWindow,scene),"window hidden behind attached neighbor");ok(!AttachmentRules.hidden(sharedWindow,new GladeDesign(List.of(a,sharedWindow),2)),"window restored after neighbor removed");
         var dormer=new GladeDesign.Item(1,GladeDesign.Kind.WINDOW_ARCH,a.center(),.9f,.5f,1.08f,true,List.of(),0,new GladeDesign.Mount(0,0,0,1));var flatHost=new GladeDesign.Item(0,a.kind(),a.center(),4,3,2.6f,false,List.of(),0,null,a.form().roof(0));ok(AttachmentRules.hidden(dormer,new GladeDesign(List.of(flatHost,dormer),2)),"lowered roof hides dormer without deleting its data");ok(!AttachmentRules.hidden(dormer,new GladeDesign(List.of(a,dormer),2)),"raised roof restores dormer");
@@ -74,5 +89,95 @@ class ArchitectureContinuityCheck extends ProceduralMechanicsCheck {
         var beforePlatform=new GladeDesign(List.of(a),scene.land(),scene.terrain());cache.update(cached,ART,beforePlatform);var oldRoot=cached.getChild(0);cache.update(cached,ART,new GladeDesign(List.of(a,platform),scene.land(),scene.terrain()));ok(cached.getChild(0)!=oldRoot,"adding a solid platform invalidates affected house shell");
         var oldPlatform=cached.getChild(1);cache.update(cached,ART,new GladeDesign(List.of(platform),scene.land(),scene.terrain()));ok(cached.getChild(0)!=oldPlatform,"removing a house rebuilds the neighboring structural platform");
         System.out.println("ARCHITECTURE_CONTINUITY_PASS: exact flush/partial walls, preserved exterior strips, real arch/round/door openings and reveals, curved path passage, raised-floor safety, round joins, stacked floor interfaces, enclosed solids, save restoration and cache invalidation; no screenshots");
+    }
+
+    private static void steppedDistricts() throws Exception {
+        for(boolean east:new boolean[]{true,false}){
+            var scene=HillsideDistrict.create(east);
+            var front=scene.items().stream().filter(i->i.stonePlatform() && i.center().z()>2).toList();
+            ok(front.stream().map(GladeDesign.Item::width).distinct().count()>=5,"front row varies parcel width");
+            ok(front.stream().map(i->i.center().z()).distinct().count()>=6,"frontage has staggered depths");
+            for(int i=1;i<front.size();i++){
+                var left=front.get(i-1);var right=front.get(i);
+                ok(Math.abs(left.center().x()+left.width()/2-right.center().x()+right.width()/2)<.001f,
+                        "neighboring platforms form one continuous frontage");
+                ok(Math.abs(left.center().z()-right.center().z())<(left.depth()+right.depth())/2,
+                        "staggered platforms still touch");
+            }
+            var rooflines=scene.items().stream().filter(i->i.kind().roofHost() && scene.roofRise(i)>.02f)
+                    .map(i->Math.round((scene.top(i)+scene.roofRise(i))*10)).distinct().count();
+            ok(rooflines>=10,"district has a varied roofline");
+            ok(front.stream().anyMatch(i->!scene.hasUpper(i.id())),"front row includes a deliberate open landing");
+            var platform=scene.items().stream().filter(GladeDesign.Item::stonePlatform).findFirst().orElseThrow();
+            var house=scene.items().stream().filter(i->i.form().support()==platform.id() && i.kind().building()).findFirst().orElseThrow();
+            ok(scene.placement(house).elevation()==scene.top(platform),"house rests on platform");
+            ok(scene.hillside(house)==east,"district uses the selected architectural style");
+            var path=scene.items().stream().filter(i->i.kind()==GladeDesign.Kind.PATH).findFirst().orElseThrow();
+            var road=path.points().stream().filter(p->SceneRules.contains(platform,p.x(),p.z(),0)).findFirst().orElseThrow();
+            ok(Math.abs(SceneRules.of(scene).walkSurface(road.x(),road.z())-scene.top(platform))<.001f,"road follows platform top");
+            ok(!scene.roofFusion().joined(house.id()),"platform roof stays independent");
+            var moved=scene.replace(BuildSnap.copy(platform,new GladeDesign.Point(platform.center().x()+.25f,platform.center().z())));
+            ok(Math.abs(moved.item(house.id()).center().x()-house.center().x()-.25f)<.001f,"platform moves its house");
+            var removed=moved.remove(platform.id());
+            ok(removed.item(house.id()).form().support()==-1 && removed.items().size()==moved.items().size()-1,"erasing a platform preserves the house");
+            var copied=BlueprintModule.capture(scene,platform.id()).place(new GladeDesign(),new GladeDesign.Point(0,0));
+            ok(copied.added().size()==scene.assemblyIds(platform.id()).size() && copied.scene().item(copied.rootId()).stonePlatform(),"platform assembly copies with its links");
+            var styled=scene.styleAssembly(platform,!east);
+            ok(styled.hillside(styled.item(house.id()))!=east && styled.item(house.id()).form().support()==platform.id(),"style changes the linked houses without moving them");
+            var history=new DesignHistory();
+            history.record(scene);
+            ok(history.step(styled,false)==scene && history.step(scene,true)==styled,"district change supports undo and redo");
+            var file=PlayerFiles.directory("checks").resolve(east?"district-east.glade":"district-west.glade");
+            scene.save(file);
+            ok(GladeDesign.load(file).items().equals(scene.items()),"district preserves links and materials after reopening");
+        }
+    }
+
+    private static void polygonClipping(){
+        var wall=PolyCuts.rectangle(0,0,4,3);
+        var cut=new ArrayList<>(PolyCuts.rectangle(1,0,3,2));
+        cut.add(1,cut.getFirst().clone());
+        var pieces=PolyCuts.subtract(List.of(wall),cut);
+        double exposed=pieces.stream().mapToDouble(PolyCuts::area).sum();
+        ok(Math.abs(exposed-8)<.0001,"duplicate clipping edge cannot duplicate wall surfaces");
+        int count=pieces.size();
+        for(int i=0;i<40;i++)pieces=PolyCuts.subtract(pieces,cut);
+        ok(pieces.size()==count,"repeated touching cuts cannot multiply wall fragments");
+        ok(PolyCuts.subtract(List.of(wall),PolyCuts.rectangle(4,0,6,3)).equals(List.of(wall)),
+                "a touching cut leaves the original wall intact");
+    }
+
+    private static void hillside() throws Exception {
+        var parts=new ArrayList<GladeDesign.Item>();
+        for(int column=0;column<4;column++){
+            float x=column*4-6;
+            int base=parts.size();
+            parts.add(block(base,x,0,4,3,2.6f,1.4f));
+            parts.add(block(base+1,x,0,2,2,2.6f,1.4f));
+            parts.set(base+1,new GladeDesign.Item(base+1,GladeDesign.Kind.HOUSE,new GladeDesign.Point(x,-.4f),2,2,2.6f,true,List.of(),0,null,parts.get(base+1).form().support(base)));
+            parts.add(new GladeDesign.Item(base+2,GladeDesign.Kind.HOUSE,new GladeDesign.Point(x,-.4f),1,1,2,true,List.of(),0,null,parts.get(base+1).form().support(base+1)));
+        }
+        var town=new GladeDesign(parts,2);
+        for(var part:parts)town=town.styleHouse(part,true);
+        var renderer=new SceneRenderer();var root=new Node();renderer.update(root,ART,town);root.updateGeometricState();
+        finite(root);
+        var base=(Node)root.getChild(0);
+        var rail=base.getChild("Lan can sân thượng");
+        ok(rail!=null && !hit(rail,new Vector3f(-4,4,1),Vector3f.UNIT_Y.negate(),1.1f),"neighboring terraces omit internal rails");
+        ok(town.roofRise(town.items().getFirst())==0,"roof hidden below upper storey");
+        var middle=parts.get(1);
+        var across=town.releaseUnsupportedMove(BuildSnap.copy(middle,new GladeDesign.Point(-2,1.9f)));
+        ok(across.form().support()==3,"drag to another aligned terrace reattaches");
+        town=town.replace(across);
+        renderer.update(root,ART,town);
+        ok(town.roofRise(town.items().getFirst())>0,"old support gets roof back");
+        ok(town.items().get(2).center().distance(across.center())<.01f,"upper storey follows its parent across terraces");
+        town=town.styleHouse(town.items().get(2),false);
+        ok(!town.hillside(town.items().get(2)) && town.items().get(2).form().support()==1,"style change preserves links");
+        renderer.update(root,ART,town);
+        ok(((Node)root.getChild(2)).getChild("Mặt tiền Vieille Ville")!=null,"western stacked house receives street facade");
+        var file=PlayerFiles.directory("checks").resolve("hillside-stack.glade");
+        town.save(file);
+        ok(GladeDesign.load(file).items().equals(town.items()),"street with twelve houses and both styles round trips");
     }
 }

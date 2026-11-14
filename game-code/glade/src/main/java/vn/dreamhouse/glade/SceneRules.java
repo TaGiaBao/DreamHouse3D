@@ -15,6 +15,8 @@ final class SceneRules {
     final Map<WaterFlow.Cell,Float> wetLevels;
     final List<GladeDesign.Item> legacyWater;
     private final List<GladeDesign.Item> structures;
+    private final List<GladeDesign.Placement> platforms;
+    private final List<GladeDesign.Item> platformItems;
     private final List<List<GladeDesign.Point>> closedFences;
     private final Map<Long,GladeDesign.Item> sources=new HashMap<>();
     private PreparedWater prepared;
@@ -27,6 +29,8 @@ final class SceneRules {
         prepared=water;
         if(water!=null)flows.put(water.id(),water.flow());
         structures=scene.items().stream().filter(item->item.kind().building() || item.kind()==GladeDesign.Kind.DECK || item.kind().roof()).toList();
+        platformItems=structures.stream().filter(GladeDesign.Item::stonePlatform).toList();
+        platforms=platformItems.stream().map(scene::placement).toList();
         closedFences=scene.items().stream().filter(item->item.kind()==GladeDesign.Kind.FENCE)
             .map(GladeDesign.Item::points)
             .filter(points->points.size()>3 && points.getFirst().distance(points.getLast())<.9f).toList();
@@ -46,6 +50,15 @@ final class SceneRules {
             combined.merge(entry.getKey(),entry.getValue().level(),Math::max);
         wetLevels=Map.copyOf(combined);
     }
+    float walkSurface(float x,float z){
+        float level=scene.terrain().height(x,z);
+        for(int i=0;i<platformItems.size();i++){
+            if(contains(platformItems.get(i),x,z,0))
+                level=Math.max(level,platforms.get(i).elevation()+platformItems.get(i).height());
+        }
+        return level;
+    }
+
     Float water(float x,float z){
         Float level=wetLevels.get(new WaterFlow.Cell((int)Math.floor(x/WaterFlow.STEP),(int)Math.floor(z/WaterFlow.STEP)));
         for(var item:legacyWater){
