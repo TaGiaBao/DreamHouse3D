@@ -10,7 +10,7 @@ import java.util.*;
 /** Continuous shoreline extracted from the flood field, independent of its simulation cells. */
 final class SoftWater {
     private static final float STEP=WaterFlow.STEP/3, EDGE=.42f;
-    private static final ColorRGBA SHALLOW=GladeArt.color("#a3d2c6"),DEEP=GladeArt.color("#69b5bb");
+    private static final ColorRGBA SHALLOW=GladeArt.color("#b7e4cb"),DEEP=GladeArt.color("#398b9d"),FOAM=GladeArt.color("#e4f5e5");
     private static final Map<Mesh,float[]> REST=Collections.synchronizedMap(new WeakHashMap<>());
     static void register(Geometry geometry,float[] positions){REST.put(geometry.getMesh(),positions.clone());geometry.setUserData("softSurface",true);}
     private record Sample(float x,float z,float coverage,float level,float arrival) {
@@ -28,7 +28,14 @@ final class SoftWater {
             float ground=scene.terrain().height(p.x,p.z),height=Math.max(ground+.022f,p.level);
             positions.add(p.x-source.center().x());positions.add(height-base);positions.add(p.z-source.center().z());
             float depth=FastMath.clamp((height-ground)/.46f,0,1),edge=FastMath.clamp((p.coverage-EDGE)/.35f,0,1);
-            colors.add(FastMath.interpolateLinear(depth,SHALLOW.r,DEEP.r));colors.add(FastMath.interpolateLinear(depth,SHALLOW.g,DEEP.g));colors.add(FastMath.interpolateLinear(depth,SHALLOW.b,DEEP.b));colors.add(.08f+.80f*edge);
+            float ripple=(float)Math.sin(p.x*3.1f+p.z*5.3f+.9f*Math.sin(p.x*1.9f-p.z*1.4f));
+            float sheen=Math.max(0,ripple-.72f)*.55f;
+            float rim=Math.max(0,1-Math.abs(edge-.23f)/.22f)*.28f;
+            float highlight=sheen+rim;
+            colors.add(FastMath.interpolateLinear(highlight,FastMath.interpolateLinear(depth,SHALLOW.r,DEEP.r),FOAM.r));
+            colors.add(FastMath.interpolateLinear(highlight,FastMath.interpolateLinear(depth,SHALLOW.g,DEEP.g),FOAM.g));
+            colors.add(FastMath.interpolateLinear(highlight,FastMath.interpolateLinear(depth,SHALLOW.b,DEEP.b),FOAM.b));
+            colors.add(.08f+.80f*edge);
             return index;
         }
     }

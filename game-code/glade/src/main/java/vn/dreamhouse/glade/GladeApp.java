@@ -82,6 +82,7 @@ public final class GladeApp extends SimpleApplication {
     private int terrainButton=-1;
     private boolean loweringTerrain;
     private final Map<Long,Float> waterBirth=new HashMap<>();
+    private GladeDesign animatedWaterScene;
     private final java.util.concurrent.ExecutorService waterWorker=java.util.concurrent.Executors
             .newSingleThreadExecutor(Thread.ofVirtual().name("dreamhouse-water").factory());
     private record PendingWater(GladeDesign before,GladeDesign after,java.util.concurrent.Future<SceneRules.PreparedWater> task){}
@@ -262,11 +263,11 @@ public final class GladeApp extends SimpleApplication {
         shadow.setLight(sun);
         shadow.setShadowIntensity(0.48f);
         shadow.setEdgeFilteringMode(EdgeFilteringMode.PCFPOISSON);
-        shadow.setEdgesThickness(2);
-        shadow.setShadowZExtend(55);
+        shadow.setEdgesThickness(4);
+        shadow.setShadowZExtend(72);
         viewPort.addProcessor(shadow);
         effects=new FilterPostProcessor(assetManager);
-        effects.addFilter(new SSAOFilter(.80f,1.25f,0.15f,0.12f));
+        effects.addFilter(new SSAOFilter(1.0f,1.45f,0.18f,0.12f));
         atmosphere=new CozyAtmosphere(sun,ambient,viewPort,shadow);
         if(managedSession){
             var savedLight=PlayerFiles.settings().getProperty("lighting","0");
@@ -420,12 +421,15 @@ public final class GladeApp extends SimpleApplication {
     private void zoom(float value,boolean inward) {
         if(walking || drawing || pendingLeft || adjustingBrush)return;
         if(mainMenuOpen || settingsOpen || confirmationOpen || fileDialogOpen || helpOpen || blueprintsOpen || libraryOpen || sceneMenuOpen)return;
+        var cursor=pointer();
+        var panel=hud.bounds("brushPanel");
+        if(panel!=null && panel.contains(cursor.x,cursor.y))return;
         float amount=FastMath.clamp(value*.025f,0,.12f);
         distance=FastMath.clamp(distance*(inward?1-amount:1+amount),5,Math.max(design.halfWidth(),design.halfDepth())*3.2f+12);updateCamera();
     }
     private void terrainStroke(boolean lower,int button) {
         if(drawing || pendingLeft || rotating || panning || mainMenuOpen || settingsOpen || confirmationOpen || fileDialogOpen || hud.hit(pointer().x,pointer().y)!=null || pointer().y<124 || helpOpen || sceneMenuOpen || libraryOpen || blueprintsOpen)return;
-        current=ground();if(current==null)return;
+        current=buildGround();if(current==null){outsidePlot();return;}
         terrainButton=button;loweringTerrain=lower;terrainDraft=design.terrain();brushLevel=terrainDraft.height(current.x(),current.z());brushClock=0;drawing=true;sculpt(.12f);
     }
 
@@ -636,13 +640,14 @@ public final class GladeApp extends SimpleApplication {
             terrainStroke(false,0);return;
         }
         if(tool==Tool.WATER){
-            start=ground();if(start==null)return;waterLift=0;
+            start=buildGround();waterLift=0;
             var cursorPoint=pointer();var origin=cam.getWorldCoordinates(cursorPoint,0);var ray=new Ray(origin,cam.getWorldCoordinates(cursorPoint,1).subtractLocal(origin).normalizeLocal());var hits=new CollisionResults();content.collideWith(ray,hits);
             if(hits.size()>0){var hit=hits.getClosestCollision();var p=hit.getContactPoint();if(hit.getContactNormal().y>.3f && p.x>design.land().minX()+.26f && p.x<design.land().maxX()-.26f && p.z>design.land().minZ()+.26f && p.z<design.land().maxZ()-.26f){start=new GladeDesign.Point(p.x,p.z);waterLift=Math.max(0,p.y-design.terrain().height(p.x,p.z));}}
+            if(start==null){outsidePlot();return;}
             current=start;leftPress.set(pointer());stroke.clear();stroke.add(start);drawing=true;dirtyPreview=true;selected=null;return;
         }
         if(tool.terrainBrush()) {
-            current=ground();if(current==null) return;
+            current=buildGround();if(current==null){outsidePlot();return;}
             terrainDraft=design.terrain();brushLevel=terrainDraft.height(current.x(),current.z());brushClock=0;drawing=true;
             sculpt(.28f);return;
         }
@@ -693,12 +698,15 @@ public final class GladeApp extends SimpleApplication {
             Long hit=pick();if(pickTag(objectHandles,"moveHandle")!=null)hit=selected;
             beginLeftPending(hit);return;
         }
-        start=ground();
-        if(start==null) return;
+        start=tool==Tool.ERASE?ground():buildGround();
         if(tool.kind!=null && tool!=Tool.WATER && !tool.kind.stroke() && !tool.kind.mounted() && stackMode) {
             var support=stackTarget();
-            if(support!=null) {draftSupport=support.id();start=ground();}
+            if(support!=null){
+                var target=supportPoint(support);
+                if(target!=null){draftSupport=support.id();start=target;}
+            }
         }
+        if(start==null){if(tool!=Tool.ERASE)outsidePlot();return;}
         Long id=pick();
         if(tool==Tool.SELECT && pickTag(objectHandles,"moveHandle")!=null) id=selected;
         if(tool==Tool.ERASE) {
@@ -921,15 +929,19 @@ public final class GladeApp extends SimpleApplication {
         return lastSnap.neighbor()<0?item:BuildSnap.copy(item,lastSnap.center());
     }
 
-    private GladeDesign.Point ground() {
-        var position=rawGround();
+    private GladeDesign.Point buildGround(){return ground(true);}
+    private void outsidePlot(){message="Hãy bấm bên trong viền khu xây. Dùng Địa hình để kéo rộng đất.";}
+    private GladeDesign.Point ground(){return ground(false);}
+    private GladeDesign.Point ground(boolean insidePlot) {
+        var position=rawGround(insidePlot);
         if(position==null) return null;
         if(resizeAxis!=null) return position;
         return new GladeDesign.Point(FastMath.clamp(position.x(),design.land().minX()+0.2f,design.land().maxX()-0.2f),
                 FastMath.clamp(position.z(),design.land().minZ()+0.2f,design.land().maxZ()-0.2f));
     }
 
-    private GladeDesign.Point rawGround() {
+    private GladeDesign.Point rawGround(){return rawGround(false);}
+    private GladeDesign.Point rawGround(boolean insidePlot) {
         var cursor=pointer();
         var origin=cam.getWorldCoordinates(cursor,0);
         var direction=cam.getWorldCoordinates(cursor,1).subtractLocal(origin).normalizeLocal();
@@ -944,7 +956,7 @@ public final class GladeApp extends SimpleApplication {
             var hits=new CollisionResults();var surface=terrain==null?null:terrain.getChild("Mặt đất");
             if(surface!=null && landEdge==null) surface.collideWith(ray,hits);
             if(hits.size()>0) position.set(hits.getClosestCollision().getContactPoint());
-            else if(!ray.intersectsWherePlane(new Plane(Vector3f.UNIT_Y,0),position)) return null;
+            else if(insidePlot || !ray.intersectsWherePlane(new Plane(Vector3f.UNIT_Y,0),position)) return null;
         }
         if(!Vector3f.isValidVector(position))return null;
         return new GladeDesign.Point(FastMath.clamp(position.x,-LandBounds.LIMIT_X,LandBounds.LIMIT_X),
@@ -1001,11 +1013,19 @@ public final class GladeApp extends SimpleApplication {
         var cursor=pointer();
         var origin=cam.getWorldCoordinates(cursor,0);
         var direction=cam.getWorldCoordinates(cursor,1).subtractLocal(origin).normalizeLocal();
+        if(!Vector3f.isValidVector(origin) || !Vector3f.isValidVector(direction) || direction.lengthSquared()<.5f)return null;
         var results=new CollisionResults();
         content.collideWith(new Ray(origin,direction),results);
-        for(var hit:results) for(Spatial node=hit.getGeometry();node!=null;node=node.getParent()) {
-            Long id=node.getUserData("itemId");
-            if(id!=null) return id;
+        for(var hit:results){
+            var geometry=hit.getGeometry();
+            boolean hidden=false;
+            for(Spatial parent=geometry;parent!=content && parent!=null;parent=parent.getParent())
+                if(parent.getCullHint()==Spatial.CullHint.Always){hidden=true;break;}
+            if(hidden)continue;
+            for(Spatial node=geometry;node!=content && node!=null;node=node.getParent()) {
+                Long id=node.getUserData("itemId");
+                if(id!=null)return id;
+            }
         }
         return null;
     }
@@ -1059,6 +1079,11 @@ public final class GladeApp extends SimpleApplication {
         if(landEdge==null || current==null) return;
         float coordinate=landEdge==LandBounds.Edge.LEFT || landEdge==LandBounds.Edge.RIGHT?current.x():current.z();
         landDraft=design.resizeLand(landEdge,coordinate);
+        var bounds=landDraft.land();
+        float edge=switch(landEdge){
+            case LEFT->bounds.minX();case RIGHT->bounds.maxX();case BACK->bounds.minZ();case FRONT->bounds.maxZ();
+        };
+        if(Math.abs(edge-coordinate)>.15f)message="Đã tới giới hạn. Cần chừa đủ đất cho công trình hiện có.";
     }
 
     private GladeDesign resizeScene(GladeDesign.Item item) {
@@ -1430,6 +1455,22 @@ public final class GladeApp extends SimpleApplication {
             case "photo" -> {photoMode=true;brushOutline.setCullHint(Spatial.CullHint.Always);updatePlotBoundary();refreshHandles();rebuildHud();return;}
             case "photoTake" -> {if(photoMode && photoFrames<0){photoFrames=2;hud.node().setCullHint(Spatial.CullHint.Always);}return;}
             case "photoBack" -> {leavePhoto();return;}
+            case "cameraSave" -> {
+                try{new CameraBookmark(focus,yaw,elevation,distance).save(currentFile);message="Đã lưu góc nhìn.";}
+                catch(IOException error){message="Không lưu được góc nhìn.";PlayerFiles.error("Lưu góc nhìn",error);}
+            }
+            case "cameraRecall" -> {
+                var saved=CameraBookmark.read(currentFile);
+                if(saved==null)message="Chưa có góc nhìn. Bấm Lưu góc nhìn trong menu trước.";
+                else{
+                    if(walking)toggleWalk();
+                    focus.set(saved.focus());boundCamera(focus);
+                    yaw=FastMath.normalize(saved.yaw(),-FastMath.PI,FastMath.PI);
+                    elevation=FastMath.clamp(saved.elevation(),.16f,1.40f);
+                    distance=FastMath.clamp(saved.distance(),5,Math.max(design.halfWidth(),design.halfDepth())*3.2f+12);
+                    updateCamera();message="Đã trở về góc nhìn đã lưu.";
+                }
+            }
             case "tools" -> toolsVisible=!toolsVisible;
             case "stack" -> stackMode=!stackMode;
             case "snap" -> snapBlocks=!snapBlocks;
@@ -1544,19 +1585,28 @@ public final class GladeApp extends SimpleApplication {
     private BlueprintShelf.Entry shelfEntry(){return savedModules.stream().filter(e->e.id().equals(shelfSelected)).findFirst().orElse(null);}
     private void blueprintAction(String command){
         if(command.equals("close")){blueprintsOpen=false;rebuildHud();return;}
+        if(command.startsWith("preset:")){
+            startModule(ArchitecturePresets.catalog().get(Integer.parseInt(command.substring(7))).module());return;
+        }
         if(command.startsWith("pick:")){shelfSelected=command.substring(5);deleteModuleConfirm="";rebuildHud();return;}
         if(command.equals("previous") || command.equals("next")){blueprintPage+=command.equals("next")?1:-1;blueprintPage=Math.max(0,Math.min(blueprintPage,Math.max(0,(savedModules.size()-1)/6)));deleteModuleConfirm="";rebuildHud();return;}
         if(command.equals("save")){nameBlueprint(false);return;}
         if(command.equals("rename")){nameBlueprint(true);return;}
         var entry=shelfEntry();if(entry==null){message="Chọn một mẫu đã lưu trong hộp.";rebuildHud();return;}
         if(command.equals("place")){
-            blueprintsOpen=false;helpOpen=false;libraryOpen=false;selected=null;tool=Tool.SELECT;activeModule=entry.module();modulePreview.clear();buildGhost.hide();message="Rê chuột để xem khung mẫu · Bấm trái để đặt · Esc để hủy.";updateModulePreview();rebuildHud();return;
+            startModule(entry.module());return;
         }
         if(command.equals("delete")){
             if(!deleteModuleConfirm.equals(entry.id())){deleteModuleConfirm=entry.id();message="Bấm Xác nhận xóa để bỏ mẫu trong hộp; công trình đã đặt vẫn giữ.";}
             else try{blueprintShelf.delete(entry.id());deleteModuleConfirm="";reloadBlueprints();message="Đã xóa mẫu trong hộp; công trình trong cảnh vẫn giữ.";}catch(Exception error){message="Không xóa được mẫu: "+error.getMessage();}
             rebuildHud();
         }
+    }
+    private void startModule(BlueprintModule module){
+        blueprintsOpen=false;helpOpen=false;libraryOpen=false;selected=null;tool=Tool.SELECT;sceneMenuOpen=false;
+        activeModule=module;modulePreview.clear();buildGhost.hide();
+        message="Rê chuột để xem khung mẫu · Bấm trái để đặt · Esc để hủy.";
+        updateModulePreview();rebuildHud();
     }
     private void nameBlueprint(boolean rename){
         if(fileDialogOpen)return;
@@ -1583,13 +1633,13 @@ public final class GladeApp extends SimpleApplication {
         if(activeModule==null || modulePreview==null)return;
         buildGhost.hide();
         if(rotating || panning || mainMenuOpen || settingsOpen || helpOpen || blueprintsOpen || libraryOpen || fileDialogOpen || confirmationOpen || hud.hit(pointer().x,pointer().y)!=null || pointer().y<124){modulePreview.hide();return;}
-        var point=ground();if(point==null){modulePreview.hide();return;}
+        var point=buildGround();if(point==null){modulePreview.hide();return;}
         if(modulePreviewSource==design && point.equals(modulePreviewPoint)){modulePreview.setCullHint(Spatial.CullHint.Inherit);return;}
         try{modulePreview.show(activeModule.place(design,point));modulePreviewSource=design;modulePreviewPoint=point;}
         catch(IllegalArgumentException error){modulePreview.hide();}
     }
     private void placeModule(){
-        var point=ground();if(point==null)return;
+        var point=buildGround();if(point==null){outsidePlot();return;}
         try{var placed=activeModule.place(design,point);selected=placed.rootId();tool=Tool.SELECT;commit(placed.scene(),"Đã đặt cả cụm. Kéo khối gốc để dời; Ctrl+Z hoàn tác cả cụm.");}
         catch(IllegalArgumentException error){message=error.getMessage();rebuildHud();}
     }
@@ -1602,17 +1652,19 @@ public final class GladeApp extends SimpleApplication {
         hud.iconButton("save","Lưu thung lũng","blueprints",x+18,y+height-106,210,40,false);
         hud.iconButton("load","Mở thung lũng","blueprints",x+244,y+height-106,210,40,false);
         hud.iconButton("blueprint:save","Lưu cụm chọn","dockBuild",x+470,y+height-106,210,40,false);
-        if(savedModules.isEmpty()){
-            hud.text("Chưa có mẫu riêng. Chọn một công trình rồi bấm Lưu cụm chọn.",x+22,y+225,width-44,28,15);
-            hud.text("Mẫu giữ tầng, cửa, mái và vật liệu; không lấy đất của cảnh cũ.",x+22,y+190,width-44,28,14);
-        }else for(int i=0;i<6;i++){
+        for(int i=0;i<6;i++){
             int index=blueprintPage*6+i;if(index>=savedModules.size())break;var entry=savedModules.get(index);
             int px=x+20+(i%3)*222,py=y+height-214-(i/3)*101;
-            hud.categoryTile("blueprint:pick:"+entry.id(),shortName(entry.name(),22),entry.module().root().kind().name(),"#dcc896",px,py,216,94,entry.id().equals(shelfSelected));
+            hud.blueprintCard("blueprint:pick:"+entry.id(),shortName(entry.name(),22),entry.module(),px,py,216,85,entry.id().equals(shelfSelected));
+        }
+        var presets=ArchitecturePresets.catalog();
+        for(int i=0;i<presets.size();i++){
+            var preset=presets.get(i);
+            hud.button("blueprint:preset:"+i,preset.name(),x+20+i*168,y+104,160,29,false);
         }
         var entry=shelfEntry();
         if(entry!=null){
-            hud.text(shortName(entry.name(),35)+" · "+entry.module().design().items().size()+" khối / cấu kiện",x+22,y+90,width-44,25,14);
+            hud.text(shortName(entry.name(),35)+" · "+entry.module().design().items().size()+" khối / cấu kiện",x+22,y+77,width-44,25,14);
             hud.button("blueprint:place","Đặt mẫu",x+22,y+46,150,36,false);
             hud.button("blueprint:rename","Đổi tên",x+184,y+46,150,36,false);
             hud.button("blueprint:delete",deleteModuleConfirm.equals(entry.id())?"Xác nhận xóa":"Xóa mẫu",x+346,y+46,150,36,false);
@@ -1956,6 +2008,12 @@ public final class GladeApp extends SimpleApplication {
         hud.launcher("blueprints","Hộp bản thiết kế","blueprints",122,h-180,blueprintsOpen);
         hud.stat("DIỆN TÍCH",String.format(Locale.ROOT,"%.1f × %.1f",design.land().width(),design.land().depth()),"LAND",w-330,h-65);
         hud.stat("CÔNG TRÌNH",design.items().size()+" khối","HOUSE",w-168,h-65);
+        var chosen=selectedItem();
+        if(tool==Tool.SELECT && chosen!=null && !sceneMenuOpen && !libraryOpen && !blueprintsOpen && !helpOpen && !mainMenuOpen && !settingsOpen){
+            String label=Arrays.stream(Tool.values()).filter(candidate->candidate.kind==chosen.kind())
+                    .findFirst().map(candidate->candidate.label).orElse(chosen.kind().name());
+            hud.text("Đang chọn · "+label+" #"+chosen.id(),w-300,h-96,280,27,13);
+        }
         flyoutBounds=null;
         if(toolsVisible) {
             String[] groups={"architecture","landscape","windows","palette","tool:ERASE","terrain","garden","trees","water","photo","sceneLight"};
@@ -1994,13 +2052,13 @@ public final class GladeApp extends SimpleApplication {
         if(design.items().isEmpty() && !mainMenuOpen && !settingsOpen)hud.iconButton("sample","Vườn mơ ước","dockFlower",18,h-340,174,48,false);
         if(sceneMenuOpen) {
             hud.layer(4);
-            int py=h-520;
-            hud.panel("","",82,py,216,318);
-            String[] ids={"sample","village","clear","viewAll","help"};
-            String[] labels={"Cảnh mẫu","Làng ven suối","Đất trống","Toàn cảnh","Hướng dẫn"};
-            String[] icons={"dockBuild","dockPath","LAND","viewAll","help"};
-            String[] tints={"#dbac82","#9cc2ab","#b2c590","#9cbfc0","#e3cd91"};
-            for(int i=0;i<ids.length;i++) hud.categoryTile(ids[i],labels[i],icons[i],tints[i],92+i%2*102,py+7+(2-i/2)*101,96,98,false);
+            int py=h-512;
+            hud.panel("","",82,py,318,310);
+            String[] ids={"sample","village","clear","viewAll","help","cameraSave","cameraRecall"};
+            String[] labels={"Cảnh mẫu","Làng ven suối","Đất trống","Toàn cảnh","Hướng dẫn","Lưu góc nhìn","Về góc đã lưu"};
+            String[] icons={"dockBuild","dockPath","LAND","viewAll","help","photo","viewAll"};
+            String[] tints={"#dbac82","#9cc2ab","#b2c590","#9cbfc0","#e3cd91","#dfbd94","#9cbfc0"};
+            for(int i=0;i<ids.length;i++) hud.categoryTile(ids[i],labels[i],icons[i],tints[i],92+i%3*102,py+6+(2-i/3)*99,96,96,false);
             hud.layer(1);
         }
         if(blueprintsOpen)drawBlueprints(w,h);
@@ -2155,12 +2213,27 @@ public final class GladeApp extends SimpleApplication {
         if(drawing)return;
         var cursor=pointer();if(cursor.y<124 || cursor.y>cam.getHeight()-100 || hud.hit(cursor.x,cursor.y)!=null){buildGhost.hide();if(snapGuide!=null)snapGuide.hide();return;}
         var support=stackMode?stackTarget():null;
-        var point=support==null?ground():supportPoint(support);
-        if(point==null){buildGhost.hide();if(snapGuide!=null)snapGuide.hide();return;}
-        var size=defaultSize(tool);point=new GladeDesign.Point(FastMath.clamp(point.x(),design.land().minX()+size[0]/2,design.land().maxX()-size[0]/2),FastMath.clamp(point.z(),design.land().minZ()+size[1]/2,design.land().maxZ()-size[1]/2));
+        var point=support==null?buildGround():supportPoint(support);
+        boolean outside=point==null;
+        if(outside){
+            point=rawGround();
+            if(point==null){buildGhost.hide();if(snapGuide!=null)snapGuide.hide();return;}
+        }
+        var size=defaultSize(tool);
+        if(!outside)point=new GladeDesign.Point(FastMath.clamp(point.x(),design.land().minX()+size[0]/2,design.land().maxX()-size[0]/2),FastMath.clamp(point.z(),design.land().minZ()+size[1]/2,design.land().maxZ()-size[1]/2));
         float roof=tool.kind.building()?size[0]*(tool==Tool.TOWER?.60f:.32f):0;
         var item=new GladeDesign.Item(design.nextId(),tool.kind,point,size[0],size[1],houseHeight,roof>0,List.of(),0,null,new GladeDesign.Form(0,roof,0,support==null?-1:support.id()).finish(activeFinish));
-        buildGhost.show(snapPlacement(item),design);
+        if(outside){
+            if(snapGuide!=null)snapGuide.hide();
+            buildGhost.show(item,design,BuildGhost.State.BLOCKED);
+        }else{
+            var snapped=snapPlacement(item);
+            buildGhost.show(snapped,design,ghostState());
+        }
+    }
+
+    private BuildGhost.State ghostState(){
+        return lastSnap!=null && lastSnap.neighbor()>=0?BuildGhost.State.SNAPPED:BuildGhost.State.READY;
     }
 
     @Override public void simpleUpdate(float tpf) {
@@ -2193,7 +2266,7 @@ public final class GladeApp extends SimpleApplication {
         if(brushCursorClock>.07f) {
             brushCursorClock=0;brushOutline.setCullHint(Spatial.CullHint.Always);
             if(!photoMode && (tool.terrainBrush() || strokeBrush()) && !adjustingBrush && !walking && !libraryOpen && !rotating && !helpOpen && !sceneMenuOpen && !blueprintsOpen && !mainMenuOpen && !settingsOpen && inputManager.getCursorPosition().y>124 && hud.hit(inputManager.getCursorPosition().x,inputManager.getCursorPosition().y)==null) {
-                var point=ground();
+                var point=buildGround();
                 if(point!=null) {
                     float radius=tool==Tool.PATH?pathWidth/2:tool==Tool.WATER?waterRadius:brushRadius;
                     if(brushRing==null){
@@ -2243,7 +2316,7 @@ public final class GladeApp extends SimpleApplication {
                             preview.attachChild(waterPreview);
                         }else{
                             var temporary=moving==null?design.add(item):design.replace(item);
-                            if(moving==null && previewStructure()){preview.detachAllChildren();buildGhost.show(item,temporary);}else previewItem(item,temporary);
+                            if(moving==null && previewStructure()){preview.detachAllChildren();buildGhost.show(item,temporary,ghostState());}else previewItem(item,temporary);
                             refreshHandles();
                         }
                     }
@@ -2251,14 +2324,17 @@ public final class GladeApp extends SimpleApplication {
                 } catch(IllegalArgumentException ignored) { preview.detachAllChildren(); }
             }
         }
-        if(waterTerrain!=design.terrain()){waterBirth.clear();waterOrigins.clear();waterTerrain=design.terrain();}
-        var sources=new HashSet<Long>();for(var source:design.items())if(WaterFlow.source(source)){
-            sources.add(source.id());if(!Objects.equals(waterOrigins.put(source.id(),source.center()),source.center()))waterBirth.put(source.id(),elapsed);
+        if(animatedWaterScene!=design){
+            animatedWaterScene=design;
+            if(waterTerrain!=design.terrain()){waterBirth.clear();waterOrigins.clear();waterTerrain=design.terrain();}
+            var sources=new HashSet<Long>();for(var source:design.items())if(WaterFlow.source(source)){
+                sources.add(source.id());if(!Objects.equals(waterOrigins.put(source.id(),source.center()),source.center()))waterBirth.put(source.id(),elapsed);
+            }
+            waterBirth.keySet().retainAll(sources);waterOrigins.keySet().retainAll(sources);
         }
-        waterBirth.keySet().retainAll(sources);waterOrigins.keySet().retainAll(sources);
         for(var root:content.getChildren()) {
-            Long id=root.getUserData("itemId");if(Boolean.TRUE.equals(root.getUserData("paintedWater")))root.depthFirstTraversal(part->SoftWater.animate(part,elapsed));if(id==null || !sources.contains(id))continue;
-            float birth=waterBirth.computeIfAbsent(id,key->elapsed);
+            Long id=root.getUserData("itemId");if(Boolean.TRUE.equals(root.getUserData("paintedWater")))root.depthFirstTraversal(part->SoftWater.animate(part,elapsed));
+            Float birth=id==null?null:waterBirth.get(id);if(birth==null)continue;
             root.depthFirstTraversal(part->{SoftWater.animate(part,elapsed);Float delay=part.getUserData("flowDelay");if(delay!=null)part.setCullHint(elapsed-birth>=delay?Spatial.CullHint.Inherit:Spatial.CullHint.Always);
                 Vector3f origin=part.getUserData("duckOrigin");if(origin!=null)part.setLocalTranslation(origin.add(FastMath.sin(elapsed*.5f)*.07f,FastMath.sin(elapsed*2)*.018f,FastMath.cos(elapsed*.5f)*.06f));});
         }

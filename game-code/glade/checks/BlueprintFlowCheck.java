@@ -34,6 +34,17 @@ class BlueprintFlowCheck extends ProceduralMechanicsCheck {
             var snapshot=design();var file=PlayerFiles.directory("saves").resolve("guided-world.glade");snapshot.save(file);invoke("acceptWorldSave",new Class<?>[]{GladeDesign.class,Path.class},snapshot,file);ok(guide.next()==null && guide.count()==5 && GladeDesign.load(file).items().equals(snapshot.items()),"manual save success completes guide with reloadable world");
             esc();clickRaw("guideHide");ok(!guide.active && field("guideBounds")==null,"guide can be dismissed cleanly");
             for(int i=0;i<7;i++)shelf.save("Mẫu trang "+i,personal.module());call("reloadBlueprints");clickRaw("blueprints");clickRaw("blueprint:next");ok((Integer)field("blueprintPage")==1,"personal shelf pagination works");bounds();clickRaw("blueprint:previous");ok((Integer)field("blueprintPage")==0,"can return to first page");
+            clickRaw("blueprint:close");fixture(new GladeDesign(List.of(),2));
+            clickRaw("blueprints");clickRaw("blueprint:preset:1");
+            ok(field("activeModule")!=null,"courtyard preset opens placement preview");
+            click(new Vector3f(0,0,0));
+            ok(design().items().size()==4,"courtyard places all editable parts");
+            chord(com.jme3.input.KeyInput.KEY_Z);ok(design().items().isEmpty(),"preset is one undo operation");
+            float yawBefore=(Float)field("yaw");
+            clickRaw("sceneMenu");clickRaw("cameraSave");
+            set("yaw",yawBefore+1);call("updateCamera");
+            clickRaw("sceneMenu");clickRaw("cameraRecall");
+            ok(Math.abs((Float)field("yaw")-yawBefore)<.001f,"saved camera angle is recalled");
             System.out.println("BLUEPRINT_FLOW_PASS: saved shelf UI and bounds, cancellable wire preview, right camera orbit, atomic assembly placement/undo, independent links, two-step template deletion, optional guide without scene reset, real build/shape/paint progress, stored module and world save completion, pagination; no screenshots");
         }finally{app.stop();}
     }

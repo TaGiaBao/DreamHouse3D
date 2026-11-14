@@ -5,13 +5,7 @@ import java.util.*;
 /** A single continuous surface cut from the union of a painted water stroke. */
 final class WaterMesh {
  static Geometry build(GladeArt art,GladeDesign.Item item,GladeDesign scene) {
-  return build(art,item,scene,false);
- }
- static Geometry preview(GladeArt art,GladeDesign.Item item,GladeDesign scene) {
-  return build(art,item,scene,true);
- }
- private static Geometry build(GladeArt art,GladeDesign.Item item,GladeDesign scene,boolean preview) {
-  float radius=item.height(),step=Math.max(Math.max(.15f,radius/(preview?10:20)),Math.max(item.width(),item.depth())/(preview?85:150));
+  float radius=item.height(),step=Math.max(Math.max(.15f,radius/20),Math.max(item.width(),item.depth())/150);
   float ground=scene.terrain().height(item.center().x(),item.center().z());
   var shallow=GladeArt.color("#aed7bf");var deep=GladeArt.color("#4fa4aa");
   var rows=new HashMap<Integer,BitSet>();
@@ -45,8 +39,58 @@ final class WaterMesh {
   float[] p=new float[positions.size()],c=new float[colors.size()],n=new float[positions.size()];for(int i=0;i<p.length;i++){p[i]=positions.get(i);n[i]=i%3==1?1:0;}for(int i=0;i<c.length;i++)c[i]=colors.get(i);
   var mesh=new Mesh();mesh.setBuffer(VertexBuffer.Type.Position,3,p);mesh.setBuffer(VertexBuffer.Type.Normal,3,n);mesh.setBuffer(VertexBuffer.Type.Color,4,c);mesh.updateBound();
   var result=new Geometry("Nước vẽ tự do",mesh);var material=art.material("#ffffff").clone();material.setBoolean("UseVertexColor",true);material.setFloat("Shininess",85);material.setColor("Specular",new ColorRGBA(.48f,.56f,.51f,1));result.setMaterial(material);
-  if(!preview)SoftWater.register(result,p);
+  SoftWater.register(result,p);
   return result;
+ }
+
+ /** Follow the cursor with a flat ribbon. The finished stroke still uses the simulated shore. */
+ static Geometry preview(GladeArt art,GladeDesign.Item item,GladeDesign scene) {
+  var points=item.points();
+  var mesh=new PlainStructure.Builder();
+  float radius=item.height(),base=scene.placement(item).elevation();
+  Vector3f left=null,right=null;
+  for(int i=0;i<points.size();i++){
+   var p=points.get(i);
+   var previous=points.get(Math.max(0,i-1));var next=points.get(Math.min(points.size()-1,i+1));
+   float dx=next.x()-previous.x(),dz=next.z()-previous.z();
+   float length=(float)Math.hypot(dx,dz);
+   if(length<.001f){dx=1;length=1;}
+   var a=previewPoint(item,scene,base,p.x()-dz/length*radius,p.z()+dx/length*radius);
+   var b=previewPoint(item,scene,base,p.x()+dz/length*radius,p.z()-dx/length*radius);
+   if(i>0)mesh.quad(left,a,b,right);
+   if(i==0 || i==points.size()-1){
+    float angle=FastMath.atan2(dz,dx)+(i==0?FastMath.HALF_PI:-FastMath.HALF_PI);
+    float span=points.size()==1?FastMath.TWO_PI:FastMath.PI;
+    var center=previewPoint(item,scene,base,p.x(),p.z());
+    var rim=previewPoint(item,scene,base,p.x()+FastMath.cos(angle)*radius,p.z()+FastMath.sin(angle)*radius);
+    for(int edge=1;edge<=12;edge++){
+     float t=angle+span*edge/12;
+     var end=previewPoint(item,scene,base,p.x()+FastMath.cos(t)*radius,p.z()+FastMath.sin(t)*radius);
+     mesh.triangle(center,end,rim);rim=end;
+    }
+   }
+   left=a;right=b;
+  }
+  var geometry=mesh.geometry(art,"Nét nước xem trước","#76c6c9");
+  var material=geometry.getMaterial().clone();
+  var color=GladeArt.color("#76c6c9");color.a=.72f;
+  material.setColor("Diffuse",color);
+  var state=material.getAdditionalRenderState();
+  state.setFaceCullMode(com.jme3.material.RenderState.FaceCullMode.Off);
+  state.setBlendMode(com.jme3.material.RenderState.BlendMode.Alpha);
+  state.setDepthWrite(false);
+  geometry.setMaterial(material);
+  geometry.setQueueBucket(com.jme3.renderer.queue.RenderQueue.Bucket.Transparent);
+  geometry.setShadowMode(com.jme3.renderer.queue.RenderQueue.ShadowMode.Off);
+  return geometry;
+ }
+
+ private static Vector3f previewPoint(GladeDesign.Item item,GladeDesign scene,float base,float x,float z){
+  var land=scene.land();
+  x=Math.clamp(x,land.minX(),land.maxX());z=Math.clamp(z,land.minZ(),land.maxZ());
+  float height=scene.terrain().height(x,z);
+  if(item.points().size()==1)height=Math.max(height,base);
+  return new Vector3f(x-item.center().x(),height-base+.07f,z-item.center().z());
  }
  private static Vector3f sample(int ix,int iz,float step,float radius,Map<Long,List<GladeDesign.Point>> bins,Map<Long,Vector3f> samples,LandBounds land){
   return samples.computeIfAbsent(key(ix,iz),ignored->{

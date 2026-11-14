@@ -13,7 +13,21 @@ final class LaunchSignals {
     }
     static void publish(String state){
         String token=System.getProperty(TOKEN_PROPERTY);if(token==null)return;
-        try{var destination=path(token);var temporary=Files.createTempFile(destination.getParent(),"ready-",".tmp");try{Files.writeString(temporary,state+"\n");PlayerFiles.move(temporary,destination);}finally{Files.deleteIfExists(temporary);}}
+        try{
+            var destination=path(token);var temporary=Files.createTempFile(destination.getParent(),"ready-",".tmp");
+            try{
+                Files.writeString(temporary,state+"\n");
+                for(int attempt=0;;attempt++){
+                    try{PlayerFiles.move(temporary,destination);break;}
+                    catch(AccessDeniedException busy){
+                        // A concurrent Windows reader can briefly hold the previous receipt open.
+                        if(attempt==5)throw busy;
+                        Thread.sleep(12L*(attempt+1));
+                    }
+                }
+            }finally{Files.deleteIfExists(temporary);}
+        }
+        catch(InterruptedException interrupted){Thread.currentThread().interrupt();}
         catch(IOException|IllegalArgumentException failure){PlayerFiles.error("Không ghi được trạng thái khởi động",failure);}
     }
     static String read(String token)throws IOException{var file=path(token);return Files.isRegularFile(file)?Files.readString(file).strip():"";}

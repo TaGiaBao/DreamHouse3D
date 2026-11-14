@@ -19,6 +19,13 @@ class WaterDrawingCheck extends ProceduralMechanicsCheck {
         var map=new HashMap<TerrainField.Cell,Float>();for(int x=-5;x<=-1;x++)for(int z=-4;z<=4;z++)map.put(new TerrainField.Cell(x,z),3.5f);
         var hill=new GladeDesign(List.of(),empty.land(),new TerrainField(map));var elevated=WaterGesture.draft(hill,List.of(new Point(-1.1f,0)),new Point(-1.1f,0),1,0);hill=hill.add(elevated);var downhill=WaterFlow.simulate(hill,elevated);ok(downhill.cells().values().stream().anyMatch(w->w.level()>3) && downhill.cells().values().stream().anyMatch(w->w.level()<1),"water reaches lower land from plateau");
         var art=new GladeArt(new DesktopAssetManager(true));ok((Integer)WaterFalls.render(art,elevated,hill,downhill).getUserData("waterfallCount")>0,"height transition creates falling ribbons");
+        var preview=WaterMesh.preview(art,drawn,empty);
+        ok(preview.getTriangleCount()>0 && preview.getTriangleCount()<=2*points.size()+24,
+                "preview geometry grows linearly with the number of points");
+        var edgePreview=WaterMesh.preview(art,edge,empty);
+        var vertices=(java.nio.FloatBuffer)edgePreview.getMesh().getBuffer(com.jme3.scene.VertexBuffer.Type.Position).getData();
+        for(int i=0;i<vertices.limit();i+=3)
+            ok(vertices.get(i)+edge.center().x()<=empty.land().maxX()+.001f,"preview stays inside the build boundary");
         var platform=new Item(0,Kind.HOUSE,new Point(0,0),3,3,3,false,List.of());var onTop=new Item(1,Kind.WATER,new Point(0,0),.5f,.5f,1,false,List.of(new Point(0,0)),0,null,new Form(3,0,0,-1).finish(Finish.DEFAULT.variant(20)));var rooftop=new GladeDesign(List.of(platform,onTop),2);var roofFlow=WaterFlow.simulate(rooftop,onTop);ok((Integer)WaterFalls.render(art,onTop,rooftop,roofFlow).getUserData("waterfallCount")>0,"water can spill from raised construction");
         var file=PlayerFiles.directory("checks").resolve("drawn-water.glade");hill.add(new Item(2,drawn.kind(),drawn.center(),drawn.width(),drawn.depth(),drawn.height(),false,drawn.points(),0,null,drawn.form())).save(file);ok(GladeDesign.load(file).items().size()==2,"source and drawn line survive signed save");
         app=new GladeApp();var settings=new AppSettings(true);settings.setResolution(1100,720);settings.setRenderer(AppSettings.LWJGL_OPENGL33);settings.setAudioRenderer(null);settings.setTitle("DreamHouse · Kiểm tra vẽ nước và thác");app.setSettings(settings);app.setShowSettings(false);app.setPauseOnLostFocus(false);app.start();

@@ -16,6 +16,7 @@ final class SceneRules {
     final Map<WaterFlow.Cell,Float> wetLevels;
     final List<GladeDesign.Item> legacyWater;
     private final List<GladeDesign.Item> structures;
+    private final List<List<GladeDesign.Point>> closedFences;
     private final Map<Long,GladeDesign.Item> sources=new HashMap<>();
     private PreparedWater prepared;
     List<SoftWater.Surface> takeSurface(long id){
@@ -27,6 +28,9 @@ final class SceneRules {
         prepared=water;
         if(water!=null)flows.put(water.id(),water.flow());
         structures=scene.items().stream().filter(item->item.kind().building() || item.kind()==GladeDesign.Kind.DECK || item.kind().roof()).toList();
+        closedFences=scene.items().stream().filter(item->item.kind()==GladeDesign.Kind.FENCE)
+            .map(GladeDesign.Item::points)
+            .filter(points->points.size()>3 && points.getFirst().distance(points.getLast())<.9f).toList();
         for(var item:scene.items())if(WaterFlow.source(item))sources.put(item.id(),item);
         for(var cached:CACHE.values()){
             if(cached.scene.terrain()!=scene.terrain() || !cached.scene.land().equals(scene.land()) || !cached.structures.equals(structures))continue;
@@ -66,8 +70,16 @@ final class SceneRules {
         }
         return (float)Math.sqrt(best);
     }
-    static boolean enclosed(GladeDesign scene,float x,float z){
-        for(var fence:scene.items())if(fence.kind()==GladeDesign.Kind.FENCE && fence.points().size()>3 && fence.points().getFirst().distance(fence.points().getLast())<.9f){boolean inside=false;var points=fence.points();for(int i=0,j=points.size()-1;i<points.size();j=i++){var a=points.get(i);var b=points.get(j);if((a.z()>z)!=(b.z()>z) && x<(b.x()-a.x())*(z-a.z())/(b.z()-a.z())+a.x())inside=!inside;}if(inside)return true;}
+    boolean enclosed(float x,float z){
+        for(var points:closedFences){
+            boolean inside=false;
+            for(int i=0,j=points.size()-1;i<points.size();j=i++){
+                var a=points.get(i);
+                var b=points.get(j);
+                if((a.z()>z)!=(b.z()>z) && x<(b.x()-a.x())*(z-a.z())/(b.z()-a.z())+a.x())inside=!inside;
+            }
+            if(inside)return true;
+        }
         return false;
     }
     static GladeDesign.Point snapFence(GladeDesign scene,GladeDesign.Point point){

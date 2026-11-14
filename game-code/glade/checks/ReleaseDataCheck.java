@@ -11,6 +11,12 @@ class ReleaseDataCheck {
     static void rejected(Path file)throws Exception {try{GladeDesign.load(file);throw new AssertionError("Tệp lỗi được chấp nhận: "+file);}catch(java.io.IOException|IllegalArgumentException expected){}}
     public static void main(String[] args)throws Exception {
         Path root=PlayerFiles.directory("checks");var first=scene(1);Path valid=root.resolve("valid.glade");first.save(valid);ok(GladeDesign.load(valid).items().equals(first.items()),"normal save roundtrip");
+        var legacy=root.resolve("legacy.glade");
+        Files.writeString(legacy,"version=glade-1\ncount=1\nitem.0.id=0\nitem.0.kind=HOUSE\nitem.0.shape=0,0,3,2,2,true\n");
+        var migrated=GladeDesign.load(legacy);
+        ok(migrated.items().getFirst().width()==3 && migrated.items().getFirst().form().roof()>0,"legacy house dimensions and roof survive import");
+        var upgraded=root.resolve("legacy-upgraded.glade");migrated.save(upgraded);
+        ok(GladeDesign.load(upgraded).items().equals(migrated.items()),"legacy world survives conversion to the current format");
         Path big=root.resolve("too-large.glade");try(var out=new java.io.RandomAccessFile(big.toFile(),"rw")){out.setLength((long)GladeDesign.MAX_FILE_BYTES+1);}rejected(big);
         var props=new Properties();try(var in=Files.newInputStream(valid)){props.load(in);}props.remove(WorldFiles.DIGEST);props.remove(WorldFiles.FORMAT);props.setProperty("count","10001");Path count=root.resolve("too-many.glade");try(var out=Files.newOutputStream(count)){props.store(out,"");}rejected(count);
         props.setProperty("count","1");props.setProperty("item.0.points","1,2;".repeat(4097));Path stroke=root.resolve("bad-stroke.glade");try(var out=Files.newOutputStream(stroke)){props.store(out,"");}rejected(stroke);

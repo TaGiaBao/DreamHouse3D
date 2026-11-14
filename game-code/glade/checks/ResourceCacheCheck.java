@@ -68,6 +68,30 @@ class ResourceCacheCheck {
             throw new AssertionError("house near the bank and road crossing water should refresh");
         renderer.update(root,art,village);
         if(root.getChild(3).getParent()!=root)throw new AssertionError("removing water restores the road");
+        if(tag(root.getChild(3),"proceduralFeature","bridge"))throw new AssertionError("dry road still contains bridge parts");
+        renderer.update(root,art,village.add(creek));
+        if(!tag(root.getChild(3),"proceduralFeature","bridge"))throw new AssertionError("restoring water recreates the bridge");
+        renderer.update(root,art,village);
+        var distantBeforeRoad=root.getChild(0);var nearBeforeRoad=root.getChild(1);
+        var approach=ProceduralMechanicsCheck.path(5,4,0,4,4);
+        var withApproach=village.add(approach);
+        renderer.update(root,art,withApproach);
+        if(root.getChild(0)!=distantBeforeRoad || root.getChild(1)==nearBeforeRoad)
+            throw new AssertionError("adding a road rebuilds only nearby houses");
+        var nearWithApproach=root.getChild(1);
+        var repaint=new GladeDesign.Item(approach.id(),approach.kind(),approach.center(),approach.width(),approach.depth(),
+                approach.height(),approach.pitched(),approach.points(),approach.rotation(),approach.mount(),
+                approach.form().finish(PathSurface.finish("brick","#bb8065")));
+        renderer.update(root,art,withApproach.replace(repaint));
+        if(root.getChild(1)!=nearWithApproach)throw new AssertionError("repainting a road keeps nearby houses intact");
+        renderer.update(root,art,village);
+        if(root.getChild(0)!=distantBeforeRoad || root.getChild(1)==nearWithApproach)
+            throw new AssertionError("removing a road restores nearby architecture only");
         System.out.println("RESOURCE_CACHE_PASS: bounded materials, path-sensitive banks, independent water, reversible grass and local scene updates");
+    }
+    private static boolean tag(com.jme3.scene.Spatial root,String key,String expected){
+        boolean[] found={false};
+        root.depthFirstTraversal(part->{if(expected.equals(part.getUserData(key)))found[0]=true;});
+        return found[0];
     }
 }

@@ -53,7 +53,6 @@ final class GladeVariants {
    node.setLocalScale(1,1,item.depth()/item.width());
   } else if(item.kind()==GladeDesign.Kind.FLOWERS){node.setLocalTranslation(0,0,0);node.detachAllChildren();String tint=variant==1?"#a18abc":variant==2?"#e7c56e":"#d790a3";
    ScenicDetails.blossoms(art,node,item.width(),item.depth(),item.height(),tint);
-   node.updateGeometricState();jme3tools.optimize.GeometryBatchFactory.optimize(node,false);
   } else if(item.kind().opening() && variant>0){node.depthFirstTraversal(s->{if(s instanceof Geometry g){var value=g.getMaterial().getParam("Diffuse");if(value!=null && value.getValue() instanceof ColorRGBA c && c.b<c.r+.03f)g.setMaterial(art.material(variant==1?"#eee2bd":variant==2?"#8fa787":"#b19ab7"));}});}
  }
 }

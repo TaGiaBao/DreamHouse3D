@@ -103,13 +103,18 @@ final class ReactiveFeatures {
             if(mesh==null){mesh=geo.getMesh();geo.setUserData("grassSource",mesh);}
             var p=(java.nio.FloatBuffer)mesh.getBuffer(Type.Position).getData();
             var index=mesh.getIndexBuffer();var kept=new int[index.size()];int count=0;
-            for(int i=0;i<index.size();i+=3){float x=0,z=0;for(int j=0;j<3;j++){int v=index.get(i+j);x+=p.get(v*3)/3;z+=p.get(v*3+2)/3;}x+=scene.land().centerX();z+=scene.land().centerZ();if(SceneRules.enclosed(scene,x,z) || rules.water(x,z)!=null)continue;
-                for(int j=0;j<3;j++)kept[count++]=index.get(i+j);
+            Integer group=geo.getUserData("indicesPerBlade");int stride=group==null?3:group;
+            for(int i=0;i<index.size();i+=stride){
+                float x=0,z=0;for(int j=0;j<3;j++){int v=index.get(i+j);x+=p.get(v*3)/3;z+=p.get(v*3+2)/3;}
+                x+=scene.land().centerX();z+=scene.land().centerZ();
+                if(rules.enclosed(x,z) || rules.water(x,z)!=null)continue;
+                for(int j=0;j<stride;j++)kept[count++]=index.get(i+j);
             }
             geo.setCullHint(count==0?Spatial.CullHint.Always:Spatial.CullHint.Inherit);
             if(count==0 || count==index.size()){geo.setMesh(mesh);return;}
             var trimmed=new Mesh();
             trimmed.setBuffer(mesh.getBuffer(Type.Position));trimmed.setBuffer(mesh.getBuffer(Type.Normal));
+            var color=mesh.getBuffer(Type.Color);if(color!=null)trimmed.setBuffer(color);
             trimmed.setBuffer(Type.Index,3,Arrays.copyOf(kept,count));
             trimmed.updateBound();geo.setMesh(trimmed);
         });

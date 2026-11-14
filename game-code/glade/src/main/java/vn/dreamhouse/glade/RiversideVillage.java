@@ -42,8 +42,17 @@ final class RiversideVillage {
             items.add(WaterGesture.draft(new GladeDesign(items,land,terrain),creek,creek.getLast(),.6f,0));
         }
         for(int i=0;i<300;i++){
-            float x=-25+(i%50)*1.01f,z=(i/50<3?-1:1)*(10+(i/50%3)*2.25f)+.28f*(float)Math.sin(i*3.1);
-            var kind=i%17==0?Kind.TREE:i%31==0?Kind.BENCH:Kind.FLOWERS;
+            int cluster=i/10,member=i%10;
+            float centerX=-23+(cluster%10)*5.1f;
+            float centerZ=(cluster/10==1?-1:1)*(cluster/10==2?15.2f:11.4f);
+            float angle=member*2.39996f;
+            float radius=.28f+(float)Math.sqrt(member)*.61f;
+            float x=centerX+radius*(float)Math.cos(angle),z=centerZ+radius*(float)Math.sin(angle);
+            var kind=member==0 && cluster%2==0?Kind.TREE:i%31==0?Kind.BENCH:Kind.FLOWERS;
+            if(member==9){
+                z=(cluster%2==0?-1:1)*(4.5f+.3f*(float)Math.sin(x));
+                kind=Kind.FLOWERS;
+            }
             float size=kind==Kind.TREE?1.5f:kind==Kind.BENCH?1.1f:.55f;
             float height=kind==Kind.TREE?2.45f:kind==Kind.BENCH?.78f:.33f;
             items.add(new Item(items.size(),kind,new Point(x,z),size,size,height,false,List.of(),0,null,new Form(0,0,0,-1).finish(Finish.DEFAULT.variant(i%4))));

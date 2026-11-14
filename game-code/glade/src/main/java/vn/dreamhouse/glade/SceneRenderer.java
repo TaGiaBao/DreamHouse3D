@@ -9,6 +9,20 @@ final class SceneRenderer {
         static List<GladeDesign.Item> filter(GladeDesign scene,java.util.function.Predicate<GladeDesign.Item> filter){return scene.items().stream().filter(filter).toList();}
     }
     private record Cached(GladeDesign.Item item,GladeDesign.Placement placement,Node node,WaterFlow.Result flow){}
+    private record RoadArea(float minX,float maxX,float minZ,float maxZ){
+        static RoadArea of(GladeDesign.Item path){
+            float minX=Float.POSITIVE_INFINITY,minZ=minX,maxX=Float.NEGATIVE_INFINITY,maxZ=maxX;
+            for(var point:path.points()){
+                minX=Math.min(minX,point.x());maxX=Math.max(maxX,point.x());
+                minZ=Math.min(minZ,point.z());maxZ=Math.max(maxZ,point.z());
+            }
+            return new RoadArea(minX,maxX,minZ,maxZ);
+        }
+        boolean overlaps(GladeDesign.Item item){
+            float x=item.center().x(),z=item.center().z(),w=item.halfWidth()+1.6f,d=item.halfDepth()+1.6f;
+            return minX<=x+w && maxX>=x-w && minZ<=z+d && maxZ>=z-d;
+        }
+    }
     private final Map<Long,Cached> cache=new HashMap<>();
     private Signature previous;
     private SceneRules previousRules;
@@ -19,6 +33,7 @@ final class SceneRenderer {
         boolean ground=previous!=null && previous.terrain()==signature.terrain() && previous.land().equals(signature.land());
         boolean structure=ground && previous.buildings().equals(signature.buildings());
         boolean roads=ground && previous.paths().equals(signature.paths());
+        var changedRoads=ground && !roads?changedRoadAreas(previous.paths(),signature.paths()):List.<RoadArea>of();
         var rules=SceneRules.of(scene);
         var changedWater=structure && rules.legacyWater.equals(previousRules.legacyWater)?changedCells(previousRules,rules):null;
         boolean water=changedWater!=null && changedWater.isEmpty();
@@ -36,9 +51,11 @@ final class SceneRenderer {
         for(var item:scene.items()){
             var old=cache.get(item.id());var placement=scene.placement(item);boolean stable=ground;
             var flow=rules.flows.get(item.id());
-            if(item.kind().building())stable=structure && roads && flora && mounts && unchangedNear(item,changedWater);
+            if(item.kind().building())stable=structure && flora && mounts && unchangedNear(item,changedWater)
+                    && changedRoads.stream().noneMatch(area->area.overlaps(item));
             else if(item.kind()==GladeDesign.Kind.DECK)stable=item.form().finish().variant()==18
-                ? structure && roads && mounts && (dry || unchangedNear(item,changedWater))
+                ? structure && mounts && (dry || unchangedNear(item,changedWater))
+                    && changedRoads.stream().noneMatch(area->area.overlaps(item))
                 : ground && (dry || unchangedNear(item,changedWater));
             else if(item.mount()!=null)stable=mounts && roads;
             else if(item.kind()==GladeDesign.Kind.WATER)stable=flow!=null?ground && old!=null && old.flow()==flow:ground && roads;
@@ -60,6 +77,20 @@ final class SceneRenderer {
             index++;
         }
         cache.keySet().retainAll(live);previous=signature;previousRules=rules;lastNanos=System.nanoTime()-start;
+    }
+
+    private static List<RoadArea> changedRoadAreas(List<GladeDesign.Item> before,List<GladeDesign.Item> after){
+        var old=new HashMap<Long,GladeDesign.Item>();
+        var changed=new ArrayList<RoadArea>();
+        for(var item:before)old.put(item.id(),item);
+        for(var item:after){
+            var prior=old.remove(item.id());
+            if(prior!=null && prior.points().equals(item.points()))continue;
+            if(prior!=null)changed.add(RoadArea.of(prior));
+            changed.add(RoadArea.of(item));
+        }
+        for(var removed:old.values())changed.add(RoadArea.of(removed));
+        return changed;
     }
 
     private static List<WaterFlow.Cell> changedCells(SceneRules before,SceneRules after){

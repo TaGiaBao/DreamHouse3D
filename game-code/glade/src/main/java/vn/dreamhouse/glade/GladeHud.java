@@ -195,6 +195,34 @@ final class GladeHud {
         node.getChild(node.getQuantity()-1).setUserData("buttonId",id);
     }
 
+    void blueprintCard(String id,String label,BlueprintModule module,int x,int y,int w,int h,boolean selected){
+        var image=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
+        var g=graphics(image);
+        g.setColor(Color.decode(selected?"#bdd298":"#eadbbc"));
+        g.fillRoundRect(0,0,w,h-4,18,18);
+        g.setColor(Color.decode(selected?"#5a7c49":"#ac916c"));
+        g.drawRoundRect(1,1,w-3,h-6,17,17);
+        var scene=module.design();
+        float scale=Math.min(16,64/Math.max(scene.land().width(),scene.land().depth()));
+        for(var item:scene.items()){
+            var position=scene.placement(item);
+            var material=item.form().finish();
+            String tint=item.mount()!=null?"#8e6b4d":material.color().isEmpty()?"#c3885e":material.color();
+            int cx=Math.round(46+position.center().x()*scale),cy=Math.round(40+position.center().z()*scale-position.elevation()*scale*.45f);
+            int iw=Math.max(3,Math.round(item.width()*scale)),ih=Math.max(3,Math.round(item.depth()*scale*.65f));
+            g.setColor(Color.decode(tint));g.fillRoundRect(cx-iw/2,cy-ih/2,iw,ih,4,4);
+            g.setColor(new Color(86,58,35,130));g.drawRoundRect(cx-iw/2,cy-ih/2,iw,ih,4,4);
+        }
+        g.setColor(Color.decode("#493d30"));
+        g.setFont(new Font("Segoe UI",Font.BOLD,11));
+        while(g.getFontMetrics().stringWidth(label)>w-91 && label.length()>2)label=label.substring(0,label.length()-2)+"…";
+        g.drawString(label,83,32);
+        g.setFont(new Font("Segoe UI",Font.PLAIN,11));
+        g.drawString(scene.items().size()+" cấu kiện",83,51);
+        g.dispose();surface(image,x,y);buttons.put(id,new Rectangle(x,y,w,h));
+        node.getChild(node.getQuantity()-1).setUserData("buttonId",id);
+    }
+
     void iconButton(String id,String label,String icon,int x,int y,int w,int h,boolean selected) {
         button(id,"",x,y,w,h,selected);
         var image=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);

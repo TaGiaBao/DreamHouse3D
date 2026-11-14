@@ -24,6 +24,7 @@ class StrokeToolsCheck extends ProceduralMechanicsCheck {
         app.setSettings(settings);app.setShowSettings(false);app.setPauseOnLostFocus(false);app.start();
         try {
             engine(()->true);set("qualityLow",true);call("applyQuality");fixture(empty);
+            checkPlotAndWheel(empty);
             clickRaw("water");slider(true);
             ok((Float)field("waterRadius")==4f && design().items().isEmpty(),"slider reaches max without painting a source");
             clickRaw("landscape");slider(false);
@@ -51,6 +52,40 @@ class StrokeToolsCheck extends ProceduralMechanicsCheck {
             design().save(file);ok(GladeDesign.load(file).items().equals(design().items()),"width and finish survive save and load");
             System.out.println("STROKE_TOOLS_PASS: independent sliders, water spread, road geometry, editing, undo and save");
         }finally{app.stop();}
+    }
+
+    private static void checkPlotAndWheel(GladeDesign empty)throws Exception {
+        float before=(Float)field("distance");
+        float yaw=(Float)field("yaw"),elevation=(Float)field("elevation");
+        set("distance",36f);set("yaw",0f);set("elevation",.85f);call("updateCamera");
+        var outside=new Vector3f(empty.land().maxX()+2,0,-2);
+        var projected=screen(outside);
+        ok(projected.x<app.getCamera().getWidth()-20 && projected.y>250,"outside target is visible in the viewport");
+        BuildMorphCheck.choose("HOUSE");click(outside);
+        ok(design()==empty,"outside click does not place a house");
+        clickRaw("water");click(outside);
+        ok(design()==empty,"outside click does not pour water");
+        clickRaw("terrain");click(outside);
+        ok(design()==empty,"outside click does not sculpt terrain");
+        clickRaw("landscape");click(outside);
+        ok(design()==empty,"outside click does not place a road");
+        var slider=ArchitectureCheck.buttons().get("brushWidth");
+        wheel((int)slider.getCenterX(),(int)slider.getCenterY(),120);
+        ok((Float)field("distance")==36f,"the brush panel consumes wheel input");
+        wheel(700,390,120);
+        ok((Float)field("distance")<36f,"wheel still zooms over the scene");
+        set("distance",before);set("yaw",yaw);set("elevation",elevation);call("updateCamera");
+    }
+
+    private static void wheel(int x,int y,int delta)throws Exception {
+        engine(()->{
+            var input=app.getInputManager();var gate=com.jme3.input.InputManager.class.getDeclaredField("eventsPermitted");
+            gate.setAccessible(true);gate.setBoolean(input,true);
+            try{input.onMouseMotionEvent(new com.jme3.input.event.MouseMotionEvent(x,y,0,0,delta,delta));}
+            finally{gate.setBoolean(input,false);}
+            return true;
+        });
+        Thread.sleep(160);
     }
 
     private static void slider(boolean wider)throws Exception {

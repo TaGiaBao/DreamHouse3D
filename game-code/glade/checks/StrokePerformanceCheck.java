@@ -17,13 +17,20 @@ import static vn.dreamhouse.glade.GladeDesign.*;
 /** Repeatable frame-time sample using the same live tools as the game. */
 class StrokePerformanceCheck extends ProceduralMechanicsCheck {
     public static void main(String[] args)throws Exception {
-        var scene=args[0].equals("--scene-s")?sceneS():GladeDesign.load(Path.of(args[0]));
+        var scene=switch(args[0]){
+            case "--scene-s" -> sceneS();
+            case "--scene-m" -> RiversideVillage.create();
+            default -> GladeDesign.load(Path.of(args[0]));
+        };
+        boolean low=java.util.Arrays.asList(args).contains("--low");
         app=new GladeApp();var settings=new AppSettings(true);
         settings.setResolution(1100,720);settings.setSamples(2);settings.setGammaCorrection(true);
         settings.setVSync(false);settings.setFrameRate(120);settings.setRenderer(AppSettings.LWJGL_OPENGL33);
         settings.setAudioRenderer(null);app.setSettings(settings);app.setShowSettings(false);app.setPauseOnLostFocus(false);app.start();
         try {
             engine(()->true);fixture(scene);
+            set("qualityLow",low);call("applyQuality");
+            System.out.println("SCENE_STROKES objects="+scene.items().size()+" quality="+(low?"low":"beautiful"));
             set("distance",42f);set("yaw",0f);set("elevation",.88f);call("updateCamera");
             set("waterRadius",4f);set("pathWidth",3f);
             var times=new ArrayList<Float>();

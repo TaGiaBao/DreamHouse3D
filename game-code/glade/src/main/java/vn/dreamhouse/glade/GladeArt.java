@@ -47,28 +47,25 @@ final class GladeArt {
 
     Node meadow(GladeDesign design) {
         var land=meadow(design.halfWidth(),design.halfDepth());
-        for(int i=0;i<3;i++) land.getChild(0).removeFromParent();
         for(var child:land.getChildren()) {
             var p=child.getLocalTranslation();
             child.move(0,design.terrain().height(p.x+design.land().centerX(),p.z+design.land().centerZ()),0);
         }
-        ReactiveFeatures.trimGrass(land,design);
         // Keep editable terrain/grass separate; batch only fixed scenery after height adjustment.
         var scenery=new Node("Trang trí thung lũng");
-        for(var child:new ArrayList<>(land.getChildren()))if(!child.getName().equals("Cỏ")){child.removeFromParent();scenery.attachChild(child);}
+        for(var child:new ArrayList<>(land.getChildren())){child.removeFromParent();scenery.attachChild(child);}
         scenery.updateGeometricState();jme3tools.optimize.GeometryBatchFactory.optimize(scenery,false);land.attachChild(scenery);
+        land.attachChild(MeadowArt.grass(this,design));
+        ReactiveFeatures.trimGrass(land,design);
         var mesh=TerrainMesh.build(this,design);land.attachChild(mesh);
         land.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);return land;
     }
 
-    Node meadow(float halfWidth,float halfDepth) {
+    private Node meadow(float halfWidth,float halfDepth) {
         random.setSeed(48);
         float scaleX=halfWidth/9;
         float scaleZ=halfDepth/6.5f;
         var land=new Node("Thung lũng");
-        box(land,halfWidth*2+2,0.65f,halfDepth*2+2,0,-0.45f,0,"#9d7955");
-        box(land,halfWidth*2+2.05f,0.18f,halfDepth*2+2.05f,0,-0.77f,0,"#d3af7b");
-        box(land,halfWidth*2+2,0.18f,halfDepth*2+2,0,-0.08f,0,"#94ac6d");
         for(var p:List.of(new Vector3f(-8,0,-4),new Vector3f(8,0,-4),
                 new Vector3f(-8.5f,0,3),new Vector3f(8,0,4),new Vector3f(-5,0,-6))) {
             var tree=tree(1.3f);
@@ -94,7 +91,6 @@ final class GladeArt {
                 land.attachChild(flowers);
             }
         }
-        grass(land,scaleX,scaleZ);
         land.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
         return land;
     }
@@ -164,7 +160,8 @@ final class GladeArt {
         }
         if(item.kind().footprint()) node.rotate(0,design.placement(item).rotation()*FastMath.DEG_TO_RAD,0);
         ArchitectureJoin.apply(node,item,design);
-        node.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        node.setShadowMode(item.kind()==GladeDesign.Kind.FLOWERS
+            ?RenderQueue.ShadowMode.Receive:RenderQueue.ShadowMode.CastAndReceive);
         return node;
     }
 
@@ -583,34 +580,6 @@ final class GladeArt {
         var node=new Node("Hoa");
         ScenicDetails.blossoms(this,node,.7f,.7f,.33f,"#f1e7ba");
         return node;
-    }
-
-    private void grass(Node node,float scaleX,float scaleZ) {
-        for(String color:List.of("#7c9855","#a3b86d")) {
-            var points=new ArrayList<Float>();
-            var normals=new ArrayList<Float>();
-            var indices=new ArrayList<Integer>();
-            for(int i=0;i<1400;i++) {
-                float x=(random.nextFloat()*19-9.5f)*scaleX,z=(random.nextFloat()*14-7)*scaleZ;
-
-                for(int blade=0;blade<3;blade++) {
-                    int start=points.size()/3;
-                    float h=0.12f+random.nextFloat()*0.18f;
-                    for(float value:new float[]{x-0.02f,0.02f,z,x+0.02f,0.02f,z,x+0.07f,h,z+0.04f}) points.add(value);
-                    for(int p=0;p<3;p++) { normals.add(0f);normals.add(0.7f);normals.add(0.7f); }
-                    indices.add(start);indices.add(start+1);indices.add(start+2);
-                }
-            }
-            var mesh=new Mesh();
-            mesh.setBuffer(VertexBuffer.Type.Position,3,toFloats(points));
-            mesh.setBuffer(VertexBuffer.Type.Normal,3,toFloats(normals));
-            mesh.setBuffer(VertexBuffer.Type.Index,3,indices.stream().mapToInt(Integer::intValue).toArray());
-            mesh.updateBound();
-            var geometry=new Geometry("Cỏ",mesh);
-            geometry.setMaterial(material(color));
-            geometry.getMaterial().getAdditionalRenderState().setFaceCullMode(com.jme3.material.RenderState.FaceCullMode.Off);
-            node.attachChild(geometry);
-        }
     }
 
     Geometry box(Node node,float w,float h,float d,float x,float y,float z,String color) {

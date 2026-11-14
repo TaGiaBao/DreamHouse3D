@@ -8,12 +8,20 @@ import java.util.*;
 
 /** A construction cage, never a saved structure and never part of world picking. */
 final class BuildGhost extends Node {
+ enum State { READY, SNAPPED, BLOCKED }
  private final Material frame,footprint;
  private String last="";
  BuildGhost(AssetManager assets){super("Khung xem trước");frame=material(assets,new ColorRGBA(.82f,.66f,.40f,.78f));footprint=material(assets,new ColorRGBA(1,1,.89f,.95f));setShadowMode(RenderQueue.ShadowMode.Off);}
  private Material material(AssetManager assets,ColorRGBA color){var mat=new Material(assets,"Common/MatDefs/Misc/Unshaded.j3md");mat.setColor("Color",color);mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);mat.getAdditionalRenderState().setDepthWrite(false);mat.getAdditionalRenderState().setLineWidth(2);return mat;}
  void hide(){setCullHint(CullHint.Always);}
  void show(GladeDesign.Item item,GladeDesign scene){
+  show(item,scene,State.READY);
+ }
+ void show(GladeDesign.Item item,GladeDesign scene,State state){
+  ColorRGBA color=switch(state){case READY->new ColorRGBA(.72f,.96f,.58f,.90f);case SNAPPED->new ColorRGBA(.48f,.87f,1,.95f);case BLOCKED->new ColorRGBA(1,.37f,.27f,.95f);};
+  frame.setColor("Color",color);
+  footprint.setColor("Color",color);
+  setUserData("placementState",state.name());
   var p=scene.placement(item);String key=item.kind()+":"+item.width()+":"+item.depth()+":"+item.height()+":"+item.form().roof();
   if(!key.equals(last)){last=key;detachAllChildren();float w=item.width()/2,d=item.depth()/2,h=item.height(),roof=item.form().roof();var lines=new ArrayList<Float>();var base=new ArrayList<Float>();
    if(item.kind()==GladeDesign.Kind.PENTAGON)polygonFrame(item,lines,base);
