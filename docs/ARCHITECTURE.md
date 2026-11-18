@@ -8,12 +8,13 @@
 | --- | --- |
 | GladeApp | Điều phối thao tác, lựa chọn, camera và giao diện trong game |
 | GladeDesign | Trạng thái cảnh và các quan hệ mount/support |
+| AssemblyDuplicator | Nhân bản nhà hoặc cấu kiện, ánh xạ liên kết cha/con |
 | AssemblyClipboard | Dán cụm công trình, cấp lại ID và liên kết giữa các phần |
 | ArchitectureJoin / StructureShell | Giao cắt và biên hình học công trình |
 | WalkController | Di chuyển ở tầm mắt và kiểm tra va chạm |
 | WorldFiles | Đọc/ghi và xác minh bản lưu |
 
-`GladeApp` vẫn lớn; lần tách AssemblyClipboard chỉ là bước đầu. Tiếp theo cần tách điều phối công cụ, giao diện HUD và phiên làm việc thành từng thay đổi riêng có kiểm thử hồi quy. Không chuyển toàn bộ lớp sang nhiều file cùng lúc vì dễ làm sai trạng thái chọn/undo/lưu.
+`GladeApp` vẫn lớn; đã tách sao chép/dán và nhân bản thành AssemblyClipboard và AssemblyDuplicator. Tiếp theo cần tách điều phối công cụ, giao diện HUD và phiên làm việc thành từng thay đổi riêng có kiểm thử hồi quy. Không chuyển toàn bộ lớp sang nhiều file cùng lúc vì dễ làm sai trạng thái chọn/undo/lưu.
 
 ## Kiểm thử
 

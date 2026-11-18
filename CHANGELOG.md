@@ -1,6 +1,8 @@
 # Lịch sử thay đổi
 
-## Đang phát triển
+## Bản Windows ngày 18/11/2026
+
+- Tách nhân bản cụm công trình thành AssemblyDuplicator, giữ liên kết cha/con và cửa gắn trên nhà.
 
 - Tách xử lý dán cụm công trình thành AssemblyClipboard và kiểm thử liên kết, vật liệu, ID mới, dữ liệu nguồn bất biến.
 - Bổ sung hướng dẫn đóng góp, kiến trúc, mẫu pull request và workflow đồ họa thủ công.

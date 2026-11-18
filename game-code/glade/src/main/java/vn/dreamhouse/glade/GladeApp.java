@@ -1729,53 +1729,11 @@ public final class GladeApp extends SimpleApplication {
     private void copySelected() {
         var item=design.items().stream().filter(candidate->Objects.equals(candidate.id(),selected)).findFirst().orElse(null);
         if(item==null) { message="Chọn công trình rồi bấm Nhân bản.";return; }
-        if(item.mount()!=null) {
-            if(item.kind().roof()) {message="Mỗi nhà dùng một bộ mái. Chọn bộ mái khác để thay thế.";return;}
-            var mount=item.mount();
-            float u=mount.u(),v=mount.v();
-            if(Math.abs(v)>.49f) u=FastMath.clamp(u+(u>.2f?-.2f:.2f),-.4f,.4f);
-            else v=FastMath.clamp(v+(v>.2f?-.2f:.2f),-.4f,.4f);
-            var copy=new GladeDesign.Item(design.nextId(),item.kind(),item.center(),item.width(),item.depth(),item.height(),
-                    item.pitched(),item.points(),item.rotation(),new GladeDesign.Mount(mount.hostId(),u,v,mount.lift()),item.form());
-            commit(design.add(copy),"Đã nhân bản cấu kiện trên cùng căn nhà.");selected=copy.id();return;
-        }
-        float minX=item.center().x(),maxX=minX,minZ=item.center().z(),maxZ=minZ;
-        if(item.kind().footprint()) {
-            minX-=item.halfWidth();maxX+=item.halfWidth();
-            minZ-=item.halfDepth();maxZ+=item.halfDepth();
-        }
-        for(var point:item.points()) {
-            minX=Math.min(minX,point.x());maxX=Math.max(maxX,point.x());
-            minZ=Math.min(minZ,point.z());maxZ=Math.max(maxZ,point.z());
-        }
-        float dx=Math.min(1.6f,design.land().maxX()-maxX);
-        if(dx<0.25f) dx=Math.max(-1.6f,design.land().minX()-minX);
-        float dz=Math.min(0.6f,design.land().maxZ()-maxZ);
-        if(dz<0.1f) dz=Math.max(-0.6f,design.land().minZ()-minZ);
-        var points=new ArrayList<GladeDesign.Point>();
-        for(var point:item.points()) points.add(new GladeDesign.Point(point.x()+dx,point.z()+dz));
         try {
-            var copy=new GladeDesign.Item(design.nextId(),item.kind(),
-                    new GladeDesign.Point(item.center().x()+dx,item.center().z()+dz),item.width(),item.depth(),
-                    item.height(),item.pitched(),points,item.rotation(),null,item.form());
-            var next=design.add(copy);
-            var pending=new ArrayDeque<Long>();pending.add(item.id());var mapped=new HashMap<Long,Long>();mapped.put(item.id(),copy.id());
-            while(!pending.isEmpty()) {
-                long parent=pending.removeFirst(),newParent=mapped.get(parent);
-                for(var child:design.items()) if(!mapped.containsKey(child.id()) && (child.form().support()==parent || child.mount()!=null && child.mount().hostId()==parent)) {
-                    var mount=child.mount();var form=child.form();
-                    if(mount!=null) mount=new GladeDesign.Mount(newParent,mount.u(),mount.v(),mount.lift());
-                    if(form.support()>=0) form=form.support(newParent);
-                    var center=new GladeDesign.Point(child.center().x()+dx,child.center().z()+dz);
-                    var cloned=new GladeDesign.Item(next.nextId(),child.kind(),center,child.width(),child.depth(),child.height(),child.pitched(),child.points(),child.rotation(),mount,form);
-                    next=next.add(cloned);mapped.put(child.id(),cloned.id());pending.add(child.id());
-                }
-            }
-            commit(next,"Đã nhân bản nhà cùng các cấu kiện gắn kèm.");
-            selected=copy.id();
+            var copied=AssemblyDuplicator.duplicate(design,item);
+            commit(copied.design(),copied.message());selected=copied.selectedId();
         } catch(IllegalArgumentException error) { message=error.getMessage(); }
     }
-
     private void focusSelected() {
         if(walking)toggleWalk();
         var item=design.items().stream().filter(candidate->Objects.equals(candidate.id(),selected)).findFirst().orElse(null);

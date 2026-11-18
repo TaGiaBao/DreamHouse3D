@@ -21,6 +21,13 @@ class AssemblyClipboardCheck {
         catch(IllegalArgumentException expected){}
         try {AssemblyClipboard.paste(source,30,new GladeDesign(List.of(),2),0);throw new AssertionError("orphan window accepted");}
         catch(IllegalArgumentException expected){}
+        var duplicate=AssemblyDuplicator.duplicate(source,source.items().stream().filter(i->i.id()==10).findFirst().orElseThrow());
+        require(duplicate.design().assemblyIds(duplicate.selectedId()).size()==3,"duplicate remaps child hierarchy");
+        require(duplicate.design().items().size()==7,"duplicate preserves existing assembly");
+        var window=source.items().stream().filter(i->i.id()==30).findFirst().orElseThrow();
+        var windowCopy=AssemblyDuplicator.duplicate(source,window);
+        var added=windowCopy.design().items().stream().filter(i->i.id()==windowCopy.selectedId()).findFirst().orElseThrow();
+        require(added.mount().hostId()==10,"duplicate window stays on original host");
         System.out.println("ASSEMBLY_CLIPBOARD_PASS");
     }
 }
