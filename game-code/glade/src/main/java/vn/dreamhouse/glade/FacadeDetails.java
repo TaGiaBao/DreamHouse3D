@@ -74,16 +74,12 @@ final class FacadeDetails {
     }
     private static void timber(GladeArt art,Node group,GladeDesign.Item item,GladeDesign scene){
         if(item.kind()==GladeDesign.Kind.TOWER){
-            int around=12;float w=item.width()/2,d=item.depth()/2;
-            for(int i=0;i<around;i++){float angle=i*FastMath.TWO_PI/around;float x=FastMath.sin(angle)*(w+.025f),z=FastMath.cos(angle)*(d+.025f);
-                column(art,group,item,scene,x,z,item.height());
-            }
             return;
         }
         for(int face=0;face<4;face++){
-            float span=face%2==0?item.width():item.depth();int bays=Math.min(20,Math.max(1,(int)Math.ceil(span/1.8f)));
-            for(int i=0;i<=bays;i++){
-                var point=local(item,face,-span/2+.045f+(span-.09f)*i/bays,0);
+            float span=face%2==0?item.width():item.depth();
+            for(int corner=0;corner<2;corner++){
+                var point=local(item,face,-span/2+.045f+(span-.09f)*corner,0);
                 column(art,group,item,scene,point.x,point.z,item.height());
             }
             int floors=Math.min(24,Math.max(1,(int)Math.ceil(item.height()/2.8f)));
@@ -152,6 +148,7 @@ final class FacadeDetails {
         return switch(face){case 0->new Vector3f(u,y,item.depth()/2+.025f);case 1->new Vector3f(item.width()/2+.025f,y,-u);case 2->new Vector3f(-u,y,-item.depth()/2-.025f);default->new Vector3f(-item.width()/2-.025f,y,u);};
     }
     private static boolean exposed(GladeDesign.Item item,GladeDesign scene,Vector3f p,float clearance){
+        if(GladeArt.streetWindowCovers(item,scene,p,clearance))return false;
         if(scene.blocksOpening(item,p.x,p.z,p.y,clearance))return false;
         var place=scene.placement(item);var world=new Quaternion().fromAngleAxis(place.rotation()*FastMath.DEG_TO_RAD,Vector3f.UNIT_Y).mult(p).addLocal(place.center().x(),place.elevation(),place.center().z());
         float door=Math.min(2.1f,item.height()*.9f),path=SceneRules.pathDistance(scene,world.x,world.z);

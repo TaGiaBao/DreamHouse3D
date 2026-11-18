@@ -34,7 +34,20 @@ class FreeCameraAndFlattenCheck extends ProceduralMechanicsCheck {
   ok(Math.abs(position.z)<.12f && position.y>WalkController.EYE_HEIGHT+.55f,"bridge supports eye height over its crown");
   for(int i=0;i<25;i++)walk.move(position,new Vector3f(0,0,-.1f));
   ok(position.z<-2.3f && Math.abs(position.y-WalkController.EYE_HEIGHT)<.04f,"walk exits the bridge at the far bank");
-  System.out.println("WALK_ROUTES_PASS stairs up/down, bridge crossing, platform edge, solid wall");
+  var lowBeam=block(4,0,0,3,3,.4f,0);
+  lowBeam=new GladeDesign.Item(lowBeam.id(),lowBeam.kind(),lowBeam.center(),lowBeam.width(),lowBeam.depth(),lowBeam.height(),false,List.of(),0,null,new GladeDesign.Form(1.4f,0,0,-1));
+  var beamScene=new GladeDesign(List.of(lowBeam),2);
+  var beamWalk=new WalkController(beamScene,ArchitectureContinuityCheck.render(beamScene));
+  beamWalk.spawn(position,0,2.8f);
+  beamWalk.move(position,new Vector3f(0,0,-3));
+  ok(position.z>=1.5f,"overhang at head height blocks camera clipping: "+position);
+  var highBeam=new GladeDesign.Item(lowBeam.id(),lowBeam.kind(),lowBeam.center(),lowBeam.width(),lowBeam.depth(),lowBeam.height(),false,List.of(),0,null,new GladeDesign.Form(2.2f,0,0,-1));
+  var clearScene=new GladeDesign(List.of(highBeam),2);
+  var clearWalk=new WalkController(clearScene,ArchitectureContinuityCheck.render(clearScene));
+  clearWalk.spawn(position,0,2.8f);
+  clearWalk.move(position,new Vector3f(0,0,-3));
+  ok(position.z<0,"high overhang permits walking underneath: "+position);
+  System.out.println("WALK_ROUTES_PASS stairs up/down, bridge crossing, platform edge, solid wall, head clearance");
  }
  public static void main(String[] args)throws Exception {
   walkRoutes();

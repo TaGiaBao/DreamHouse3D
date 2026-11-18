@@ -325,7 +325,8 @@ final class GladeDesign {
                 item.points(),item.rotation(),item.mount(),item.form().support(nextSupport));
     }
 
-    GladeDesign replace(Item item) {
+    GladeDesign replace(Item replacement) {
+        var item=releaseUnsupportedMove(replacement);
         var next=new ArrayList<>(items);
         var original=items.stream().filter(old->old.id()==item.id()).findFirst().orElseThrow();
         var queue=new ArrayDeque<Item[]>();queue.add(new Item[]{original,item});
@@ -342,7 +343,17 @@ final class GladeDesign {
                 queue.addLast(new Item[]{child,moved});
             }
         }
-        return new GladeDesign(next,land,terrain);
+        var result=new GladeDesign(next,land,terrain);
+        for(int index=0;index<next.size();index++){
+            var child=next.get(index);
+            if(child.form().support()!=item.id())continue;
+            var supported=result.releaseUnsupportedMove(child);
+            if(!supported.equals(child)){
+                next.set(index,supported);
+                result=new GladeDesign(next,land,terrain);
+            }
+        }
+        return result;
     }
 
     GladeDesign remove(long id) {

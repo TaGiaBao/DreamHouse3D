@@ -146,7 +146,7 @@ final class GladeArt {
         if((design.hillside(item) || attachedRoof!=null && attachedRoof.kind()==GladeDesign.Kind.ROOF_CURVED)
                 && item.kind()!=GladeDesign.Kind.PENTAGON)
             curvedRoofFrame(node,item,design);
-        else if(item.kind()==GladeDesign.Kind.HOUSE && finish.variant()==18 && (hasJoinedRoof || design.hasUpper(item.id()) || item.form().support()>=0))
+        else if(streetWindows(item,design))
             streetFacade(node,item,design);
         ReactiveFeatures.decorate(this,node,item,design);
         PlainStructure.terraceRail(this,node,item,design);
@@ -202,6 +202,27 @@ final class GladeArt {
                 lantern.setMaterial(lit);
             }
         }
+    }
+
+    static boolean streetWindows(GladeDesign.Item item,GladeDesign design){
+        var roof=design.attachedRoof(item.id());
+        return item.kind()==GladeDesign.Kind.HOUSE && item.height()>=1.55f
+                && item.form().finish().variant()==18 && !design.hillside(item)
+                && (roof==null || roof.kind()!=GladeDesign.Kind.ROOF_CURVED)
+                && (design.roofFusion().joined(item.id()) || design.hasUpper(item.id()) || item.form().support()>=0);
+    }
+    static boolean streetWindowCovers(GladeDesign.Item item,GladeDesign design,Vector3f point,float clearance){
+        if(!streetWindows(item,design) || Math.abs(Math.abs(point.z)-item.depth()/2)>.1f+clearance
+                || Math.abs(point.y-item.height()*.60f)>.36f+clearance)return false;
+        int bays=Math.clamp((int)(item.width()/.95f),1,16);
+        for(int i=0;i<bays;i++){
+            float x=((i+.5f)/bays-.5f)*item.width();
+            if(Math.abs(point.x-x)>.31f+clearance)continue;
+            float z=Math.copySign(item.depth()/2+.025f,point.z),y=item.height()*.60f;
+            if(!StructureShell.coveredDetail(item,design,new Vector3f(x,y,z))
+                    && !design.blocksOpening(item,x,z,y,.31f))return true;
+        }
+        return false;
     }
 
     private void streetFacade(Node node,GladeDesign.Item item,GladeDesign design){

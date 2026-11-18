@@ -42,6 +42,7 @@ class ArchitectureContinuityCheck extends ProceduralMechanicsCheck {
     }
     public static void main(String[]args)throws Exception {
         terrainChecks();
+        supportEdits();
         var a=block(0,0,0,4,3,2.6f,1.4f);var b=block(1,3,0,2,3,2.6f,1.4f);var scene=new GladeDesign(List.of(a,b),2);var root=render(scene);
         ok(!hit(root,new Vector3f(1.7f,1,0),Vector3f.UNIT_X,.65f),"flush join has no interior wall or timber post");
         b=block(1,3.137f,.219f,3,2.2f,2.6f,1.4f);scene=new GladeDesign(List.of(a,b),2);root=render(scene);
@@ -89,6 +90,39 @@ class ArchitectureContinuityCheck extends ProceduralMechanicsCheck {
         var beforePlatform=new GladeDesign(List.of(a),scene.land(),scene.terrain());cache.update(cached,ART,beforePlatform);var oldRoot=cached.getChild(0);cache.update(cached,ART,new GladeDesign(List.of(a,platform),scene.land(),scene.terrain()));ok(cached.getChild(0)!=oldRoot,"adding a solid platform invalidates affected house shell");
         var oldPlatform=cached.getChild(1);cache.update(cached,ART,new GladeDesign(List.of(platform),scene.land(),scene.terrain()));ok(cached.getChild(0)!=oldPlatform,"removing a house rebuilds the neighboring structural platform");
         System.out.println("ARCHITECTURE_CONTINUITY_PASS: exact flush/partial walls, preserved exterior strips, real arch/round/door openings and reveals, curved path passage, raised-floor safety, round joins, stacked floor interfaces, enclosed solids, save restoration and cache invalidation; no screenshots");
+    }
+
+    private static void supportEdits() throws Exception {
+        var base=block(0,0,0,8,4,2.6f,1.4f);
+        var upper=block(1,3,0,2,2,2,1);
+        upper=new GladeDesign.Item(1,upper.kind(),upper.center(),2,2,2,true,List.of(),0,null,upper.form().support(0));
+        var scene=new GladeDesign(List.of(base,upper),2);
+        var wallDetails=new Node();
+        FacadeDetails.build(ART,wallDetails,base,scene);
+        wallDetails.updateGeometricState();
+        var plasterFrame=wallDetails.getChild("Chi tiết vật liệu plaster");
+        ok(plasterFrame!=null,"plaster frame exists");
+        ok(!hit(plasterFrame,new Vector3f(-.791f,.8f,2.4f),Vector3f.UNIT_Z.negate(),.6f),
+                "plaster wall has no intermediate vertical timber posts");
+        ok(hit(plasterFrame,new Vector3f(-3.955f,.8f,2.4f),Vector3f.UNIT_Z.negate(),.6f),
+                "corner trim remains on plaster wall");
+        ok(GladeArt.streetWindowCovers(base,scene,new Vector3f(-.5f,base.height()*.6f,2.025f),.08f),
+                "automatic street window reserves space in facade trim");
+        ok(!GladeArt.streetWindowCovers(base,scene,new Vector3f(-.5f,.4f,2.025f),.08f),
+                "trim below windows remains visible");
+        var shrunk=scene.replace(block(0,0,0,2,4,2.6f,1.4f));
+        ok(shrunk.item(1).form().support()==-1,"shrinking support releases an upper floor outside footprint");
+        ok(shrunk.placement(shrunk.item(1)).elevation()==0,"released floor rests on terrain");
+        ok(shrunk.roofRise(shrunk.item(0))>0,"lower roof returns after resize detaches upper floor");
+        var retained=scene.replace(block(0,0,0,7,4,2.6f,1.4f));
+        ok(retained.item(1).form().support()==0,"partial overlap retains support");
+        var moved=scene.replace(BuildSnap.copy(upper,new GladeDesign.Point(7,0)));
+        ok(moved.item(1).form().support()==-1,"model-level move releases support without a UI-specific call");
+        var history=new DesignHistory();history.record(scene);
+        ok(history.step(shrunk,false)==scene && history.step(scene,true)==shrunk,"support edit undo and redo restore exact scenes");
+        var file=PlayerFiles.directory("checks").resolve("support-resize.glade");
+        shrunk.save(file);
+        ok(GladeDesign.load(file).items().equals(shrunk.items()),"resized support links survive save reload");
     }
 
     private static void steppedDistricts() throws Exception {

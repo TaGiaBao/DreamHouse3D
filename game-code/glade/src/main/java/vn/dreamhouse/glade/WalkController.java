@@ -101,7 +101,7 @@ final class WalkController {
         float distance=(float)Math.hypot(dx,dz);
         var direction=new Vector3f(dx/distance,0,dz/distance);
         var side=new Vector3f(direction.z,0,-direction.x);
-        for(float shoulder:new float[]{-RADIUS,0,RADIUS})for(float height:new float[]{.32f,1.25f}){
+        for(float shoulder:new float[]{-RADIUS,0,RADIUS})for(float height:new float[]{.32f,1.25f,EYE_HEIGHT+.12f}){
             var ray=new Ray(new Vector3f(position.x+side.x*shoulder,Math.max(feet,target)+height,position.z+side.z*shoulder),direction);
             ray.setLimit(distance+RADIUS);
             hits.clear();
