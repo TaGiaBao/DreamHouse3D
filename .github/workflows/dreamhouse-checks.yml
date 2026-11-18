@@ -1,19 +1,28 @@
 name: DreamHouse regression
 on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+concurrency:
+  group: regression-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   data-and-cache:
     runs-on: windows-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
-      - name: Data, recovery, import and CPU cache checks
+      - name: Data, assembly, recovery and cache checks
         shell: powershell
         run: ./game-code/Run-DreamHouse-Checks.ps1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: qa-results
-          path: game-code/glade/test-results/**
+          retention-days: 14
+          path: |
+            game-code/glade/test-results/**/summary.json
+            game-code/glade/test-results/**/*.log

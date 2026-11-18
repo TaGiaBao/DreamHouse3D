@@ -2,6 +2,10 @@
 
 ## Đang phát triển
 
+- Tách xử lý dán cụm công trình thành AssemblyClipboard và kiểm thử liên kết, vật liệu, ID mới, dữ liệu nguồn bất biến.
+- Bổ sung hướng dẫn đóng góp, kiến trúc, mẫu pull request và workflow đồ họa thủ công.
+- CI giới hạn thời gian, quyền đọc và chỉ tải log/summary; không đưa classes hoặc save vào artifact.
+
 - Khối trên được kiểm tra lại liên kết khi khối đỡ bị thu nhỏ. Khi hết phần đỡ, khối trở về địa hình và mái khối dưới được khôi phục.
 - Nhà tường trát bỏ cột gỗ dọc giữa mảng tường. Chi tiết mặt đứng chừa khoảng cho cửa sổ tự sinh.
 - Chế độ đi bộ kiểm tra thêm va chạm ở tầm đầu.

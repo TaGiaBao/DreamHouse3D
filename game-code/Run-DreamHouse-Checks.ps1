@@ -1,4 +1,4 @@
-﻿param([switch]$IncludeGraphics, [switch]$CaptureScreenshots)
+param([switch]$IncludeGraphics, [switch]$CaptureScreenshots)
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\Find-Java.ps1"
 . "$PSScriptRoot\Checked-Process.ps1"
@@ -42,6 +42,7 @@ if ($IncludeGraphics) {
         @{ Name='RightOrbitCheck'; Marker='RIGHT_ORBIT_PASS' }
     )
 }
+$suite += @{ Name='AssemblyClipboardCheck'; Marker='ASSEMBLY_CLIPBOARD_PASS' }
 $results = @()
 $suite += @(@{ Name='SessionPersistenceCheck'; Marker='SESSION_PERSISTENCE_PASS' }, @{ Name='ResourceCacheCheck'; Marker='RESOURCE_CACHE_PASS' })
 if($IncludeGraphics){$suite += @{ Name='PersistenceUiCheck'; Marker='PERSISTENCE_UI_PASS' }}

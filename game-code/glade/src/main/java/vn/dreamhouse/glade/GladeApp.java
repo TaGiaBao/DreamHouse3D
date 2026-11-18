@@ -1720,33 +1720,12 @@ public final class GladeApp extends SimpleApplication {
     }
     private void pasteClipboard() {
         if(clipboardDesign==null || clipboardRoot==null){message="Chưa có công trình trong bộ nhớ sao chép.";return;}
-        var source=clipboardDesign;var root=source.items().stream().filter(i->i.id()==clipboardRoot).findFirst().orElseThrow();
-        var ids=source.assemblyIds(root.id());var mapping=new HashMap<Long,Long>();long id=design.nextId();
-        for(var part:source.items()) if(ids.contains(part.id())) mapping.put(part.id(),id++);
-        float offset=1.2f*(pasteCount+1),dx=offset,dz=offset;
-        float minX=Float.POSITIVE_INFINITY,maxX=-minX,minZ=minX,maxZ=-minX;
-        for(var part:source.items()) if(ids.contains(part.id()) && part.mount()==null) {
-            minX=Math.min(minX,part.center().x()-part.halfWidth());maxX=Math.max(maxX,part.center().x()+part.halfWidth());
-            minZ=Math.min(minZ,part.center().z()-part.halfDepth());maxZ=Math.max(maxZ,part.center().z()+part.halfDepth());
-        }
-        if(Float.isFinite(minX)){dx=FastMath.clamp(dx,design.land().minX()-minX+.1f,design.land().maxX()-maxX-.1f);dz=FastMath.clamp(dz,design.land().minZ()-minZ+.1f,design.land().maxZ()-maxZ-.1f);}
-        var result=new ArrayList<>(design.items());
         try {
-            for(var part:source.items()) if(ids.contains(part.id())) {
-                var mount=part.mount();
-                if(mount!=null){Long parent=mapping.get(mount.hostId());
-                    long hostId=mount.hostId();
-                    if(parent==null && design.items().stream().noneMatch(host->host.id()==hostId)) throw new IllegalArgumentException("Cần có nhà gốc để dán cấu kiện này.");
-                    mount=new GladeDesign.Mount(parent==null?mount.hostId():parent,mount.u(),mount.v(),mount.lift());}
-                var form=part.form().support(mapping.getOrDefault(part.form().support(),-1L));
-                var points=new ArrayList<GladeDesign.Point>();for(var point:part.points())points.add(new GladeDesign.Point(point.x()+dx,point.z()+dz));
-                result.add(new GladeDesign.Item(mapping.get(part.id()),part.kind(),new GladeDesign.Point(part.center().x()+dx,part.center().z()+dz),part.width(),part.depth(),part.height(),part.pitched(),points,part.rotation(),mount,form));
-            }
-            var next=new GladeDesign(result,design.land(),design.terrain());selected=mapping.get(root.id());tool=Tool.SELECT;pasteCount++;
-            commit(next,"Đã dán công trình. Kéo dấu giữa khối để dời.");
+            var pasted=AssemblyClipboard.paste(clipboardDesign,clipboardRoot,design,pasteCount);
+            selected=pasted.selectedId();tool=Tool.SELECT;pasteCount++;
+            commit(pasted.design(),"Đã dán công trình. Kéo dấu giữa khối để dời.");
         } catch(IllegalArgumentException error){message=error.getMessage();}
     }
-
     private void copySelected() {
         var item=design.items().stream().filter(candidate->Objects.equals(candidate.id(),selected)).findFirst().orElse(null);
         if(item==null) { message="Chọn công trình rồi bấm Nhân bản.";return; }

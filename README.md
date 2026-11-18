@@ -41,3 +41,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\game-code\Build-DreamH
 ```
 
 Chạy `.\KIEM-TRA.cmd -IncludeGraphics` để kiểm tra thêm các thao tác trong cửa sổ game. [GitHub Actions](.github/workflows/dreamhouse-checks.yml) chạy nhóm kiểm thử dữ liệu, phục hồi, nhập tệp và bộ nhớ đệm trên Windows.
+
+## Dành cho người đọc mã nguồn
+
+- [Thiết lập máy và quy trình đóng góp](CONTRIBUTING.md)
+- [Kiến trúc, trách nhiệm các lớp và giới hạn](docs/ARCHITECTURE.md)
+- [Kiểm thử đồ họa trên Windows](docs/GRAPHICS-QA.md)
+- [Các thay đổi chưa có trong bản tải](CHANGELOG.md)
+
+Nhánh phát triển có thể mới hơn gói Windows liên kết ở trên. PASS kiểm thử dữ liệu không đồng nghĩa mọi tình huống đồ họa đã được xác nhận. Windows là nền tảng mục tiêu hiện tại.

@@ -1,0 +1,25 @@
+name: DreamHouse graphics
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: graphics-desktop
+  cancel-in-progress: false
+jobs:
+  graphics:
+    runs-on: [self-hosted, Windows, X64, dreamhouse-graphics]
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify graphics and interaction on Windows desktop
+        shell: powershell
+        run: ./game-code/Run-DreamHouse-Checks.ps1 -IncludeGraphics
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: graphics-results
+          retention-days: 14
+          path: |
+            game-code/glade/test-results/**/summary.json
+            game-code/glade/test-results/**/*.log
