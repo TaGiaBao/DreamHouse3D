@@ -8,7 +8,6 @@ import java.nio.file.*;
 import java.util.*;
 import javax.imageio.ImageIO;
 
-/** Original multi-size app icon drawn from the game's existing illustration system. */
 final class LauncherIcon {
     static BufferedImage image(int size){
         var image=new BufferedImage(size,size,BufferedImage.TYPE_INT_ARGB);var g=image.createGraphics();g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);

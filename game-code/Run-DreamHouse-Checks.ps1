@@ -1,4 +1,4 @@
-﻿param([switch]$IncludeGraphics, [switch]$CaptureScreenshots)
+param([switch]$IncludeGraphics, [switch]$CaptureScreenshots)
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\Find-Java.ps1"
 . "$PSScriptRoot\Checked-Process.ps1"
@@ -31,6 +31,7 @@ if ($IncludeGraphics) {
         @{ Name='GardenStyleCheck'; Marker='GARDEN_STYLE_PASS' },
         @{ Name='RoofColorCheck'; Marker='ROOF_COLOR_PASS' },
         @{ Name='WaterDrawingCheck'; Marker='WATER_DRAWING_PASS' },
+        @{ Name='StrokeToolsCheck'; Marker='STROKE_TOOLS_PASS' },
         @{ Name='BlueprintFlowCheck'; Marker='BLUEPRINT_FLOW_PASS' },
         @{ Name='BuildInteractionCheck'; Marker='BUILD_INTERACTION_PASS' },
         @{ Name='FreeCameraAndFlattenCheck'; Marker='FREE_CAMERA_FLATTEN_PASS' },
@@ -41,6 +42,7 @@ if ($IncludeGraphics) {
         @{ Name='RightOrbitCheck'; Marker='RIGHT_ORBIT_PASS' }
     )
 }
+$suite += @{ Name='AssemblyClipboardCheck'; Marker='ASSEMBLY_CLIPBOARD_PASS' }
 $results = @()
 $suite += @(@{ Name='SessionPersistenceCheck'; Marker='SESSION_PERSISTENCE_PASS' }, @{ Name='ResourceCacheCheck'; Marker='RESOURCE_CACHE_PASS' })
 if($IncludeGraphics){$suite += @{ Name='PersistenceUiCheck'; Marker='PERSISTENCE_UI_PASS' }}

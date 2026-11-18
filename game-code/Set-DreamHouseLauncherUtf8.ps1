@@ -73,7 +73,6 @@ public static class DreamHouseLauncherResources {
         $resources.Add([uint16]0x0409, [Text.Encoding]::UTF8.GetBytes('<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"/>'))
     }
     foreach ($language in @($resources.Keys)) {
-        # The native Java bootstrap resolves its runtime through the Windows code page.
         $xml = New-Object Xml.XmlDocument
         $stream = [IO.MemoryStream]::new($resources[$language])
         try { $xml.Load($stream) } finally { $stream.Dispose() }

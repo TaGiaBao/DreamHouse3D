@@ -82,7 +82,7 @@ Dữ liệu riêng của người chơi nằm trong **%LOCALAPPDATA%/DreamHouse*
 
 Ngân sách tệp lưu/nhập: 16 MB, 10.000 công trình, tổng 250.000 điểm nét, mỗi nét tối đa 4096 điểm và dữ liệu địa hình có giới hạn. Khi vượt ngân sách ghi, bản lưu tốt trước đó không bị thay thế. Cảnh hiện tại được giữ nếu nhập tệp thất bại. Các giới hạn này là bảo vệ dữ liệu/khả năng nạp, chưa phải cam kết hiệu năng cho cảnh có 10.000 vật thể.
 
-**Kiểm thử:** từ thư mục gốc, chạy `.\game-code\Run-DreamHouse-Checks.ps1` để kiểm tra dữ liệu và bộ đệm mô hình; thêm `-IncludeGraphics` để chạy các bài giao diện/3D. Kết quả nằm trong `game-code/glade/test-results/<lượt>/summary.json`. Mặc định không chụp ảnh. Chỉ dùng `-CaptureScreenshots` khi người dùng yêu cầu. Workflow `.github/workflows/dreamhouse-checks.yml` chạy kiểm tra dữ liệu trên Windows CI.
+**Kiểm thử:** chạy `KIEM-TRA.cmd` cho dữ liệu và bộ đệm mô hình, hoặc `KIEM-TRA.cmd -IncludeGraphics` để chạy 17 bài hiện hành có phần giao diện/3D. Kết quả nằm trong `glade/test-results/<lượt>/summary.json`. Mặc định không chụp ảnh. Chỉ dùng `-CaptureScreenshots` khi người dùng yêu cầu. Workflow `.github/workflows/dreamhouse-checks.yml` chuẩn bị cho kiểm thử dữ liệu trên Windows CI, chưa được xác nhận chạy từ repository từ xa.
 
 **Đóng gói:** `Build-DreamHouse.ps1` tạo app-image Windows, không dùng installer. `release/current.json` trỏ bản hiện hành. `Start-DreamHouse.ps1` mở bản đóng gói đã kiểm tra; dùng `-Rebuild` khi phát triển để tạo bản mới. Bản exe đã thử với JAVA_HOME không hợp lệ và PATH không có Java trên máy hiện tại; còn cần thử Windows sạch khác.
 
@@ -128,7 +128,7 @@ Chọn mẫu → **Đặt mẫu**, rê chuột xem khung rồi bấm trái đặ
 
 Mẫu riêng ở `%LOCALAPPDATA%/DreamHouse/blueprints`, mỗi mẫu là tệp .glade có metadata module.version=1, tương thích dữ liệu glade-9. Ghi thay thế nguyên tử; đọc bỏ qua tệp lỗi hoặc quá 2 MB. Giới hạn 256 phần/mẫu, 128 mẫu/hộp và ngân sách điểm/công trình hiện có khi đặt. Thư mục lưu/phục hồi thế giới tiếp tục dùng luồng cũ.
 
-**F1 → Học qua thao tác** bật năm mục tiêu: dựng, biến đổi hình, vật liệu, cất mẫu và lưu thung lũng. Bắt đầu hướng dẫn giữ cảnh hiện tại; có thể tạm ẩn. Thẻ nhường chỗ cho bảng màu; Esc quay lại xem bước tiếp. Tiến độ chỉ theo phiên chơi, có thể khởi động lại qua F1.
+**F1 → Học qua thao tác** bật năm mục tiêu: dựng, biến đổi hình, vật liệu, cất mẫu và lưu thung lũng. Bắt đầu hướng dẫn giữ cảnh hiện tại; có thể tạm ẩn. Thẻ nhường chỗ cho bảng màu; Esc quay lại xem bước tiếp. Tiến độ chỉ theo phiên chơi, có thể khởi động lại qua F1. Xem [hướng dẫn ngắn](../BAT-DAU-CHOI.md).
 
 **BlueprintDataCheck** và **BlueprintFlowCheck** bổ sung kiểm tra dữ liệu/lưu và thao tác thư viện/hướng dẫn. Bộ đầy đủ có 14 bài đạt, không chụp ảnh. Tên mẫu và chọn tệp dùng hộp thoại Swing hiện có; nhánh thành công được kiểm tra qua lưu thật và callback dùng chung, còn hộp thoại/DPI và thử người mới cần xác nhận trực tiếp. Không coi kiểm thử tự động là nghiệm thu trải nghiệm hoặc máy khác.
 

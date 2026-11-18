@@ -22,6 +22,28 @@ final class GladeHud {
     Node node() { return node; }
     Rectangle bounds(String id) {return buttons.get(id);}
     void clear() { node.detachAllChildren();buttons.clear();layer=1; }
+    void block(String id,int x,int y,int width,int height) {buttons.put(id,new Rectangle(x,y,width,height));}
+
+    void slider(String id,int x,int y,int width,float fraction) {
+        buttons.put(id,new Rectangle(x,y,width,32));
+        sliderValue(id,fraction);
+    }
+
+    void sliderValue(String id,float fraction) {
+        var area=buttons.get(id);if(area==null)return;
+        node.detachChildNamed(id);
+        var image=new BufferedImage(area.width,area.height,BufferedImage.TYPE_INT_ARGB);
+        var g=graphics(image);
+        g.setColor(new Color(66,52,39));g.fillRoundRect(0,0,area.width,area.height,18,18);
+        int thumb=Math.round(12+(area.width-24)*fraction);
+        g.setColor(new Color(122,103,80));g.fillRoundRect(10,14,area.width-20,4,4,4);
+        g.setColor(new Color(101,200,238));g.fillRoundRect(10,14,thumb-8,4,4,4);
+        g.setColor(new Color(136,222,252,94));g.fillOval(thumb-9,7,18,18);
+        g.setColor(new Color(108,208,245));g.fillOval(thumb-5,11,10,10);
+        g.dispose();surface(image,area.x,area.y,3);
+        var slider=node.getChild(node.getQuantity()-1);
+        slider.setName(id);slider.setUserData("buttonId",id);
+    }
 
     String hit(float x,float y) {
         var entries=new java.util.ArrayList<>(buttons.entrySet());
@@ -173,6 +195,34 @@ final class GladeHud {
         node.getChild(node.getQuantity()-1).setUserData("buttonId",id);
     }
 
+    void blueprintCard(String id,String label,BlueprintModule module,int x,int y,int w,int h,boolean selected){
+        var image=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
+        var g=graphics(image);
+        g.setColor(Color.decode(selected?"#bdd298":"#eadbbc"));
+        g.fillRoundRect(0,0,w,h-4,18,18);
+        g.setColor(Color.decode(selected?"#5a7c49":"#ac916c"));
+        g.drawRoundRect(1,1,w-3,h-6,17,17);
+        var scene=module.design();
+        float scale=Math.min(16,64/Math.max(scene.land().width(),scene.land().depth()));
+        for(var item:scene.items()){
+            var position=scene.placement(item);
+            var material=item.form().finish();
+            String tint=item.mount()!=null?"#8e6b4d":material.color().isEmpty()?"#c3885e":material.color();
+            int cx=Math.round(46+position.center().x()*scale),cy=Math.round(40+position.center().z()*scale-position.elevation()*scale*.45f);
+            int iw=Math.max(3,Math.round(item.width()*scale)),ih=Math.max(3,Math.round(item.depth()*scale*.65f));
+            g.setColor(Color.decode(tint));g.fillRoundRect(cx-iw/2,cy-ih/2,iw,ih,4,4);
+            g.setColor(new Color(86,58,35,130));g.drawRoundRect(cx-iw/2,cy-ih/2,iw,ih,4,4);
+        }
+        g.setColor(Color.decode("#493d30"));
+        g.setFont(new Font("Segoe UI",Font.BOLD,11));
+        while(g.getFontMetrics().stringWidth(label)>w-91 && label.length()>2)label=label.substring(0,label.length()-2)+"…";
+        g.drawString(label,83,32);
+        g.setFont(new Font("Segoe UI",Font.PLAIN,11));
+        g.drawString(scene.items().size()+" cấu kiện",83,51);
+        g.dispose();surface(image,x,y);buttons.put(id,new Rectangle(x,y,w,h));
+        node.getChild(node.getQuantity()-1).setUserData("buttonId",id);
+    }
+
     void iconButton(String id,String label,String icon,int x,int y,int w,int h,boolean selected) {
         button(id,"",x,y,w,h,selected);
         var image=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
@@ -213,6 +263,7 @@ final class GladeHud {
     }
 
     void stat(String label,String value,String icon,int x,int y) {
+        node.detachChildNamed(label);
         int w=152,h=49;
         var image=new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);var g=graphics(image);
         g.setColor(new Color(84,64,42,45));g.fillRoundRect(1,4,w-2,h-4,25,25);
@@ -223,6 +274,7 @@ final class GladeHud {
         g.setColor(Color.decode("#7b694b"));g.setFont(new Font("Segoe UI",Font.BOLD,9));g.drawString(label,48,17);
         g.setColor(Color.decode("#594a33"));g.setFont(new Font("Segoe UI",Font.BOLD,13));g.drawString(value,48,33);
         g.dispose();surface(image,x,y);
+        node.getChild(node.getQuantity()-1).setName(label);
     }
 
     void update(float tpf,float mouseX,float mouseY) {

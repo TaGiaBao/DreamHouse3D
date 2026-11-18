@@ -3,7 +3,6 @@ package vn.dreamhouse.glade;
 import java.util.*;
 import static vn.dreamhouse.glade.GladeDesign.*;
 
-/** Small authored scene built exclusively from the same saved items available to the player. */
 final class CozyShowcase {
     static GladeDesign create(){
         var items=new ArrayList<Item>();var finish=GladeCatalog.plain();

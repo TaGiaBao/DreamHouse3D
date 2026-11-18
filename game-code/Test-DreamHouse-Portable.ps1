@@ -5,8 +5,6 @@ $ErrorActionPreference='Stop'
 
 $exe=Resolve-DreamHouseRelease -Root $PSScriptRoot
 $resultRoot=New-Item -ItemType Directory -Force -Path $ResultDirectory
-# Use a fresh installation and profile for each run to rule out stale readiness logs.
-# Construct the characters explicitly so Windows PowerShell 5 reads this UTF-8 script correctly.
 $accented='B'+[char]0x1EA3+'n n'+[char]0x1ED9+'p'
 $fixture=Join-Path $resultRoot.FullName ("portable-"+[Guid]::NewGuid().ToString('N').Substring(0,8))
 $installation=Join-Path $fixture "$accented DreamHouse"

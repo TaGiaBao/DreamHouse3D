@@ -18,11 +18,8 @@ final class GladeArt {
         @Override protected boolean removeEldestEntry(Map.Entry<String,Mesh> eldest) { return size()>384; }
     };
     private final Random random=new Random(48);
-    private GladeDesign fusionDesign;
-    private BlockFusion fusion;
     boolean joinedRoof(GladeDesign.Item item,GladeDesign design) {
-        if(fusionDesign!=design) {fusionDesign=design;fusion=new BlockFusion(design);}
-        return fusion.joined(item.id());
+        return design.roofFusion().joined(item.id());
     }
 
     GladeArt(AssetManager assets) { this.assets=assets; }
@@ -47,28 +44,24 @@ final class GladeArt {
 
     Node meadow(GladeDesign design) {
         var land=meadow(design.halfWidth(),design.halfDepth());
-        for(int i=0;i<3;i++) land.getChild(0).removeFromParent();
         for(var child:land.getChildren()) {
             var p=child.getLocalTranslation();
             child.move(0,design.terrain().height(p.x+design.land().centerX(),p.z+design.land().centerZ()),0);
         }
-        ReactiveFeatures.trimGrass(land,design);
-        // Keep editable terrain/grass separate; batch only fixed scenery after height adjustment.
         var scenery=new Node("Trang trí thung lũng");
-        for(var child:new ArrayList<>(land.getChildren()))if(!child.getName().equals("Cỏ")){child.removeFromParent();scenery.attachChild(child);}
+        for(var child:new ArrayList<>(land.getChildren())){child.removeFromParent();scenery.attachChild(child);}
         scenery.updateGeometricState();jme3tools.optimize.GeometryBatchFactory.optimize(scenery,false);land.attachChild(scenery);
+        land.attachChild(MeadowArt.grass(this,design));
+        ReactiveFeatures.trimGrass(land,design);
         var mesh=TerrainMesh.build(this,design);land.attachChild(mesh);
         land.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);return land;
     }
 
-    Node meadow(float halfWidth,float halfDepth) {
+    private Node meadow(float halfWidth,float halfDepth) {
         random.setSeed(48);
         float scaleX=halfWidth/9;
         float scaleZ=halfDepth/6.5f;
         var land=new Node("Thung lũng");
-        box(land,halfWidth*2+2,0.65f,halfDepth*2+2,0,-0.45f,0,"#9d7955");
-        box(land,halfWidth*2+2.05f,0.18f,halfDepth*2+2.05f,0,-0.77f,0,"#d3af7b");
-        box(land,halfWidth*2+2,0.18f,halfDepth*2+2,0,-0.08f,0,"#94ac6d");
         for(var p:List.of(new Vector3f(-8,0,-4),new Vector3f(8,0,-4),
                 new Vector3f(-8.5f,0,3),new Vector3f(8,0,4),new Vector3f(-5,0,-6))) {
             var tree=tree(1.3f);
@@ -94,13 +87,12 @@ final class GladeArt {
                 land.attachChild(flowers);
             }
         }
-        grass(land,scaleX,scaleZ);
         land.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
         return land;
     }
 
     Node render(GladeDesign.Item item,GladeDesign design) {
-        joinedRoof(item,design);
+        if(item.kind()==GladeDesign.Kind.PATH)return renderPath(item,design);
         var node=new Node(item.kind().name());
         node.setUserData("itemId",item.id());
         if(AttachmentRules.hidden(item,design)){node.setUserData("hiddenAttachment",true);return node;}
@@ -111,10 +103,9 @@ final class GladeArt {
             case CANAL_HOUSE, BRICK_HOUSE -> urbanHouse(node,item,design,item.kind()==GladeDesign.Kind.BRICK_HOUSE);
             case TOWER -> tower(node,item,design);
             case PAVILION -> pavilion(node,item,design);
-            case BRIDGE -> bridge(node,item);
+            case BRIDGE -> bridge(node,item,design);
             case WALL -> wall(node,item,design);
             case FENCE -> fence(node,item,design);
-            case PATH -> path(node,item,design);
             case TREE -> {
                 node.attachChild(tree(1));
                 node.setLocalTranslation(item.center().x(),0,item.center().z());
@@ -124,7 +115,10 @@ final class GladeArt {
                 node.setLocalTranslation(item.center().x(),0,item.center().z());
             }
             case WATER -> {
-                if(WaterFlow.source(item))node.attachChild(WaterFlow.render(this,item,design,SceneRules.of(design).flows.get(item.id())));
+                if(WaterFlow.source(item)){
+                    var rules=SceneRules.of(design);
+                    node.attachChild(WaterFlow.render(this,item,design,rules.flows.get(item.id()),rules.takeSurface(item.id())));
+                }
                 else if(item.points().isEmpty()){var water=sphere(node,1,0,0.01f,0,"#79b4b0");water.setLocalScale(item.width()/2,0.035f,item.depth()/2);}
                 else {node.attachChild(WaterMesh.build(this,item,design));WaterBank.decorate(this,node,item,design);node.setUserData("paintedWater",true);}
                 node.setLocalTranslation(item.center().x(),0,item.center().z());
@@ -132,7 +126,14 @@ final class GladeArt {
             default -> new GladeParts(this).render(node,item,design);
         }
         if(!crafted) GladeVariants.apply(this,node,item);
-        if(fusion.joined(item.id())) {var joined=fusion.mesh(this,item);if(joined!=null){joined.depthFirstTraversal(part->{if(part instanceof Geometry && !Boolean.TRUE.equals(part.getUserData("wallSurface")))part.setUserData("roofSurface",true);});node.attachChild(joined);}}
+        boolean hasJoinedRoof=item.kind().roofHost() && joinedRoof(item,design);
+        if(hasJoinedRoof) {
+            var joined=design.roofFusion().mesh(this,item);
+            if(joined!=null){
+                joined.depthFirstTraversal(part->{if(part instanceof Geometry && !Boolean.TRUE.equals(part.getUserData("wallSurface")))part.setUserData("roofSurface",true);});
+                node.attachChild(joined);
+            }
+        }
         if(item.kind()==GladeDesign.Kind.WALL || item.kind()==GladeDesign.Kind.BRICK_WALL || item.kind()==GladeDesign.Kind.TIMBER_WALL || item.kind()==GladeDesign.Kind.FENCE)
             node.depthFirstTraversal(part->{if(part instanceof Geometry)part.setUserData("wallSurface",true);});
         if(Set.of(GladeDesign.Kind.DECK,GladeDesign.Kind.PERGOLA,GladeDesign.Kind.BENCH,GladeDesign.Kind.STAIRS_WOOD,GladeDesign.Kind.STAIRS_STONE).contains(item.kind()))
@@ -141,7 +142,14 @@ final class GladeArt {
         if(item.kind().roof() && item.mount()!=null) finish=design.items().stream().filter(host->host.id()==item.mount().hostId()).findFirst().orElseThrow().form().finish();
         if(item.kind().building())ScenicDetails.house(this,node,item,design);
         GladePaint.apply(this,node,finish);
+        var attachedRoof=item.kind().roofHost()?design.attachedRoof(item.id()):null;
+        if((design.hillside(item) || attachedRoof!=null && attachedRoof.kind()==GladeDesign.Kind.ROOF_CURVED)
+                && item.kind()!=GladeDesign.Kind.PENTAGON)
+            curvedRoofFrame(node,item,design);
+        else if(streetWindows(item,design))
+            streetFacade(node,item,design);
         ReactiveFeatures.decorate(this,node,item,design);
+        PlainStructure.terraceRail(this,node,item,design);
         if(item.kind().chimney())ScenicDetails.smoke(this,node,item.height());
         if(item.kind().roof() || item.kind().chimney()) node.setUserData("roofPart",true);
         if(!item.kind().stroke()) {
@@ -149,8 +157,11 @@ final class GladeArt {
             if((item.kind().building() || item.kind()==GladeDesign.Kind.DECK) && item.form().stilts()>.02f) {
                 float lift=item.form().stilts();
                 for(int x:new int[]{-1,1}) for(int z:new int[]{-1,1}) {
-                    box(node,.20f,lift,.20f,x*item.width()*.36f,-lift/2,z*item.depth()*.36f,"#a27d52");
-                    box(node,.32f,.12f,.32f,x*item.width()*.36f,-lift+.06f,z*item.depth()*.36f,"#c4b18e");
+                    float localX=x*item.width()*.36f,localZ=z*item.depth()*.36f;
+                    float floor=item.form().support()>=0?-lift:TerrainFoundation.ground(design,p,localX,localZ);
+                    if(floor>=-.02f)continue;
+                    box(node,.20f,-floor+.05f,.20f,localX,floor/2,localZ,"#a27d52");
+                    box(node,.32f,.12f,.32f,localX,floor+.04f,localZ,"#c4b18e");
                 }
             }
         } else if(item.kind()!=GladeDesign.Kind.BRIDGE) {
@@ -158,8 +169,82 @@ final class GladeArt {
         }
         if(item.kind().footprint()) node.rotate(0,design.placement(item).rotation()*FastMath.DEG_TO_RAD,0);
         ArchitectureJoin.apply(node,item,design);
-        node.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        node.setShadowMode(item.kind()==GladeDesign.Kind.FLOWERS
+            ?RenderQueue.ShadowMode.Receive:RenderQueue.ShadowMode.CastAndReceive);
         return node;
+    }
+
+    private void curvedRoofFrame(Node node,GladeDesign.Item item,GladeDesign design){
+        if(item.height()<=.4f)return;
+        float x=item.width()/2,z=item.depth()/2,h=item.height();
+        for(int side:new int[]{-1,1}){
+            for(int end:new int[]{-1,1}){
+                float px=side*x,pz=end*z;
+                if(!StructureShell.coveredDetail(item,design,new Vector3f(px,h/2,pz)))
+                    box(node,.14f,h,.14f,px,h/2,pz,"#4c342a");
+            }
+            if(!StructureShell.coveredDetail(item,design,new Vector3f(0,h-.1f,side*z)))
+                box(node,item.width(),.16f,.17f,0,h-.1f,side*z,"#594033");
+            if(!StructureShell.coveredDetail(item,design,new Vector3f(side*x,h-.1f,0)))
+                box(node,.17f,.16f,item.depth(),side*x,h-.1f,0,"#594033");
+        }
+        if(design.hillside(item) && h>1.6f){
+            int bays=Math.clamp((int)(item.width()/2f),1,5);
+            for(int i=0;i<bays;i++){
+                float px=((i+.5f)/bays-.5f)*item.width();
+                var hook=new Vector3f(px,h-.18f,z+.12f);
+                if(StructureShell.coveredDetail(item,design,hook))continue;
+                box(node,.026f,.14f,.026f,px,h-.17f,z+.18f,"#4c342a");
+                var lantern=sphere(node,.095f,px,h-.31f,z+.18f,"#ce492c");
+                lantern.setLocalScale(1,1.18f,1);
+                var lit=lantern.getMaterial().clone();
+                lit.setColor("GlowColor",new ColorRGBA(.54f,.09f,.025f,1));
+                lantern.setMaterial(lit);
+            }
+        }
+    }
+
+    static boolean streetWindows(GladeDesign.Item item,GladeDesign design){
+        var roof=design.attachedRoof(item.id());
+        return item.kind()==GladeDesign.Kind.HOUSE && item.height()>=1.55f
+                && item.form().finish().variant()==18 && !design.hillside(item)
+                && (roof==null || roof.kind()!=GladeDesign.Kind.ROOF_CURVED)
+                && (design.roofFusion().joined(item.id()) || design.hasUpper(item.id()) || item.form().support()>=0);
+    }
+    static boolean streetWindowCovers(GladeDesign.Item item,GladeDesign design,Vector3f point,float clearance){
+        if(!streetWindows(item,design) || Math.abs(Math.abs(point.z)-item.depth()/2)>.1f+clearance
+                || Math.abs(point.y-item.height()*.60f)>.36f+clearance)return false;
+        int bays=Math.clamp((int)(item.width()/.95f),1,16);
+        for(int i=0;i<bays;i++){
+            float x=((i+.5f)/bays-.5f)*item.width();
+            if(Math.abs(point.x-x)>.31f+clearance)continue;
+            float z=Math.copySign(item.depth()/2+.025f,point.z),y=item.height()*.60f;
+            if(!StructureShell.coveredDetail(item,design,new Vector3f(x,y,z))
+                    && !design.blocksOpening(item,x,z,y,.31f))return true;
+        }
+        return false;
+    }
+
+    private void streetFacade(Node node,GladeDesign.Item item,GladeDesign design){
+        if(item.height()<1.55f)return;
+        var facade=new Node("Mặt tiền Vieille Ville");
+        int bays=Math.clamp((int)(item.width()/.95f),1,16);
+        float y=item.height()*.60f,z=item.depth()/2+.025f;
+        var shutters=new String[]{"#6b7562","#6d7b82","#837363","#627a73"};
+        String color=shutters[(int)Math.floorMod(item.id(),shutters.length)];
+        for(int side:new int[]{-1,1})for(int i=0;i<bays;i++){
+            float x=((i+.5f)/bays-.5f)*item.width();
+            if(StructureShell.coveredDetail(item,design,new Vector3f(x,y,side*z))
+                    || design.blocksOpening(item,x,side*z,y,.31f))continue;
+            box(facade,.34f,.58f,.055f,x,y,side*z,"#4a5153");
+            box(facade,.24f,.44f,.065f,x,y,side*z,"#92acb0");
+            for(int leaf:new int[]{-1,1})box(facade,.12f,.55f,.057f,x+leaf*.23f,y,side*z,color);
+            box(facade,.53f,.07f,.15f,x,y-.32f,side*z,"#aa9a83");
+        }
+        if(facade.getQuantity()==0)return;
+        facade.updateGeometricState();
+        jme3tools.optimize.GeometryBatchFactory.optimize(facade,false);
+        node.attachChild(facade);
     }
 
     private void house(Node node,GladeDesign.Item item,GladeDesign design) {
@@ -268,7 +353,6 @@ final class GladeArt {
         if(!design.customRoof(item.id()) && !joinedRoof(item,design) && design.roofRise(item)>.02f) {
             buildingRoof(roofParts,item,design,true,brick);
             if(!brick && design.roofRise(item)>w*.25f) {
-                // Stepped Dutch-inspired gables, built separately at both ends of the ridge.
                 int steps=5;
                 for(int end:new int[]{-1,1}) for(int step=0;step<steps;step++) {
                     float sw=(w+0.12f)*(1-step/(float)steps);
@@ -278,7 +362,6 @@ final class GladeArt {
                     box(roofParts,sw+0.09f,0.055f,0.23f,0,y+sh/2,end*(d/2+0.35f),trim);
                 }
             } else if(brick && design.roofRise(item)>w*.25f) {
-                // A side-facing dormer emerges from the slope, rather than sitting on the ridge.
                 float dw=Math.min(1.05f,d*0.40f),scale=Math.min(1,w/2);
                 var dormer=new Node("Cửa áp mái");
                 box(dormer,dw,0.80f,0.70f,0,0.40f,-0.18f,trim);
@@ -384,18 +467,20 @@ final class GladeArt {
         node.setLocalTranslation(item.center().x(),0,item.center().z());
     }
 
-    private void bridge(Node node,GladeDesign.Item item) {
+    private void bridge(Node node,GladeDesign.Item item,GladeDesign design) {
         var a=item.points().getFirst();
         var b=item.points().getLast();
         float length=Math.max(0.30f,a.distance(b));
         float yaw=FastMath.atan2(b.x()-a.x(),b.z()-a.z());
         int planks=Math.max(3,(int)Math.ceil(length/0.23f));
         float width=Math.max(1,Math.min(3,item.width()));
+        var rules=SceneRules.of(design);
+        float start=rules.walkSurface(a.x(),a.z()),end=rules.walkSurface(b.x(),b.z());
         Vector3f previousLeft=null,previousRight=null;
         for(int i=0;i<=planks;i++) {
             float t=(float)i/planks;
-            float y=0.16f+FastMath.sin(t*FastMath.PI)*item.height()*0.45f;
-            box(node,width,0.10f,length/planks+0.025f,0,y,t*length,"#b58a5a");
+            float y=FastMath.interpolateLinear(t,start,end)+0.16f+FastMath.sin(t*FastMath.PI)*item.height()*0.45f;
+            box(node,width,0.10f,length/planks+0.025f,0,y,t*length,"#b58a5a").setUserData("walkFloor",true);
             if(i%3==0 || i==planks) {
                 var left=new Vector3f(-width/2,y+0.68f,t*length);
                 var right=new Vector3f(width/2,y+0.68f,t*length);
@@ -531,7 +616,14 @@ final class GladeArt {
         node.depthFirstTraversal(part->{if(part instanceof Geometry geo && geo.getMesh().getBuffer(VertexBuffer.Type.Normal)!=null)part.setUserData("roofSurface",true);});
     }
 
-    private void path(Node node,GladeDesign.Item item,GladeDesign design) {ReactiveFeatures.path(this,node,item,design);}
+    Node renderPath(GladeDesign.Item item,GladeDesign design) {
+        var node=new Node(item.kind().name());
+        node.setUserData("itemId",item.id());
+        ReactiveFeatures.path(this,node,item,design);
+        GladePaint.apply(this,node,item.form().finish());
+        node.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
+        return node;
+    }
 
     private void wall(Node node,GladeDesign.Item item,GladeDesign design) {
         if(item.points().size()<2) return;
@@ -570,34 +662,6 @@ final class GladeArt {
         var node=new Node("Hoa");
         ScenicDetails.blossoms(this,node,.7f,.7f,.33f,"#f1e7ba");
         return node;
-    }
-
-    private void grass(Node node,float scaleX,float scaleZ) {
-        for(String color:List.of("#7c9855","#a3b86d")) {
-            var points=new ArrayList<Float>();
-            var normals=new ArrayList<Float>();
-            var indices=new ArrayList<Integer>();
-            for(int i=0;i<1400;i++) {
-                float x=(random.nextFloat()*19-9.5f)*scaleX,z=(random.nextFloat()*14-7)*scaleZ;
-
-                for(int blade=0;blade<3;blade++) {
-                    int start=points.size()/3;
-                    float h=0.12f+random.nextFloat()*0.18f;
-                    for(float value:new float[]{x-0.02f,0.02f,z,x+0.02f,0.02f,z,x+0.07f,h,z+0.04f}) points.add(value);
-                    for(int p=0;p<3;p++) { normals.add(0f);normals.add(0.7f);normals.add(0.7f); }
-                    indices.add(start);indices.add(start+1);indices.add(start+2);
-                }
-            }
-            var mesh=new Mesh();
-            mesh.setBuffer(VertexBuffer.Type.Position,3,toFloats(points));
-            mesh.setBuffer(VertexBuffer.Type.Normal,3,toFloats(normals));
-            mesh.setBuffer(VertexBuffer.Type.Index,3,indices.stream().mapToInt(Integer::intValue).toArray());
-            mesh.updateBound();
-            var geometry=new Geometry("Cỏ",mesh);
-            geometry.setMaterial(material(color));
-            geometry.getMaterial().getAdditionalRenderState().setFaceCullMode(com.jme3.material.RenderState.FaceCullMode.Off);
-            node.attachChild(geometry);
-        }
     }
 
     Geometry box(Node node,float w,float h,float d,float x,float y,float z,String color) {

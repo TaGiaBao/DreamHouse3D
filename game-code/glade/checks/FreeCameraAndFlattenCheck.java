@@ -6,8 +6,52 @@ import com.jme3.system.AppSettings;
 import java.util.*;
 class FreeCameraAndFlattenCheck extends ProceduralMechanicsCheck {
  static Vector3f vector(String name)throws Exception{return ((Vector3f)field(name)).clone();}
+ static void walkRoutes(){
+  var stone=GladeCatalog.finish(GladeCatalog.v("DECK","Nền bậc đá",GladeDesign.STONE_PLATFORM));
+  var platform=new GladeDesign.Item(0,GladeDesign.Kind.DECK,new GladeDesign.Point(0,-1.5f),3,3,1.2f,false,List.of(),0,null,new GladeDesign.Form(0,0,0,-1).finish(stone));
+  var stair=new GladeDesign.Item(1,GladeDesign.Kind.STAIRS_STONE,new GladeDesign.Point(0,1.5f),1.2f,3,1.2f,false,List.of());
+  var house=block(2,4,0,3,3,2.6f,1.2f);
+  var start=new GladeDesign.Point(-7,-2);
+  var end=new GladeDesign.Point(-7,2);
+  var bridge=new GladeDesign.Item(3,GladeDesign.Kind.BRIDGE,start,1.6f,1,1,false,List.of(start,end));
+  var scene=new GladeDesign(List.of(platform,stair,house,bridge),2);
+  var root=ArchitectureContinuityCheck.render(scene);
+  var walk=new WalkController(scene,root);
+  var position=new Vector3f();
+  walk.spawn(position,0,3.2f);
+  for(int i=0;i<39;i++)walk.move(position,new Vector3f(0,0,-.1f));
+  ok(position.z<-.5f && Math.abs(position.y-WalkController.EYE_HEIGHT-1.2f)<.04f,"stair leads onto stone platform: "+position);
+  for(int i=0;i<18;i++)walk.move(position,new Vector3f(-.1f,0,0));
+  ok(position.x>=-1.51f,"platform edge blocks abrupt fall");
+  for(int i=0;i<18;i++)walk.move(position,new Vector3f(.1f,0,0));
+  for(int i=0;i<40;i++)walk.move(position,new Vector3f(0,0,.1f));
+  ok(position.z>3 && Math.abs(position.y-WalkController.EYE_HEIGHT)<.04f,"stairs lead back down to ground: "+position);
+  walk.spawn(position,4,2.8f);
+  walk.move(position,new Vector3f(0,0,-3));
+  ok(position.z>=1.5f,"walk cannot cross a house wall");
+  walk.spawn(position,-7,2.4f);
+  for(int i=0;i<24;i++)walk.move(position,new Vector3f(0,0,-.1f));
+  ok(Math.abs(position.z)<.12f && position.y>WalkController.EYE_HEIGHT+.55f,"bridge supports eye height over its crown");
+  for(int i=0;i<25;i++)walk.move(position,new Vector3f(0,0,-.1f));
+  ok(position.z<-2.3f && Math.abs(position.y-WalkController.EYE_HEIGHT)<.04f,"walk exits the bridge at the far bank");
+  var lowBeam=block(4,0,0,3,3,.4f,0);
+  lowBeam=new GladeDesign.Item(lowBeam.id(),lowBeam.kind(),lowBeam.center(),lowBeam.width(),lowBeam.depth(),lowBeam.height(),false,List.of(),0,null,new GladeDesign.Form(1.4f,0,0,-1));
+  var beamScene=new GladeDesign(List.of(lowBeam),2);
+  var beamWalk=new WalkController(beamScene,ArchitectureContinuityCheck.render(beamScene));
+  beamWalk.spawn(position,0,2.8f);
+  beamWalk.move(position,new Vector3f(0,0,-3));
+  ok(position.z>=1.5f,"overhang at head height blocks camera clipping: "+position);
+  var highBeam=new GladeDesign.Item(lowBeam.id(),lowBeam.kind(),lowBeam.center(),lowBeam.width(),lowBeam.depth(),lowBeam.height(),false,List.of(),0,null,new GladeDesign.Form(2.2f,0,0,-1));
+  var clearScene=new GladeDesign(List.of(highBeam),2);
+  var clearWalk=new WalkController(clearScene,ArchitectureContinuityCheck.render(clearScene));
+  clearWalk.spawn(position,0,2.8f);
+  clearWalk.move(position,new Vector3f(0,0,-3));
+  ok(position.z<0,"high overhang permits walking underneath: "+position);
+  System.out.println("WALK_ROUTES_PASS stairs up/down, bridge crossing, platform edge, solid wall, head clearance");
+ }
  public static void main(String[] args)throws Exception {
-  // This is the exact former crash input: float subtraction produces 0.03999996, below the item minimum.
+  walkRoutes();
+  if(Arrays.asList(args).contains("--routes-only"))return;
   ok(2.3f-(2.3f-.04f)<.04f,"original floating-point failure reproduced");
   app=new GladeApp();var settings=new AppSettings(true);settings.setResolution(1360,860);settings.setRenderer(AppSettings.LWJGL_OPENGL33);settings.setAudioRenderer(null);settings.setTitle("DreamHouse · Kiểm thử camera và ép phẳng");app.setSettings(settings);app.setShowSettings(false);app.setPauseOnLostFocus(false);app.start();
   try {engine(()->true);Thread.sleep(350);fixture(new GladeDesign(List.of(block(0,0,0,4,3,2.3f,1.4f)),2));esc();

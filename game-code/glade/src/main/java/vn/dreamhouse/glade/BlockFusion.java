@@ -4,13 +4,13 @@ import com.jme3.math.*;
 import com.jme3.scene.*;
 import java.util.*;
 
-/** A shared roof envelope for touching rectangular blocks at the same storey. Blocks retain their IDs. */
 final class BlockFusion {
     private final GladeDesign design;
     private final Map<Long,List<GladeDesign.Item>> groups=new HashMap<>();
     BlockFusion(GladeDesign design) {
         this.design=design;
-        var roofs=design.items().stream().filter(item->item.kind().roofHost() && item.kind()!=GladeDesign.Kind.PAVILION
+        var roofs=design.items().stream().filter(item->item.kind().roofHost() && item.kind()!=GladeDesign.Kind.PENTAGON && !design.hillside(item)
+                && !onStonePlatform(item)
                 && item.form().roofLeft()==0 && item.form().roofRight()==0 && item.form().roofFront()==0 && item.form().roofBack()==0 && design.roofRise(item)>.02f && !design.customRoof(item.id())).toList();
         int[] parents=new int[roofs.size()];for(int i=0;i<parents.length;i++) parents[i]=i;
         var bins=new HashMap<String,List<Integer>>();var checked=new HashSet<Long>();
@@ -28,9 +28,16 @@ final class BlockFusion {
         for(var group:components.values()) if(group.size()>1) for(var item:group) groups.put(item.id(),group);
     }
     private static int find(int[] parents,int x) {while(parents[x]!=x) {parents[x]=parents[parents[x]];x=parents[x];}return x;}
+    private boolean onStonePlatform(GladeDesign.Item item){
+        for(long parent=item.form().support();parent>=0;){
+            var support=design.item(parent);
+            if(support.stonePlatform())return true;
+            parent=support.form().support();
+        }
+        return false;
+    }
     private boolean touches(GladeDesign.Item a,GladeDesign.Item b) {
         if(Math.abs(design.top(a)-design.top(b))>.08f) return false;
-        // Test actual rotated footprints; AABBs alone join separated rotated houses.
         for(float angle:new float[]{a.rotation(),a.rotation()+90,b.rotation(),b.rotation()+90}){
             double t=Math.toRadians(angle);float ax=(float)Math.cos(t),az=-(float)Math.sin(t);
             float ra=projection(a,ax,az),rb=projection(b,ax,az);
@@ -59,8 +66,6 @@ final class BlockFusion {
     }
     private float envelope(List<GladeDesign.Item> group,float x,float z,float fallback) {
         float y=Float.NEGATIVE_INFINITY;for(var item:group)y=Math.max(y,height(item,x,z));if(Float.isFinite(y))return y;
-        // Every shared lattice vertex must get the same height, including just outside the eaves.
-        // A per-cell fallback gives adjacent triangles different endpoints and tears the roof open.
         float closest=Float.POSITIVE_INFINITY,result=fallback;
         var point=new GladeDesign.Point(x,z);
         for(var item:group){float lx=item.localX(point),lz=item.localZ(point),span=item.width()/2+.20f,depth=item.depth()/2+.20f;
@@ -76,7 +81,6 @@ final class BlockFusion {
         var vertices=new ArrayList<Float>();var normals=new ArrayList<Float>();var indices=new ArrayList<Integer>();
         var gableVertices=new ArrayList<Float>();var gableNormals=new ArrayList<Float>();var gableIndices=new ArrayList<Integer>();
         float step=Math.max(.22f,Math.max(item.width(),item.depth())/100);
-        // A common lattice avoids cracks where two roofs meet.
         step=Math.max(.22f,group.stream().map(roof->Math.max(roof.width(),roof.depth())).max(Float::compare).orElse(1f)/100);
         float base=design.placement(item).elevation();
         double angle=Math.toRadians(item.rotation());
@@ -95,7 +99,6 @@ final class BlockFusion {
                     if(owner(group,nx,nz)!=null) continue;
                     Vector3f p=side==0?a:side==1?d:side==2?b:c;
                     Vector3f q=side==0?c:side==1?b:side==2?a:d;
-                    // Strip order must face outward. The former p,q order pointed all gables inward.
                     quad(item,base,angle,q,p,new Vector3f(q.x,design.top(item),q.z),new Vector3f(p.x,design.top(item),p.z),gableVertices,gableNormals,gableIndices);
                 }
             }

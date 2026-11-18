@@ -8,7 +8,6 @@ import com.jme3.math.*;
 import com.jme3.renderer.queue.RenderQueue;
 import java.util.*;
 
-/** Lightweight wire cages only; never collidable content or a saved object. */
 final class ModulePreview extends Node {
     private final AssetManager assets;
     private final Map<Long,BuildGhost> ghosts=new HashMap<>();

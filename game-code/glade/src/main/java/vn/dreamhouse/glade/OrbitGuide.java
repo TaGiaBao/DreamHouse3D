@@ -7,7 +7,6 @@ import com.jme3.scene.*;
 import com.jme3.renderer.queue.RenderQueue;
 import java.util.*;
 
-/** A screen-space anchor and drag vector, fixed at the actual left-button press. */
 final class OrbitGuide extends Node {
     private final Geometry geometry;
     OrbitGuide(AssetManager assets){

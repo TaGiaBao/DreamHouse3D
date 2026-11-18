@@ -3,7 +3,6 @@ package vn.dreamhouse.glade;
 import com.jme3.math.*;
 import com.jme3.renderer.Camera;
 
-/** Closest ray/axis drag, calibrated at the exact grab point rather than by camera distance. */
 final class AxisDrag {
     private final Camera camera;
     private final Vector3f origin,axis;

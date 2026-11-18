@@ -8,7 +8,6 @@ import com.jme3.scene.*;
 import com.jme3.scene.shape.Sphere;
 import java.nio.FloatBuffer;
 
-/** Noninteractive distant scenery. Never inserted into the editable/pickable content node. */
 final class ScenicBackdrop {
     final Node node=new Node("Chân trời thung lũng");
     private final Geometry sky;
@@ -39,14 +38,11 @@ final class ScenicBackdrop {
     void rebuild(GladeArt art,LandBounds land){
         for(var child:new java.util.ArrayList<>(node.getChildren()))if(child!=sky)child.removeFromParent();
         float radius=Math.max(land.width(),land.depth())*.8f+24;
-        // A low meadow joins the diorama to the distant hills instead of leaving a pale void.
-        var meadow=new Geometry("Đồng cỏ ngoài khu xây",new com.jme3.scene.shape.Box(radius*2,.10f,radius*2));
-        meadow.setLocalTranslation(land.centerX(),-1.25f,land.centerZ());meadow.setMaterial(art.material("#8c9e68"));meadow.setShadowMode(RenderQueue.ShadowMode.Receive);node.attachChild(meadow);
         var woods=new Node("Rừng ven thung lũng");
         for(int i=0;i<46;i++){
             float a=i*2.399f,dist=radius*.59f+(i%4)*3.2f,x=FastMath.sin(a)*dist+land.centerX(),z=FastMath.cos(a)*dist+land.centerZ(),h=2.7f+(i%5)*.48f;
-            art.cylinder(woods,.12f,h*.65f,x,h*.325f-1.2f,z,"#8d7452");
-            for(int j=0;j<7;j++){float t=j*2.399f;var leaf=art.sphere(woods,h*.25f,x+FastMath.sin(t)*h*.18f,h*(.6f+j%3*.08f)-1.2f,z+FastMath.cos(t)*h*.18f,i%4==0?"#b4ac6a":"#839666");CanopyShading.apply(leaf);}
+            art.cylinder(woods,.12f,h*.65f,x,h*.325f,z,"#8d7452");
+            for(int j=0;j<7;j++){float t=j*2.399f;var leaf=art.sphere(woods,h*.25f,x+FastMath.sin(t)*h*.18f,h*(.6f+j%3*.08f),z+FastMath.cos(t)*h*.18f,i%4==0?"#b4ac6a":"#839666");CanopyShading.apply(leaf);}
         }
         woods.updateGeometricState();jme3tools.optimize.GeometryBatchFactory.optimize(woods,false);woods.setShadowMode(RenderQueue.ShadowMode.Off);node.attachChild(woods);
         for(int ring=0;ring<3;ring++){

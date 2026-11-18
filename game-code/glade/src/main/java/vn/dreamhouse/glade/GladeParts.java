@@ -3,7 +3,6 @@ package vn.dreamhouse.glade;
 import com.jme3.math.*;
 import com.jme3.scene.Node;
 
-/** Original modular scenery; all dimensions follow the same editable design data as houses. */
 final class GladeParts {
     private final GladeArt art;
     GladeParts(GladeArt art) { this.art=art; }
@@ -24,13 +23,16 @@ final class GladeParts {
                     shape.setLocalScale(1,h/.5f,1);node.attachChild(shape);
                 }
             }
+            case ROOF_FLAT,ROOF_PYRAMID,ROOF_PENTAGON,ROOF_SHED,ROOF_CURVED -> {
+                var host=design.items().stream().filter(part->part.id()==item.mount().hostId()).findFirst().orElseThrow();
+                if(!design.hasUpper(host.id()))RoofProfiles.build(art,node,item.kind(),host,h);
+            }
             case CHIMNEY_BRICK,CHIMNEY_STONE -> chimney(node,w,d,h,item.kind()==GladeDesign.Kind.CHIMNEY_BRICK);
             case WINDOW_ARCH -> {
                 var window=art.window();window.setLocalScale(w/0.89f,h/1.08f,1);node.attachChild(window);
             }
             case WINDOW_ROUND -> {
                 art.cylinder(node,w/2,0.13f,0,0,0,"#d3ba85");
-                // Cylinder axes start vertical; rotate a separate face to look out from the wall.
                 node.getChild(0).rotate(FastMath.HALF_PI,0,0);
                 node.getChild(0).setLocalScale(1,h/w,1);
                 var glass=art.sphere(node,1,0,0,0.08f,"#7eacb4");glass.setLocalScale(w*.38f,h*.38f,0.06f);
@@ -111,7 +113,7 @@ final class GladeParts {
     }
 
     private void stairs(Node node,float w,float d,float h,boolean wood) {
-        int steps=Math.max(3,Math.min(36,(int)Math.ceil(h/.19f)));
+        int steps=WalkController.stairSteps(h);
         for(int i=0;i<steps;i++) {
             float top=(i+1)*h/steps,z=d/2-(i+.5f)*d/steps;
             art.box(node,w,wood?.12f:top,d/steps+.025f,0,wood?top-.06f:top/2,z,wood?"#c29a67":"#b9b49b");

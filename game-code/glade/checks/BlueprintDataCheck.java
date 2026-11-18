@@ -16,6 +16,12 @@ class BlueprintDataCheck {
     }
     static void rejected(Runnable operation,String label){try{operation.run();throw new AssertionError(label);}catch(IllegalArgumentException expected){}}
     public static void main(String[] args)throws Exception{
+        var empty=new GladeDesign(List.of(),2);
+        for(var preset:ArchitecturePresets.catalog()){
+            var built=preset.module().place(empty,new Point(0,0));
+            ok(built.scene().items().size()>=2 && built.scene().assemblyIds(built.rootId()).equals(built.added()),
+                    "preset places one editable assembly: "+preset.name());
+        }
         var source=source();var module=BlueprintModule.capture(source,30);
         ok(module.design().items().size()==3 && module.root().id()==0 && module.root().center().equals(new Point(0,0)),"window capture resolves host and only descendants");
         ok(module.root().form().finish().equals(source.items().get(1).form().finish()) && module.root().rotation()==32,"finish and rotation preserved");

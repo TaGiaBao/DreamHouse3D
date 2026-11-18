@@ -3,7 +3,6 @@ package vn.dreamhouse.glade;
 import com.jme3.scene.*;
 import java.nio.FloatBuffer;
 
-/** Soft baked leaf variation, independent of sunlight and without extra textures or draw calls. */
 final class CanopyShading {
     static void apply(Geometry leaf){
         var mesh=leaf.getMesh();var buffer=mesh.getBuffer(VertexBuffer.Type.Position);if(buffer==null)return;

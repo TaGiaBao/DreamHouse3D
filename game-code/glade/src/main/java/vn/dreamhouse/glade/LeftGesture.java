@@ -1,6 +1,5 @@
 package vn.dreamhouse.glade;
 
-/** Separates a click from an intentional held orbit; time is supplied for deterministic checks. */
 final class LeftGesture {
     static final float SLOP=8;
     static final long HOLD_NANOS=120_000_000L;

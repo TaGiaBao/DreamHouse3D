@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 
-/** At most one active and one latest pending autosave; each committed version has a logical order. */
 final class SessionStore implements AutoCloseable {
     record Recovery(GladeDesign design,Path file){}
     record Stats(int active,int pending,long coalesced,long written){}

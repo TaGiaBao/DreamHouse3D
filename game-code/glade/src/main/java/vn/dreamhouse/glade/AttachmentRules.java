@@ -1,14 +1,16 @@
 package vn.dreamhouse.glade;
 import com.jme3.math.*;
 
-/** Preserve attachment data while its supporting face is temporarily absent or covered. */
 final class AttachmentRules {
     static boolean hidden(GladeDesign.Item part,GladeDesign scene){
         if(part.mount()==null)return false;
         var host=scene.items().stream().filter(i->i.id()==part.mount().hostId()).findFirst().orElseThrow();
         if(host.height()<=.12f)return true;
         if(part.kind().roof())return scene.hasUpper(host.id());
-        if(part.kind().opening() && part.mount().lift()>=1)return scene.hasUpper(host.id()) || scene.roofRise(host)<=.02f && !scene.customRoof(host.id());
+        if(part.kind().opening() && part.mount().lift()>=1){
+            var roof=scene.attachedRoof(host.id());
+            return scene.hasUpper(host.id()) || (roof==null?scene.roofRise(host)<=.02f:roof.kind()==GladeDesign.Kind.ROOF_FLAT);
+        }
         if(!part.kind().opening())return false;
         var placement=scene.placement(part);float angle=placement.rotation()*FastMath.DEG_TO_RAD;
         float x=placement.center().x()+FastMath.sin(angle)*.08f,z=placement.center().z()+FastMath.cos(angle)*.08f;

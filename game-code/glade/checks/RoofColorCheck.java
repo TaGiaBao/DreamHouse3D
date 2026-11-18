@@ -7,7 +7,6 @@ import com.jme3.util.BufferUtils;
 import java.util.*;
 import java.util.concurrent.*;
 
-/** Read a few rendered roof pixels in memory; creates no image file or displayed screenshot. */
 class RoofColorCheck extends ProceduralMechanicsCheck {
     public static void main(String[] args)throws Exception{
         app=new GladeApp();var settings=new AppSettings(true);settings.setResolution(1100,720);settings.setSamples(4);settings.setGammaCorrection(true);settings.setRenderer(AppSettings.LWJGL_OPENGL33);settings.setAudioRenderer(null);settings.setVSync(true);app.setSettings(settings);app.setShowSettings(false);app.setPauseOnLostFocus(false);app.start();

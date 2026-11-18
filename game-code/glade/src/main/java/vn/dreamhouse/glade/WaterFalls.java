@@ -5,7 +5,6 @@ import com.jme3.material.RenderState;
 import com.jme3.renderer.queue.RenderQueue;
 import java.util.*;
 
-/** Falling ribbons connect upper and lower water levels; bounded independently of world size. */
 final class WaterFalls {
     static Node render(GladeArt art,GladeDesign.Item source,GladeDesign scene,WaterFlow.Result flow){
         var root=new Node("Thác nước mềm");var builder=new PlainStructure.Builder();float base=scene.placement(source).elevation();int count=0;

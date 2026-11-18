@@ -4,7 +4,6 @@ import com.jme3.util.BufferUtils;
 import java.nio.*;
 import java.util.Random;
 
-/** Small original synthesized sounds; no external recordings or downloads. */
 final class GameSound {
     private final AudioNode tap,place,wind;
     private float volume;

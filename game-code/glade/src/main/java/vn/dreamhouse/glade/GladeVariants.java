@@ -2,10 +2,9 @@ package vn.dreamhouse.glade;
 import com.jme3.scene.*;
 import com.jme3.math.*;
 import com.jme3.scene.shape.Cylinder;
-/** Procedural catalog variations and continuous upper/lower-bound craft forms. */
 final class GladeVariants {
  static boolean craft(GladeArt art,Node node,GladeDesign.Item item) {
-  if(item.kind().stroke() || item.kind().mounted() || item.kind()==GladeDesign.Kind.WATER)return false;
+  if(item.kind().stroke() || item.kind().mounted() || item.kind()==GladeDesign.Kind.WATER || item.kind()==GladeDesign.Kind.PENTAGON)return false;
   float w=item.width(),d=item.depth(),h=item.height();var finish=item.form().finish();
   boolean template=(finish.variant()>=7 && finish.variant()<=9 && item.kind().building()) || finish.variant()==18 && item.kind()==GladeDesign.Kind.DECK;
   if(h<=.12f){art.box(node,w,h,d,0,h/2,0,finish.material().equals("wood")?"#be9c70":"#c4baa2").setUserData("wallSurface",true);node.setUserData("craftShape","Tấm phẳng");return true;}
@@ -53,7 +52,6 @@ final class GladeVariants {
    node.setLocalScale(1,1,item.depth()/item.width());
   } else if(item.kind()==GladeDesign.Kind.FLOWERS){node.setLocalTranslation(0,0,0);node.detachAllChildren();String tint=variant==1?"#a18abc":variant==2?"#e7c56e":"#d790a3";
    ScenicDetails.blossoms(art,node,item.width(),item.depth(),item.height(),tint);
-   node.updateGeometricState();jme3tools.optimize.GeometryBatchFactory.optimize(node,false);
   } else if(item.kind().opening() && variant>0){node.depthFirstTraversal(s->{if(s instanceof Geometry g){var value=g.getMaterial().getParam("Diffuse");if(value!=null && value.getValue() instanceof ColorRGBA c && c.b<c.r+.03f)g.setMaterial(art.material(variant==1?"#eee2bd":variant==2?"#8fa787":"#b19ab7"));}});}
  }
 }

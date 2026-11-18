@@ -11,7 +11,6 @@ function Invoke-CheckedProcess {
     $clock = [Diagnostics.Stopwatch]::StartNew()
     try {
         if (!$process.Start()) { throw 'Khong khoi dong duoc tien trinh kiem thu.' }
-        # Hold our own process handle; Start-Process objects can lose ExitCode on Windows PowerShell.
         $outTask = $process.StandardOutput.ReadToEndAsync()
         $errTask = $process.StandardError.ReadToEndAsync()
         $timedOut = !$process.WaitForExit($TimeoutMs)

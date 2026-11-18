@@ -4,7 +4,6 @@ import java.io.*;
 import java.nio.channels.*;
 import java.nio.file.*;
 
-/** OS-held lock releases even after a crash; an old file is never treated as a running game. */
 final class GameSessionLock implements AutoCloseable {
     private final FileChannel channel;
     private final FileLock lock;

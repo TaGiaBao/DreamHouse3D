@@ -3,7 +3,6 @@ package vn.dreamhouse.glade;
 import java.util.*;
 import static vn.dreamhouse.glade.GladeDesign.*;
 
-/** A detached assembly, expressed around its root and independent of the source world's terrain. */
 record BlueprintModule(GladeDesign design) {
     static final int MAX_PARTS=256;
     BlueprintModule {

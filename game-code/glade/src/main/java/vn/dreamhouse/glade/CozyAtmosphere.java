@@ -6,13 +6,12 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.post.filters.FogFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 
-/** A bounded, reversible lighting transition; no changes to scene geometry or player data. */
 final class CozyAtmosphere {
     record Look(ColorRGBA sunlight,ColorRGBA ambient,ColorRGBA sky,Vector3f direction,float shadow){}
     private static final Look[] LOOKS={
-        new Look(new ColorRGBA(1.10f,1.01f,.86f,1),new ColorRGBA(.30f,.37f,.42f,1),new ColorRGBA(.79f,.85f,.84f,1),new Vector3f(-.65f,-1,-.45f).normalizeLocal(),.48f),
-        new Look(new ColorRGBA(1.20f,.83f,.57f,1),new ColorRGBA(.46f,.45f,.53f,1),new ColorRGBA(.86f,.73f,.65f,1),new Vector3f(.72f,-.65f,-.38f).normalizeLocal(),.43f),
-        new Look(new ColorRGBA(.43f,.49f,.68f,1),new ColorRGBA(.32f,.37f,.49f,1),new ColorRGBA(.29f,.36f,.49f,1),new Vector3f(-.35f,-.80f,.55f).normalizeLocal(),.30f)
+        new Look(new ColorRGBA(1.13f,1.02f,.83f,1),new ColorRGBA(.37f,.44f,.54f,1),new ColorRGBA(.72f,.83f,.88f,1),new Vector3f(-.76f,-.86f,-.42f).normalizeLocal(),.53f),
+        new Look(new ColorRGBA(1.25f,.88f,.60f,1),new ColorRGBA(.43f,.44f,.55f,1),new ColorRGBA(.87f,.76f,.72f,1),new Vector3f(.82f,-.57f,-.48f).normalizeLocal(),.52f),
+        new Look(new ColorRGBA(.45f,.53f,.76f,1),new ColorRGBA(.34f,.40f,.52f,1),new ColorRGBA(.30f,.39f,.56f,1),new Vector3f(-.35f,-.80f,.55f).normalizeLocal(),.32f)
     };
     private final DirectionalLight sun;
     private final AmbientLight ambient;
@@ -26,6 +25,7 @@ final class CozyAtmosphere {
         this.sun=sun;this.ambient=ambient;this.viewport=viewport;this.shadow=shadow;start=copy(current);apply();
     }
     static String label(int mode){return switch(Math.floorMod(mode,3)){case 1->"Nắng chiều";case 2->"Chạng vạng";default->"Ban ngày";};}
+    static ColorRGBA sunlight(int mode){return LOOKS[Math.floorMod(mode,3)].sunlight().clone();}
     void select(int mode){target=Math.floorMod(mode,3);start=copy(current);elapsed=0;}
     void update(float dt,float cameraDistance){
         if(!Float.isFinite(dt) || dt<0)return;
