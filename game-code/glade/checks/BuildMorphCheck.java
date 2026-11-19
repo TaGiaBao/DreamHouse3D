@@ -6,7 +6,14 @@ import com.jme3.input.KeyInput;
 import java.nio.file.*;
 import java.util.*;
 class BuildMorphCheck extends ProceduralMechanicsCheck {
- static void choose(String id)throws Exception {var icon=ArchitectureCheck.buttons().get("architecture");mouse((int)icon.getCenterX(),(int)icon.getCenterY(),null);clickRaw("architecture");clickRaw("house:"+id);}
+ static void choose(String id)throws Exception {
+  engine(()->{
+   var action=GladeApp.class.getDeclaredMethod("action",String.class);action.setAccessible(true);action.invoke(app,"architecture");
+   var member=GladeApp.class.getDeclaredField("hud");member.setAccessible(true);var hud=(GladeHud)member.get(app);
+   var bounds=hud.bounds("house:"+id);ok(bounds!=null && ("house:"+id).equals(hud.hit((float)bounds.getCenterX(),(float)bounds.getCenterY())),"structure option is visible and clickable: "+id);
+   action.invoke(app,"house:"+id);return true;
+  });
+ }
  static void camera(float distance)throws Exception {set("distance",distance);engine(()->{var f=GladeApp.class.getDeclaredField("focus");f.setAccessible(true);((Vector3f)f.get(app)).set(0,1,0);return true;});call("updateCamera");}
  public static void main(String[] args)throws Exception {
   app=new GladeApp();var settings=new AppSettings(true);settings.setResolution(1360,860);settings.setRenderer(AppSettings.LWJGL_OPENGL33);settings.setSamples(4);settings.setGammaCorrection(true);settings.setAudioRenderer(null);settings.setTitle("DreamHouse · Kiểm tra khung và mái biến đổi");app.setSettings(settings);app.setShowSettings(false);app.setPauseOnLostFocus(false);app.start();
